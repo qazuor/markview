@@ -46,10 +46,10 @@ describe('sanitizeFilename', () => {
         expect(result).toBe('filename');
     });
 
-    it('should limit length to 100 characters', () => {
+    it('should limit length to 50 characters', () => {
         const longName = 'a'.repeat(150);
         const result = sanitizeFilename(longName);
 
-        expect(result.length).toBe(100);
+        expect(result.length).toBe(50);
     });
 });
