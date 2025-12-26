@@ -1,0 +1,123 @@
+{
+    "app": {
+        "name": "MarkView",
+        "tagline": "Markdown, visualizado"
+    },
+    "common": {
+        "save": "Guardar",
+        "cancel": "Cancelar",
+        "delete": "Eliminar",
+        "close": "Cerrar",
+        "open": "Abrir",
+        "new": "Nuevo",
+        "rename": "Renombrar",
+        "duplicate": "Duplicar",
+        "download": "Descargar",
+        "export": "Exportar",
+        "import": "Importar",
+        "settings": "Configuración",
+        "search": "Buscar",
+        "replace": "Reemplazar",
+        "yes": "Sí",
+        "no": "No",
+        "ok": "OK",
+        "loading": "Cargando...",
+        "error": "Error",
+        "success": "Éxito"
+    },
+    "editor": {
+        "untitled": "Sin título",
+        "placeholder": "Empieza a escribir...",
+        "modified": "Modificado",
+        "saved": "Guardado",
+        "saving": "Guardando..."
+    },
+    "toolbar": {
+        "bold": "Negrita",
+        "italic": "Cursiva",
+        "strikethrough": "Tachado",
+        "heading": "Encabezado",
+        "link": "Insertar Enlace",
+        "image": "Insertar Imagen",
+        "code": "Código en línea",
+        "codeBlock": "Bloque de Código",
+        "quote": "Cita",
+        "bulletList": "Lista con Viñetas",
+        "numberedList": "Lista Numerada",
+        "taskList": "Lista de Tareas",
+        "horizontalRule": "Línea Horizontal",
+        "emoji": "Insertar Emoji",
+        "mermaid": "Insertar Diagrama",
+        "format": "Formatear Documento"
+    },
+    "sidebar": {
+        "explorer": "Explorador",
+        "toc": "Tabla de Contenidos",
+        "search": "Buscar",
+        "local": "Archivos Locales",
+        "github": "GitHub",
+        "noFiles": "Sin archivos aún",
+        "noHeadings": "Sin encabezados"
+    },
+    "settings": {
+        "title": "Configuración",
+        "appearance": "Apariencia",
+        "editor": "Editor",
+        "behavior": "Comportamiento",
+        "language": "Idioma",
+        "theme": "Tema",
+        "themeLight": "Claro",
+        "themeDark": "Oscuro",
+        "themeSystem": "Sistema",
+        "previewStyle": "Estilo de Vista Previa",
+        "fontSize": "Tamaño de Fuente",
+        "fontFamily": "Familia de Fuente",
+        "wordWrap": "Ajuste de Línea",
+        "lineNumbers": "Números de Línea",
+        "minimap": "Minimapa",
+        "syncScroll": "Sincronizar Scroll",
+        "autoSave": "Guardado Automático",
+        "formatOnSave": "Formatear al Guardar",
+        "lintOnType": "Validar al Escribir",
+        "reset": "Restablecer Valores"
+    },
+    "export": {
+        "title": "Exportar",
+        "markdown": "Markdown (.md)",
+        "html": "HTML",
+        "pdf": "PDF",
+        "image": "Imagen"
+    },
+    "github": {
+        "connect": "Conectar GitHub",
+        "disconnect": "Desconectar",
+        "connected": "Conectado como",
+        "selectRepo": "Selecciona un repositorio",
+        "noRepos": "No se encontraron repositorios",
+        "private": "Privado",
+        "public": "Público"
+    },
+    "shortcuts": {
+        "title": "Atajos de Teclado",
+        "formatting": "Formato",
+        "navigation": "Navegación",
+        "general": "General"
+    },
+    "status": {
+        "words": "palabras",
+        "characters": "caracteres",
+        "lines": "líneas",
+        "readingTime": "min de lectura"
+    },
+    "errors": {
+        "saveFailed": "Error al guardar",
+        "loadFailed": "Error al cargar",
+        "exportFailed": "Error al exportar",
+        "githubError": "Error de GitHub"
+    },
+    "confirm": {
+        "unsavedChanges": "Tienes cambios sin guardar. ¿Quieres guardarlos?",
+        "deleteFile": "¿Estás seguro de que quieres eliminar este archivo?",
+        "deleteVersion": "¿Estás seguro de que quieres eliminar esta versión?"
+    }
+}
