@@ -1,0 +1,101 @@
+/* Notion Preview Theme */
+
+/* Light mode */
+.preview-notion {
+    --preview-bg: #ffffff;
+    --preview-text: #37352f;
+    --preview-text-muted: #9b9a97;
+    --preview-link: #37352f;
+    --preview-border: #e9e9e7;
+    --preview-code-bg: #f7f6f3;
+    --preview-code-text: #eb5757;
+    --preview-blockquote-border: #37352f;
+    --preview-table-border: #e9e9e7;
+    --preview-table-header-bg: #f7f6f3;
+    --preview-hr: #e9e9e7;
+    --preview-highlight: #ffeaa7;
+}
+
+/* Dark mode */
+.preview-notion.dark {
+    --preview-bg: #191919;
+    --preview-text: #e6e6e4;
+    --preview-text-muted: #9b9a97;
+    --preview-link: #e6e6e4;
+    --preview-border: #373737;
+    --preview-code-bg: #252525;
+    --preview-code-text: #eb5757;
+    --preview-blockquote-border: #e6e6e4;
+    --preview-table-border: #373737;
+    --preview-table-header-bg: #252525;
+    --preview-hr: #373737;
+    --preview-highlight: #89632a;
+}
+
+.preview-notion {
+    background-color: var(--preview-bg);
+    color: var(--preview-text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif;
+}
+
+.preview-notion h1 {
+    font-size: 1.875em;
+    font-weight: 700;
+}
+
+.preview-notion h2 {
+    font-size: 1.5em;
+    font-weight: 600;
+}
+
+.preview-notion h3 {
+    font-size: 1.25em;
+    font-weight: 600;
+}
+
+.preview-notion a {
+    color: var(--preview-link);
+    text-decoration: underline;
+    text-decoration-color: var(--preview-border);
+}
+
+.preview-notion a:hover {
+    text-decoration-color: var(--preview-text);
+}
+
+.preview-notion code {
+    background-color: var(--preview-code-bg);
+    color: var(--preview-code-text);
+    padding: 0.2em 0.4em;
+    border-radius: 3px;
+    font-size: 0.85em;
+}
+
+.preview-notion pre {
+    background-color: var(--preview-code-bg);
+    border-radius: 3px;
+}
+
+.preview-notion pre code {
+    color: var(--preview-text);
+}
+
+.preview-notion blockquote {
+    border-left-color: var(--preview-text);
+    border-left-width: 3px;
+}
+
+.preview-notion table th,
+.preview-notion table td {
+    border-color: var(--preview-table-border);
+}
+
+.preview-notion table th {
+    background-color: var(--preview-table-header-bg);
+    font-weight: 600;
+}
+
+.preview-notion hr {
+    background-color: var(--preview-hr);
+    height: 1px;
+}

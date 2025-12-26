@@ -1,0 +1,96 @@
+/* Obsidian Preview Theme */
+
+/* Light mode */
+.preview-obsidian {
+    --preview-bg: #ffffff;
+    --preview-text: #2e3338;
+    --preview-text-muted: #888888;
+    --preview-link: #705dcf;
+    --preview-border: #e5e5e5;
+    --preview-code-bg: #f4f4f4;
+    --preview-code-text: #2e3338;
+    --preview-blockquote-border: #705dcf;
+    --preview-blockquote-bg: #f9f9f9;
+    --preview-table-border: #e5e5e5;
+    --preview-table-header-bg: #f4f4f4;
+    --preview-hr: #e5e5e5;
+    --preview-tag: #705dcf;
+}
+
+/* Dark mode */
+.preview-obsidian.dark {
+    --preview-bg: #202020;
+    --preview-text: #dcddde;
+    --preview-text-muted: #999999;
+    --preview-link: #a88bfa;
+    --preview-border: #3a3a3a;
+    --preview-code-bg: #2d2d2d;
+    --preview-code-text: #dcddde;
+    --preview-blockquote-border: #a88bfa;
+    --preview-blockquote-bg: #2d2d2d;
+    --preview-table-border: #3a3a3a;
+    --preview-table-header-bg: #2d2d2d;
+    --preview-hr: #3a3a3a;
+    --preview-tag: #a88bfa;
+}
+
+.preview-obsidian {
+    background-color: var(--preview-bg);
+    color: var(--preview-text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.preview-obsidian h1,
+.preview-obsidian h2,
+.preview-obsidian h3,
+.preview-obsidian h4,
+.preview-obsidian h5,
+.preview-obsidian h6 {
+    font-weight: 700;
+}
+
+.preview-obsidian a {
+    color: var(--preview-link);
+}
+
+.preview-obsidian a:hover {
+    color: var(--preview-link);
+    opacity: 0.8;
+}
+
+.preview-obsidian code {
+    background-color: var(--preview-code-bg);
+    color: var(--preview-code-text);
+    border-radius: 4px;
+}
+
+.preview-obsidian pre {
+    background-color: var(--preview-code-bg);
+    border-radius: 4px;
+    border: 1px solid var(--preview-border);
+}
+
+.preview-obsidian blockquote {
+    border-left-color: var(--preview-blockquote-border);
+    background-color: var(--preview-blockquote-bg);
+    padding: 0.5em 1em;
+    border-radius: 0 4px 4px 0;
+}
+
+.preview-obsidian table th,
+.preview-obsidian table td {
+    border-color: var(--preview-table-border);
+}
+
+.preview-obsidian table th {
+    background-color: var(--preview-table-header-bg);
+}
+
+.preview-obsidian hr {
+    background-color: var(--preview-hr);
+}
+
+/* Obsidian-specific: internal links */
+.preview-obsidian a[href^="#"] {
+    color: var(--preview-tag);
+}

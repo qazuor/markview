@@ -1,0 +1,88 @@
+/* Stack Overflow Preview Theme */
+
+/* Light mode */
+.preview-stackoverflow {
+    --preview-bg: #ffffff;
+    --preview-text: #232629;
+    --preview-text-muted: #6a737c;
+    --preview-link: #0074cc;
+    --preview-border: #d6d9dc;
+    --preview-code-bg: #f6f6f6;
+    --preview-code-text: #232629;
+    --preview-blockquote-border: #f48024;
+    --preview-blockquote-bg: #fff8dc;
+    --preview-table-border: #d6d9dc;
+    --preview-table-header-bg: #f6f6f6;
+    --preview-hr: #d6d9dc;
+}
+
+/* Dark mode */
+.preview-stackoverflow.dark {
+    --preview-bg: #1c1d1e;
+    --preview-text: #d1d2d3;
+    --preview-text-muted: #9a9c9f;
+    --preview-link: #6cbbf7;
+    --preview-border: #3d3d3d;
+    --preview-code-bg: #2d2d2d;
+    --preview-code-text: #d1d2d3;
+    --preview-blockquote-border: #f48024;
+    --preview-blockquote-bg: #3d3d3d;
+    --preview-table-border: #3d3d3d;
+    --preview-table-header-bg: #2d2d2d;
+    --preview-hr: #3d3d3d;
+}
+
+.preview-stackoverflow {
+    background-color: var(--preview-bg);
+    color: var(--preview-text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI Adjusted", "Segoe UI", "Liberation Sans", sans-serif;
+    font-size: 15px;
+}
+
+.preview-stackoverflow a {
+    color: var(--preview-link);
+}
+
+.preview-stackoverflow code {
+    background-color: var(--preview-code-bg);
+    color: var(--preview-code-text);
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 13px;
+}
+
+.preview-stackoverflow pre {
+    background-color: var(--preview-code-bg);
+    border-radius: 5px;
+    padding: 12px;
+}
+
+.preview-stackoverflow pre code {
+    font-size: 13px;
+    line-height: 1.3;
+}
+
+.preview-stackoverflow blockquote {
+    border-left-color: var(--preview-blockquote-border);
+    background-color: var(--preview-blockquote-bg);
+    padding: 0.5em 1em;
+    margin-left: 0;
+}
+
+.preview-stackoverflow table th,
+.preview-stackoverflow table td {
+    border-color: var(--preview-table-border);
+    padding: 8px;
+}
+
+.preview-stackoverflow table th {
+    background-color: var(--preview-table-header-bg);
+}
+
+.preview-stackoverflow hr {
+    background-color: var(--preview-hr);
+}
+
+.preview-stackoverflow h6 {
+    color: var(--preview-text-muted);
+}

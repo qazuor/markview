@@ -1,0 +1,8 @@
+/* Import all preview themes */
+@import "./base.css";
+@import "./github.css";
+@import "./gitlab.css";
+@import "./notion.css";
+@import "./obsidian.css";
+@import "./stackoverflow.css";
+@import "./devto.css";

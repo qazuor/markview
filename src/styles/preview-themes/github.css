@@ -1,0 +1,79 @@
+/* GitHub Preview Theme */
+
+/* Light mode */
+.preview-github {
+    --preview-bg: #ffffff;
+    --preview-text: #1f2328;
+    --preview-text-muted: #656d76;
+    --preview-link: #0969da;
+    --preview-border: #d1d9e0;
+    --preview-code-bg: #f6f8fa;
+    --preview-code-text: #1f2328;
+    --preview-blockquote-border: #d1d9e0;
+    --preview-blockquote-text: #656d76;
+    --preview-table-border: #d1d9e0;
+    --preview-table-header-bg: #f6f8fa;
+    --preview-hr: #d1d9e0b3;
+}
+
+/* Dark mode */
+.preview-github.dark {
+    --preview-bg: #0d1117;
+    --preview-text: #e6edf3;
+    --preview-text-muted: #8d96a0;
+    --preview-link: #4493f8;
+    --preview-border: #3d444d;
+    --preview-code-bg: #161b22;
+    --preview-code-text: #e6edf3;
+    --preview-blockquote-border: #3d444d;
+    --preview-blockquote-text: #8d96a0;
+    --preview-table-border: #3d444d;
+    --preview-table-header-bg: #161b22;
+    --preview-hr: #3d444db3;
+}
+
+.preview-github {
+    background-color: var(--preview-bg);
+    color: var(--preview-text);
+}
+
+.preview-github h1,
+.preview-github h2 {
+    padding-bottom: 0.3em;
+    border-bottom: 1px solid var(--preview-border);
+}
+
+.preview-github a {
+    color: var(--preview-link);
+}
+
+.preview-github code {
+    background-color: var(--preview-code-bg);
+    color: var(--preview-code-text);
+}
+
+.preview-github pre {
+    background-color: var(--preview-code-bg);
+}
+
+.preview-github blockquote {
+    border-left-color: var(--preview-blockquote-border);
+    color: var(--preview-blockquote-text);
+}
+
+.preview-github table th,
+.preview-github table td {
+    border-color: var(--preview-table-border);
+}
+
+.preview-github table th {
+    background-color: var(--preview-table-header-bg);
+}
+
+.preview-github hr {
+    background-color: var(--preview-hr);
+}
+
+.preview-github h6 {
+    color: var(--preview-text-muted);
+}

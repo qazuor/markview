@@ -1,0 +1,73 @@
+/* GitLab Preview Theme */
+
+/* Light mode */
+.preview-gitlab {
+    --preview-bg: #ffffff;
+    --preview-text: #303030;
+    --preview-text-muted: #737278;
+    --preview-link: #1f75cb;
+    --preview-border: #dcdcde;
+    --preview-code-bg: #f0f0f0;
+    --preview-code-text: #303030;
+    --preview-blockquote-border: #1f75cb;
+    --preview-blockquote-bg: #f0f0f0;
+    --preview-table-border: #dcdcde;
+    --preview-table-header-bg: #fafafa;
+    --preview-hr: #dcdcde;
+}
+
+/* Dark mode */
+.preview-gitlab.dark {
+    --preview-bg: #1f1f1f;
+    --preview-text: #fafafa;
+    --preview-text-muted: #bfbfc3;
+    --preview-link: #428fdc;
+    --preview-border: #404040;
+    --preview-code-bg: #2e2e2e;
+    --preview-code-text: #fafafa;
+    --preview-blockquote-border: #428fdc;
+    --preview-blockquote-bg: #2e2e2e;
+    --preview-table-border: #404040;
+    --preview-table-header-bg: #2e2e2e;
+    --preview-hr: #404040;
+}
+
+.preview-gitlab {
+    background-color: var(--preview-bg);
+    color: var(--preview-text);
+}
+
+.preview-gitlab a {
+    color: var(--preview-link);
+}
+
+.preview-gitlab code {
+    background-color: var(--preview-code-bg);
+    color: var(--preview-code-text);
+    border-radius: 3px;
+}
+
+.preview-gitlab pre {
+    background-color: var(--preview-code-bg);
+    border-radius: 4px;
+}
+
+.preview-gitlab blockquote {
+    border-left-color: var(--preview-blockquote-border);
+    background-color: var(--preview-blockquote-bg);
+    padding: 0.5em 1em;
+    border-radius: 0 4px 4px 0;
+}
+
+.preview-gitlab table th,
+.preview-gitlab table td {
+    border-color: var(--preview-table-border);
+}
+
+.preview-gitlab table th {
+    background-color: var(--preview-table-header-bg);
+}
+
+.preview-gitlab hr {
+    background-color: var(--preview-hr);
+}

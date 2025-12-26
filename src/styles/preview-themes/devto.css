@@ -1,0 +1,100 @@
+/* Dev.to Preview Theme */
+
+/* Light mode */
+.preview-devto {
+    --preview-bg: #ffffff;
+    --preview-text: #242424;
+    --preview-text-muted: #717171;
+    --preview-link: #3b49df;
+    --preview-border: #d4d4d4;
+    --preview-code-bg: #f9fafa;
+    --preview-code-text: #242424;
+    --preview-blockquote-border: #3b49df;
+    --preview-blockquote-bg: #f9fafa;
+    --preview-table-border: #d4d4d4;
+    --preview-table-header-bg: #f9fafa;
+    --preview-hr: #d4d4d4;
+}
+
+/* Dark mode */
+.preview-devto.dark {
+    --preview-bg: #161f2d;
+    --preview-text: #f9f9f9;
+    --preview-text-muted: #a3a3a3;
+    --preview-link: #5b6ef7;
+    --preview-border: #3d4b5d;
+    --preview-code-bg: #1e2836;
+    --preview-code-text: #f9f9f9;
+    --preview-blockquote-border: #5b6ef7;
+    --preview-blockquote-bg: #1e2836;
+    --preview-table-border: #3d4b5d;
+    --preview-table-header-bg: #1e2836;
+    --preview-hr: #3d4b5d;
+}
+
+.preview-devto {
+    background-color: var(--preview-bg);
+    color: var(--preview-text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 18px;
+    line-height: 1.8;
+}
+
+.preview-devto h1 {
+    font-size: 2.25em;
+    font-weight: 800;
+}
+
+.preview-devto h2 {
+    font-size: 1.75em;
+    font-weight: 700;
+}
+
+.preview-devto h3 {
+    font-size: 1.375em;
+    font-weight: 700;
+}
+
+.preview-devto a {
+    color: var(--preview-link);
+}
+
+.preview-devto code {
+    background-color: var(--preview-code-bg);
+    color: var(--preview-code-text);
+    padding: 0.2em 0.4em;
+    border-radius: 6px;
+    font-size: 0.9em;
+}
+
+.preview-devto pre {
+    background-color: var(--preview-code-bg);
+    border-radius: 6px;
+    padding: 1.5em;
+}
+
+.preview-devto blockquote {
+    border-left-color: var(--preview-blockquote-border);
+    background-color: var(--preview-blockquote-bg);
+    padding: 1em 1.5em;
+    border-radius: 0 6px 6px 0;
+    font-style: italic;
+}
+
+.preview-devto table th,
+.preview-devto table td {
+    border-color: var(--preview-table-border);
+}
+
+.preview-devto table th {
+    background-color: var(--preview-table-header-bg);
+}
+
+.preview-devto hr {
+    background-color: var(--preview-hr);
+}
+
+/* Dev.to article style images */
+.preview-devto img {
+    border-radius: 6px;
+}
