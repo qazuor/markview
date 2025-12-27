@@ -6,21 +6,44 @@ import { useCallback, useEffect, useRef } from 'react';
 import {
     createActiveLineExtension,
     createBracketMatchingExtension,
+    createEmptyLinter,
     createHistoryExtension,
     createLineNumbersExtension,
     createMarkdownExtension,
+    createMarkdownLinter,
+    createMinimapExtension,
     createWordWrapExtension
 } from '../extensions';
 import { createDefaultKeymap, createMarkdownKeymap } from '../extensions/keymap';
 import { darkEditorTheme, lightEditorTheme } from '../themes';
 
+// Create font style extension (outside component to avoid re-creation)
+function createFontExtension(size: number, family: string) {
+    return EditorView.theme({
+        '&': {
+            fontSize: `${size}px`
+        },
+        '.cm-content': {
+            fontFamily: `"${family}", ui-monospace, monospace`
+        },
+        '.cm-gutters': {
+            fontSize: `${size}px`
+        }
+    });
+}
+
 export interface UseCodeMirrorOptions {
     initialContent?: string;
     onChange?: (content: string) => void;
     onCursorChange?: (line: number, column: number) => void;
+    onScroll?: (scrollPercent: number) => void;
     theme?: 'light' | 'dark';
     lineNumbers?: boolean;
     wordWrap?: boolean;
+    minimap?: boolean;
+    fontSize?: number;
+    fontFamily?: string;
+    lintOnType?: boolean;
     placeholderText?: string;
 }
 
@@ -30,6 +53,8 @@ export interface UseCodeMirrorReturn {
     focus: () => void;
     getValue: () => string;
     setValue: (value: string) => void;
+    scrollToPercent: (percent: number) => void;
+    getScrollPercent: () => number;
 }
 
 export function useCodeMirror(options: UseCodeMirrorOptions = {}): UseCodeMirrorReturn {
@@ -37,9 +62,14 @@ export function useCodeMirror(options: UseCodeMirrorOptions = {}): UseCodeMirror
         initialContent = '',
         onChange,
         onCursorChange,
+        onScroll,
         theme = 'light',
         lineNumbers = true,
         wordWrap = true,
+        minimap = false,
+        fontSize = 14,
+        fontFamily = 'JetBrains Mono',
+        lintOnType = true,
         placeholderText = 'Start writing Markdown...'
     } = options;
 
@@ -48,18 +78,27 @@ export function useCodeMirror(options: UseCodeMirrorOptions = {}): UseCodeMirror
     const themeCompartment = useRef(new Compartment());
     const lineNumbersCompartment = useRef(new Compartment());
     const wordWrapCompartment = useRef(new Compartment());
+    const minimapCompartment = useRef(new Compartment());
+    const fontCompartment = useRef(new Compartment());
+    const lintCompartment = useRef(new Compartment());
 
     // Store callbacks in refs to avoid re-creating the editor
     const onChangeRef = useRef(onChange);
     const onCursorChangeRef = useRef(onCursorChange);
+    const onScrollRef = useRef(onScroll);
     onChangeRef.current = onChange;
     onCursorChangeRef.current = onCursorChange;
+    onScrollRef.current = onScroll;
 
     // Store initial values in refs
     const initialContentRef = useRef(initialContent);
     const initialThemeRef = useRef(theme);
     const initialLineNumbersRef = useRef(lineNumbers);
     const initialWordWrapRef = useRef(wordWrap);
+    const initialMinimapRef = useRef(minimap);
+    const initialFontSizeRef = useRef(fontSize);
+    const initialFontFamilyRef = useRef(fontFamily);
+    const initialLintOnTypeRef = useRef(lintOnType);
     const initialPlaceholderRef = useRef(placeholderText);
 
     // Initialize editor - only runs once
@@ -78,6 +117,19 @@ export function useCodeMirror(options: UseCodeMirrorOptions = {}): UseCodeMirror
             }
         });
 
+        // Scroll event handler
+        const scrollHandler = EditorView.domEventHandlers({
+            scroll: (_event, view) => {
+                if (onScrollRef.current) {
+                    const scroller = view.scrollDOM;
+                    const scrollHeight = scroller.scrollHeight - scroller.clientHeight;
+                    const percent = scrollHeight > 0 ? scroller.scrollTop / scrollHeight : 0;
+                    onScrollRef.current(percent);
+                }
+                return false;
+            }
+        });
+
         const state = EditorState.create({
             doc: initialContentRef.current,
             extensions: [
@@ -87,6 +139,9 @@ export function useCodeMirror(options: UseCodeMirrorOptions = {}): UseCodeMirror
                 // Editor configuration (compartmentalized)
                 lineNumbersCompartment.current.of(createLineNumbersExtension(initialLineNumbersRef.current)),
                 wordWrapCompartment.current.of(createWordWrapExtension(initialWordWrapRef.current)),
+                minimapCompartment.current.of(createMinimapExtension(initialMinimapRef.current)),
+                fontCompartment.current.of(createFontExtension(initialFontSizeRef.current, initialFontFamilyRef.current)),
+                lintCompartment.current.of(initialLintOnTypeRef.current ? createMarkdownLinter() : createEmptyLinter()),
 
                 // Core extensions
                 createMarkdownExtension(),
@@ -105,7 +160,10 @@ export function useCodeMirror(options: UseCodeMirrorOptions = {}): UseCodeMirror
                 placeholder(initialPlaceholderRef.current),
 
                 // Update listener
-                updateListener
+                updateListener,
+
+                // Scroll handler
+                scrollHandler
             ]
         });
 
@@ -149,6 +207,33 @@ export function useCodeMirror(options: UseCodeMirrorOptions = {}): UseCodeMirror
         });
     }, [wordWrap]);
 
+    // Update minimap when setting changes
+    useEffect(() => {
+        if (!viewRef.current) return;
+
+        viewRef.current.dispatch({
+            effects: minimapCompartment.current.reconfigure(createMinimapExtension(minimap))
+        });
+    }, [minimap]);
+
+    // Update font settings when they change
+    useEffect(() => {
+        if (!viewRef.current) return;
+
+        viewRef.current.dispatch({
+            effects: fontCompartment.current.reconfigure(createFontExtension(fontSize, fontFamily))
+        });
+    }, [fontSize, fontFamily]);
+
+    // Update linting when setting changes
+    useEffect(() => {
+        if (!viewRef.current) return;
+
+        viewRef.current.dispatch({
+            effects: lintCompartment.current.reconfigure(lintOnType ? createMarkdownLinter() : createEmptyLinter())
+        });
+    }, [lintOnType]);
+
     const focus = useCallback(() => {
         viewRef.current?.focus();
     }, []);
@@ -169,11 +254,29 @@ export function useCodeMirror(options: UseCodeMirrorOptions = {}): UseCodeMirror
         });
     }, []);
 
+    const scrollToPercent = useCallback((percent: number) => {
+        if (!viewRef.current) return;
+
+        const scroller = viewRef.current.scrollDOM;
+        const scrollHeight = scroller.scrollHeight - scroller.clientHeight;
+        scroller.scrollTop = scrollHeight * Math.max(0, Math.min(1, percent));
+    }, []);
+
+    const getScrollPercent = useCallback(() => {
+        if (!viewRef.current) return 0;
+
+        const scroller = viewRef.current.scrollDOM;
+        const scrollHeight = scroller.scrollHeight - scroller.clientHeight;
+        return scrollHeight > 0 ? scroller.scrollTop / scrollHeight : 0;
+    }, []);
+
     return {
         editorRef,
         view: viewRef.current,
         focus,
         getValue,
-        setValue
+        setValue,
+        scrollToPercent,
+        getScrollPercent
     };
 }
