@@ -1,6 +1,6 @@
-import { useDebounce } from '@/hooks/useDebounce';
+import { useDebouncedCallback } from '@/hooks/useDebounce';
 import { useDocumentStore } from '@/stores/documentStore';
-import { useCallback, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
 interface UseEditorSyncOptions {
     debounceMs?: number;
@@ -19,23 +19,44 @@ interface UseEditorSyncReturn {
 export function useEditorSync(options: UseEditorSyncOptions = {}): UseEditorSyncReturn {
     const { debounceMs = 300 } = options;
 
-    const { activeDocumentId, getActiveDocument, updateContent, updateCursor } = useDocumentStore();
+    const activeDocumentId = useDocumentStore((s) => s.activeDocumentId);
+    const documents = useDocumentStore((s) => s.documents);
+    const updateContent = useDocumentStore((s) => s.updateContent);
+    const updateCursor = useDocumentStore((s) => s.updateCursor);
 
-    const activeDocument = getActiveDocument();
+    const activeDocument = activeDocumentId ? (documents.get(activeDocumentId) ?? null) : null;
     const content = activeDocument?.content ?? '';
 
-    const pendingContent = useRef<string | null>(null);
+    // Track pending content per document to avoid losing changes on tab switch
+    const pendingContentMap = useRef<Map<string, string>>(new Map());
+    const prevDocumentIdRef = useRef<string | null>(null);
+
+    // Flush pending content when document changes
+    useEffect(() => {
+        const prevId = prevDocumentIdRef.current;
+
+        // Save pending content from previous document immediately
+        if (prevId && pendingContentMap.current.has(prevId)) {
+            const pendingContent = pendingContentMap.current.get(prevId);
+            if (pendingContent !== undefined) {
+                updateContent(prevId, pendingContent);
+                pendingContentMap.current.delete(prevId);
+            }
+        }
+
+        prevDocumentIdRef.current = activeDocumentId;
+    }, [activeDocumentId, updateContent]);
 
     // Debounced update to store
-    const debouncedUpdate = useDebounce((documentId: string, newContent: string) => {
+    const debouncedUpdate = useDebouncedCallback((documentId: string, newContent: string) => {
         updateContent(documentId, newContent);
-        pendingContent.current = null;
+        pendingContentMap.current.delete(documentId);
     }, debounceMs);
 
     const handleChange = useCallback(
         (newContent: string) => {
             if (!activeDocumentId) return;
-            pendingContent.current = newContent;
+            pendingContentMap.current.set(activeDocumentId, newContent);
             debouncedUpdate(activeDocumentId, newContent);
         },
         [activeDocumentId, debouncedUpdate]
@@ -49,8 +70,11 @@ export function useEditorSync(options: UseEditorSyncOptions = {}): UseEditorSync
         [activeDocumentId, updateCursor]
     );
 
+    // Get pending content for current document, or fall back to stored content
+    const currentPendingContent = activeDocumentId ? pendingContentMap.current.get(activeDocumentId) : undefined;
+
     return {
-        content: pendingContent.current ?? content,
+        content: currentPendingContent ?? content,
         documentId: activeDocumentId,
         handleChange,
         handleCursorChange

@@ -1,5 +1,6 @@
 import { useSettingsStore } from '@/stores/settingsStore';
 import { cn } from '@/utils/cn';
+import type { EditorView } from '@codemirror/view';
 import { useEffect, useRef } from 'react';
 import { useCodeMirror } from './hooks/useCodeMirror';
 import { useEditorSync } from './hooks/useEditorSync';
@@ -7,21 +8,39 @@ import { useEditorTheme } from './hooks/useEditorTheme';
 
 interface EditorProps {
     className?: string;
+    onViewReady?: (view: EditorView | null) => void;
+    onScroll?: (scrollPercent: number) => void;
+    onScrollToReady?: (scrollTo: (percent: number) => void) => void;
 }
 
-export function Editor({ className }: EditorProps) {
+export function Editor({ className, onViewReady, onScroll, onScrollToReady }: EditorProps) {
     const theme = useEditorTheme();
-    const { lineNumbers, wordWrap } = useSettingsStore();
+    const { lineNumbers, wordWrap, minimap, editorFontSize, fontFamily, lintOnType } = useSettingsStore();
     const { content, documentId, handleChange, handleCursorChange } = useEditorSync();
 
-    const { editorRef, setValue, focus } = useCodeMirror({
+    const { editorRef, view, setValue, focus, scrollToPercent } = useCodeMirror({
         initialContent: content,
         onChange: handleChange,
         onCursorChange: handleCursorChange,
+        onScroll,
         theme,
         lineNumbers,
-        wordWrap
+        wordWrap,
+        minimap,
+        fontSize: editorFontSize,
+        fontFamily,
+        lintOnType
     });
+
+    // Notify parent when view is ready
+    useEffect(() => {
+        onViewReady?.(view);
+    }, [view, onViewReady]);
+
+    // Expose scrollToPercent to parent
+    useEffect(() => {
+        onScrollToReady?.(scrollToPercent);
+    }, [scrollToPercent, onScrollToReady]);
 
     // Store content in ref to avoid triggering effect on every content change
     const contentRef = useRef(content);
