@@ -9,3 +9,5 @@ export {
     type ScrollPosition
 } from './scrollMap';
 export { extractToc, buildTocTree, type TocItem } from './toc';
+export { formatMarkdown, formatMarkdownSync } from './formatter';
+export { lintMarkdown, lintMarkdownSync, toCodeMirrorDiagnostics, type LintResult } from './linter';
