@@ -1,5 +1,6 @@
+import { useSettingsStore } from '@/stores/settingsStore';
 import { cn } from '@/utils/cn';
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { processCodeBlocks } from './CodeBlock';
 import { PreviewLoading } from './PreviewLoading';
 import { useMarkdown, usePreviewTheme } from './hooks';
@@ -7,14 +8,16 @@ import { useMarkdown, usePreviewTheme } from './hooks';
 interface PreviewProps {
     content: string;
     className?: string;
-    onScroll?: (scrollTop: number) => void;
+    onScroll?: (scrollPercent: number) => void;
+    onScrollToReady?: (scrollTo: (percent: number) => void) => void;
 }
 
 /**
  * Markdown preview component
  */
-export function Preview({ content, className, onScroll }: PreviewProps) {
+export function Preview({ content, className, onScroll, onScrollToReady }: PreviewProps) {
     const { themeClass, isDark } = usePreviewTheme();
+    const { previewFontSize, fontFamily } = useSettingsStore();
     const { html, isLoading, error } = useMarkdown(content, {
         theme: isDark ? 'dark' : 'light',
         debounceMs: 300
@@ -33,9 +36,35 @@ export function Preview({ content, className, onScroll }: PreviewProps) {
     // Handle scroll events
     const handleScroll = useCallback(() => {
         if (containerRef.current && onScroll) {
-            onScroll(containerRef.current.scrollTop);
+            const el = containerRef.current;
+            const scrollHeight = el.scrollHeight - el.clientHeight;
+            const percent = scrollHeight > 0 ? el.scrollTop / scrollHeight : 0;
+            onScroll(percent);
         }
     }, [onScroll]);
+
+    // Scroll to percent function
+    const scrollToPercent = useCallback((percent: number) => {
+        if (containerRef.current) {
+            const el = containerRef.current;
+            const scrollHeight = el.scrollHeight - el.clientHeight;
+            el.scrollTop = scrollHeight * Math.max(0, Math.min(1, percent));
+        }
+    }, []);
+
+    // Expose scrollToPercent to parent
+    useEffect(() => {
+        onScrollToReady?.(scrollToPercent);
+    }, [scrollToPercent, onScrollToReady]);
+
+    // Font styles for preview content
+    const contentStyle = useMemo(
+        () => ({
+            fontSize: `${previewFontSize}px`,
+            fontFamily: `"${fontFamily}", ui-sans-serif, system-ui, sans-serif`
+        }),
+        [previewFontSize, fontFamily]
+    );
 
     // Show loading state only for slow renders
     if (isLoading && !html) {
@@ -70,6 +99,7 @@ export function Preview({ content, className, onScroll }: PreviewProps) {
             <div
                 ref={contentRef}
                 className={cn('preview-content prose max-w-none p-6', isDark && 'prose-invert')}
+                style={contentStyle}
                 // biome-ignore lint/security/noDangerouslySetInnerHtml: Content is sanitized by rehype-sanitize
                 dangerouslySetInnerHTML={{ __html: html }}
             />

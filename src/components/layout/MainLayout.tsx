@@ -2,11 +2,14 @@ import { Editor } from '@/components/editor';
 import { Preview } from '@/components/preview';
 import { SplitPane } from '@/components/ui';
 import { useDocumentStore } from '@/stores/documentStore';
+import { useSettingsStore } from '@/stores/settingsStore';
 import { cn } from '@/utils/cn';
-import { useCallback, useEffect, useState } from 'react';
+import type { EditorView } from '@codemirror/view';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 interface MainLayoutProps {
     className?: string;
+    onEditorViewReady?: (view: EditorView | null) => void;
 }
 
 // Breakpoint for responsive behavior
@@ -17,13 +20,63 @@ type ViewMode = 'split' | 'editor' | 'preview';
 /**
  * Main content layout with editor and preview
  */
-export function MainLayout({ className }: MainLayoutProps) {
+export function MainLayout({ className, onEditorViewReady }: MainLayoutProps) {
     const [viewMode, setViewMode] = useState<ViewMode>('split');
     const [isMobile, setIsMobile] = useState(false);
     const [splitSize, setSplitSize] = useState(50);
 
-    const activeDocument = useDocumentStore((state) => state.getActiveDocument());
+    const activeDocumentId = useDocumentStore((state) => state.activeDocumentId);
+    const documents = useDocumentStore((state) => state.documents);
+    const activeDocument = activeDocumentId ? (documents.get(activeDocumentId) ?? null) : null;
     const content = activeDocument?.content ?? '';
+
+    // Sync scroll settings and functions
+    const syncScroll = useSettingsStore((state) => state.syncScroll);
+    const editorScrollToRef = useRef<((percent: number) => void) | null>(null);
+    const previewScrollToRef = useRef<((percent: number) => void) | null>(null);
+    const isScrollingRef = useRef<'editor' | 'preview' | null>(null);
+    const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    // Handle editor scroll - sync to preview
+    const handleEditorScroll = useCallback(
+        (percent: number) => {
+            if (!syncScroll || isScrollingRef.current === 'preview') return;
+            isScrollingRef.current = 'editor';
+
+            if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+            scrollTimeoutRef.current = setTimeout(() => {
+                isScrollingRef.current = null;
+            }, 100);
+
+            previewScrollToRef.current?.(percent);
+        },
+        [syncScroll]
+    );
+
+    // Handle preview scroll - sync to editor
+    const handlePreviewScroll = useCallback(
+        (percent: number) => {
+            if (!syncScroll || isScrollingRef.current === 'editor') return;
+            isScrollingRef.current = 'preview';
+
+            if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+            scrollTimeoutRef.current = setTimeout(() => {
+                isScrollingRef.current = null;
+            }, 100);
+
+            editorScrollToRef.current?.(percent);
+        },
+        [syncScroll]
+    );
+
+    // Capture scroll functions from children
+    const handleEditorScrollToReady = useCallback((scrollTo: (percent: number) => void) => {
+        editorScrollToRef.current = scrollTo;
+    }, []);
+
+    const handlePreviewScrollToReady = useCallback((scrollTo: (percent: number) => void) => {
+        previewScrollToRef.current = scrollTo;
+    }, []);
 
     // Check for mobile viewport
     useEffect(() => {
@@ -85,7 +138,11 @@ export function MainLayout({ className }: MainLayoutProps) {
 
                 {/* Content */}
                 <div className="flex-1 overflow-hidden">
-                    {viewMode === 'editor' ? <Editor className="h-full" /> : <Preview content={content} className="h-full" />}
+                    {viewMode === 'editor' ? (
+                        <Editor className="h-full" onViewReady={onEditorViewReady} />
+                    ) : (
+                        <Preview content={content} className="h-full" />
+                    )}
                 </div>
             </div>
         );
@@ -95,8 +152,22 @@ export function MainLayout({ className }: MainLayoutProps) {
     return (
         <div className={cn('h-full', className)}>
             <SplitPane
-                left={<Editor className="h-full" />}
-                right={<Preview content={content} className="h-full" />}
+                left={
+                    <Editor
+                        className="h-full"
+                        onViewReady={onEditorViewReady}
+                        onScroll={handleEditorScroll}
+                        onScrollToReady={handleEditorScrollToReady}
+                    />
+                }
+                right={
+                    <Preview
+                        content={content}
+                        className="h-full"
+                        onScroll={handlePreviewScroll}
+                        onScrollToReady={handlePreviewScrollToReady}
+                    />
+                }
                 defaultSize={splitSize}
                 minSize={20}
                 maxSize={80}
