@@ -1,6 +1,7 @@
-export { SplitPane } from './SplitPane';
 export { Button, IconButton } from './Button';
-export { Modal, ModalTrigger, ModalFooter } from './Modal';
+export { DropOverlay } from './DropOverlay';
+export { Modal, ModalFooter, ModalTrigger } from './Modal';
+export { SplitPane } from './SplitPane';
 export { Tooltip, TooltipWithShortcut } from './Tooltip';
 export {
     DropdownMenu,
