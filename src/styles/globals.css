@@ -155,3 +155,56 @@
 .cm-content {
     min-width: 0;
 }
+
+/* Minimap styles */
+.cm-editor .cm-gutters.cm-minimap-gutter {
+    padding-left: 10px;
+}
+
+.cm-editor .cm-minimap-inner {
+    border-left: 1px solid rgb(203 213 225); /* slate-300 for light theme */
+    padding-left: 5px;
+    left: 5px;
+}
+
+.dark .cm-editor .cm-minimap-inner {
+    border-left: 1px solid rgb(71 85 105); /* slate-600 for dark theme */
+}
+
+/* Minimap overlay (visible block indicator) */
+.cm-minimap-overlay {
+    background: rgb(14 165 233) !important; /* sky-500 */
+    opacity: 0.25 !important;
+}
+
+.cm-minimap-overlay:hover {
+    opacity: 0.35 !important;
+}
+
+.cm-minimap-overlay-active .cm-minimap-overlay {
+    opacity: 0.45 !important;
+}
+
+.dark .cm-minimap-overlay {
+    background: rgb(56 189 248) !important; /* sky-400 */
+    opacity: 0.3 !important;
+}
+
+.dark .cm-minimap-overlay:hover {
+    opacity: 0.4 !important;
+}
+
+.dark .cm-minimap-overlay-active .cm-minimap-overlay {
+    opacity: 0.5 !important;
+}
+
+/* Prevent text selection while dragging minimap overlay */
+body:has(.cm-minimap-overlay-active) {
+    user-select: none;
+    -webkit-user-select: none;
+    cursor: grabbing !important;
+}
+
+body:has(.cm-minimap-overlay-active) * {
+    cursor: grabbing !important;
+}
