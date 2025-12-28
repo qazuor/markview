@@ -4,6 +4,8 @@ export type ModalType = 'settings' | 'shortcuts' | 'onboarding' | 'versions' | '
 
 export type SaveStatus = 'saved' | 'saving' | 'modified' | 'error';
 
+export type ViewMode = 'split' | 'editor' | 'preview';
+
 export interface SearchResult {
     line: number;
     column: number;
@@ -16,6 +18,7 @@ export interface UIState {
     sidebarOpen: boolean;
     sidebarSection: SidebarSection;
     sidebarWidth: number;
+    viewMode: ViewMode;
     zenMode: boolean;
 
     // Modals
