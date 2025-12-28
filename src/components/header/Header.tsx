@@ -3,8 +3,25 @@ import { useDocumentStore } from '@/stores/documentStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useUIStore } from '@/stores/uiStore';
 import { cn } from '@/utils/cn';
-import { ChevronDown, Download, FileCode, FilePlus, FileText, FileType, FolderOpen, Info, Keyboard, Save, Settings } from 'lucide-react';
-import { useCallback, useRef, useState } from 'react';
+import {
+    ChevronDown,
+    Columns2,
+    Download,
+    ExternalLink,
+    FileCode,
+    FilePlus,
+    FileText,
+    FileType,
+    FolderOpen,
+    Image,
+    Info,
+    Keyboard,
+    PanelLeft,
+    PanelRight,
+    Save,
+    Settings
+} from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 interface HeaderProps {
@@ -13,7 +30,7 @@ interface HeaderProps {
     className?: string;
 }
 
-type ExportFormat = 'markdown' | 'html' | 'pdf';
+type ExportFormat = 'markdown' | 'html' | 'pdf' | 'png' | 'jpeg';
 
 interface MenuItem {
     id: string;
@@ -30,6 +47,7 @@ export function Header({ onImport, onSave, className }: HeaderProps) {
     const [activeMenu, setActiveMenu] = useState<string | null>(null);
     const [isExporting, setIsExporting] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
+    const previewWindowRef = useRef<Window | null>(null);
 
     const createDocument = useDocumentStore((s) => s.createDocument);
     const activeDocumentId = useDocumentStore((s) => s.activeDocumentId);
@@ -37,6 +55,7 @@ export function Header({ onImport, onSave, className }: HeaderProps) {
     const currentDocument = activeDocumentId ? documents.get(activeDocumentId) : null;
 
     const openModal = useUIStore((s) => s.openModal);
+    const setViewMode = useUIStore((s) => s.setViewMode);
     const theme = useSettingsStore((s) => s.theme);
 
     const closeMenu = useCallback(() => setActiveMenu(null), []);
@@ -66,6 +85,35 @@ export function Header({ onImport, onSave, className }: HeaderProps) {
         closeMenu();
     }, [openModal, closeMenu]);
 
+    const handleOpenPreviewWindow = useCallback(() => {
+        const previewUrl = `${window.location.origin}${window.location.pathname}?preview`;
+        const newWindow = window.open(previewUrl, 'markview-preview', 'width=800,height=600,menubar=no,toolbar=no,location=no,status=no');
+        previewWindowRef.current = newWindow;
+        // Auto-collapse preview to show editor full-width when opening preview in new window
+        setViewMode('editor');
+        closeMenu();
+    }, [setViewMode, closeMenu]);
+
+    // Monitor preview window close to restore split view
+    useEffect(() => {
+        const checkWindowClosed = setInterval(() => {
+            if (previewWindowRef.current?.closed) {
+                previewWindowRef.current = null;
+                setViewMode('split');
+            }
+        }, 500);
+
+        return () => clearInterval(checkWindowClosed);
+    }, [setViewMode]);
+
+    const handleSetViewMode = useCallback(
+        (mode: 'split' | 'editor' | 'preview') => {
+            setViewMode(mode);
+            closeMenu();
+        },
+        [setViewMode, closeMenu]
+    );
+
     const handleExport = useCallback(
         async (format: ExportFormat) => {
             if (!currentDocument || isExporting) return;
@@ -91,6 +139,13 @@ export function Header({ onImport, onSave, className }: HeaderProps) {
                         filename,
                         theme: exportTheme
                     });
+                } else if (format === 'png' || format === 'jpeg') {
+                    const { exportToImage } = await import('@/services/export');
+                    await exportToImage({
+                        filename,
+                        format,
+                        backgroundColor: exportTheme === 'dark' ? '#1f2937' : '#ffffff'
+                    });
                 }
             } catch (error) {
                 console.error(`Export to ${format} failed:`, error);
@@ -114,12 +169,42 @@ export function Header({ onImport, onSave, className }: HeaderProps) {
             children: [
                 { id: 'export-md', icon: FileText, label: t('export.markdown'), onClick: () => handleExport('markdown') },
                 { id: 'export-html', icon: FileCode, label: t('export.html'), onClick: () => handleExport('html') },
-                { id: 'export-pdf', icon: FileType, label: t('export.pdf'), onClick: () => handleExport('pdf') }
+                { id: 'export-pdf', icon: FileType, label: t('export.pdf'), onClick: () => handleExport('pdf') },
+                { id: 'export-png', icon: Image, label: t('export.png'), onClick: () => handleExport('png') },
+                { id: 'export-jpeg', icon: Image, label: t('export.jpeg'), onClick: () => handleExport('jpeg') }
             ]
         },
         { id: 'sep-2', type: 'separator', label: '' },
         { id: 'settings', icon: Settings, label: t('common.settings'), shortcut: 'Ctrl+,', onClick: handleSettings },
         { id: 'shortcuts', icon: Keyboard, label: t('shortcuts.title'), shortcut: 'Ctrl+/', onClick: handleShortcuts }
+    ];
+
+    const viewMenuItems: MenuItem[] = [
+        {
+            id: 'view-editor',
+            icon: PanelLeft,
+            label: t('layout.showEditor'),
+            onClick: () => handleSetViewMode('editor')
+        },
+        {
+            id: 'view-split',
+            icon: Columns2,
+            label: t('layout.splitView'),
+            onClick: () => handleSetViewMode('split')
+        },
+        {
+            id: 'view-preview',
+            icon: PanelRight,
+            label: t('layout.showPreview'),
+            onClick: () => handleSetViewMode('preview')
+        },
+        { id: 'sep-view', type: 'separator', label: '' },
+        {
+            id: 'preview-window',
+            icon: ExternalLink,
+            label: t('preview.openInNewWindow'),
+            onClick: handleOpenPreviewWindow
+        }
     ];
 
     const helpMenuItems: MenuItem[] = [
@@ -230,6 +315,7 @@ export function Header({ onImport, onSave, className }: HeaderProps) {
             {/* Menu bar */}
             <nav className="flex items-center gap-0.5 ml-2">
                 {renderMenu('file', t('menu.file') || 'File', fileMenuItems)}
+                {renderMenu('view', t('menu.view') || 'View', viewMenuItems)}
                 {renderMenu('help', t('menu.help') || 'Help', helpMenuItems)}
             </nav>
 
