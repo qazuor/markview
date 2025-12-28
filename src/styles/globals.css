@@ -88,3 +88,18 @@
         display: none;
     }
 }
+
+/* CodeMirror container constraints */
+.cm-editor {
+    height: 100%;
+    max-width: 100%;
+    overflow: hidden;
+}
+
+.cm-scroller {
+    overflow: auto !important;
+}
+
+.cm-content {
+    min-width: 0;
+}

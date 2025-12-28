@@ -71,7 +71,7 @@ export function Editor({ className, onViewReady, onScroll, onScrollToReady }: Ed
     return (
         <div
             className={cn(
-                'h-full w-full overflow-hidden',
+                'h-full w-full min-w-0 overflow-hidden',
                 'bg-white dark:bg-secondary-900',
                 'border-r border-secondary-200 dark:border-secondary-700',
                 className
@@ -79,7 +79,7 @@ export function Editor({ className, onViewReady, onScroll, onScrollToReady }: Ed
         >
             <div
                 ref={editorRef as React.RefObject<HTMLDivElement>}
-                className="h-full w-full [&_.cm-editor]:h-full [&_.cm-scroller]:overflow-auto"
+                className="h-full w-full [&_.cm-editor]:h-full [&_.cm-editor]:overflow-hidden [&_.cm-scroller]:overflow-auto"
             />
         </div>
     );

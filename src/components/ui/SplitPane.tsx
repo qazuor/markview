@@ -94,9 +94,9 @@ export function SplitPane({ left, right, defaultSize = 50, minSize = 20, maxSize
     }, [isDragging, handleTouchMove, handleTouchEnd]);
 
     return (
-        <div ref={containerRef} className={cn('flex h-full', isDragging && 'cursor-col-resize select-none', className)}>
+        <div ref={containerRef} className={cn('flex h-full w-full min-w-0', isDragging && 'cursor-col-resize select-none', className)}>
             {/* Left pane */}
-            <div style={{ width: `${leftSize}%` }} className="h-full overflow-hidden">
+            <div style={{ width: `${leftSize}%` }} className="h-full min-w-0 overflow-hidden">
                 {left}
             </div>
 
@@ -123,7 +123,7 @@ export function SplitPane({ left, right, defaultSize = 50, minSize = 20, maxSize
             />
 
             {/* Right pane */}
-            <div style={{ width: `${100 - leftSize}%` }} className="h-full overflow-hidden">
+            <div style={{ width: `${100 - leftSize}%` }} className="h-full min-w-0 overflow-hidden">
                 {right}
             </div>
         </div>
