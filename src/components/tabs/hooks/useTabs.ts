@@ -87,6 +87,33 @@ export function useTabs() {
 
     const hasModifiedTabs = useMemo(() => tabs.some((tab) => tab.isModified), [tabs]);
 
+    const closeOtherTabs = useCallback(
+        (keepTabId: string) => {
+            const tabsToClose = tabs.filter((tab) => tab.id !== keepTabId && !tab.isModified);
+            for (const tab of tabsToClose) {
+                closeDocument(tab.id);
+            }
+            setTabOrder((prev) => prev.filter((id) => id === keepTabId || tabs.find((t) => t.id === id)?.isModified));
+        },
+        [tabs, closeDocument]
+    );
+
+    const closeAllTabs = useCallback(() => {
+        const tabsToClose = tabs.filter((tab) => !tab.isModified);
+        for (const tab of tabsToClose) {
+            closeDocument(tab.id);
+        }
+        setTabOrder((prev) => prev.filter((id) => tabs.find((t) => t.id === id)?.isModified));
+    }, [tabs, closeDocument]);
+
+    const closeSavedTabs = useCallback(() => {
+        const tabsToClose = tabs.filter((tab) => !tab.isModified);
+        for (const tab of tabsToClose) {
+            closeDocument(tab.id);
+        }
+        setTabOrder((prev) => prev.filter((id) => tabs.find((t) => t.id === id)?.isModified));
+    }, [tabs, closeDocument]);
+
     return {
         tabs,
         activeTab,
@@ -96,6 +123,9 @@ export function useTabs() {
         addTab,
         reorderTabs,
         hasModifiedTabs,
-        tabCount: tabs.length
+        tabCount: tabs.length,
+        closeOtherTabs,
+        closeAllTabs,
+        closeSavedTabs
     };
 }
