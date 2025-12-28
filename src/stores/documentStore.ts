@@ -1,4 +1,5 @@
 import type { Document, Version } from '@/types';
+import { extractHeading, sanitizeFilename } from '@/utils';
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 
@@ -89,12 +90,25 @@ export const useDocumentStore = create<DocumentState>()(
                         if (!doc) return state;
 
                         const newDocs = new Map(state.documents);
-                        newDocs.set(id, {
+                        const updatedDoc: Document = {
                             ...doc,
                             content,
                             isModified: true,
                             updatedAt: new Date()
-                        });
+                        };
+
+                        // Auto-name from first H1 if not manually named
+                        if (!doc.isManuallyNamed) {
+                            const heading = extractHeading(content);
+                            if (heading) {
+                                updatedDoc.name = sanitizeFilename(heading);
+                            } else if (doc.name !== 'Untitled' && !content.trim()) {
+                                // Reset to Untitled if content is cleared
+                                updatedDoc.name = 'Untitled';
+                            }
+                        }
+
+                        newDocs.set(id, updatedDoc);
                         return { documents: newDocs };
                     });
                 },
