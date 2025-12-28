@@ -1,6 +1,7 @@
 import { cn } from '@/utils/cn';
 import { X } from 'lucide-react';
 import type React from 'react';
+import { EditableTabName } from './EditableTabName';
 
 interface TabProps {
     id: string;
@@ -48,8 +49,8 @@ export function Tab({ id, name, isActive, isModified, onClick, onClose, onMiddle
             {/* Modified indicator */}
             {isModified && <span className="absolute left-1.5 top-1/2 -translate-y-1/2 h-2 w-2 rounded-full bg-primary-500" />}
 
-            {/* Tab name */}
-            <span className={cn('flex-1 truncate text-sm', isModified && 'ml-2')}>{name}</span>
+            {/* Tab name - double-click to rename */}
+            <EditableTabName documentId={id} name={name} isActive={isActive} className={cn('flex-1 text-sm', isModified && 'ml-2')} />
 
             {/* Close button */}
             <button

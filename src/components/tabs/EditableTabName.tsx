@@ -86,44 +86,50 @@ export function EditableTabName({ documentId, name, isActive, className }: Edita
         }
     }, [error, editValue, name, saveEdit, cancelEditing]);
 
-    if (isEditing) {
-        return (
-            <div className="relative">
-                <input
-                    ref={inputRef}
-                    type="text"
-                    value={editValue}
-                    onChange={(e) => {
-                        setEditValue(e.target.value);
-                        setError(null);
-                    }}
-                    onKeyDown={handleKeyDown}
-                    onBlur={handleBlur}
-                    className={cn(
-                        'w-full min-w-[60px] max-w-[200px]',
-                        'px-1 py-0 text-sm',
-                        'bg-bg-secondary border rounded',
-                        error ? 'border-red-500' : 'border-primary-500',
-                        'focus:outline-none',
-                        className
-                    )}
-                />
-                {error && (
-                    <div className="absolute left-0 top-full mt-1 px-2 py-1 text-xs text-white bg-red-500 rounded shadow-lg whitespace-nowrap z-50">
-                        {error}
-                    </div>
-                )}
-            </div>
-        );
-    }
-
+    // Use a fixed-size container to prevent layout shifts during editing
     return (
-        <span
-            onDoubleClick={startEditing}
-            className={cn('truncate cursor-default', isActive ? 'text-text-primary' : 'text-text-secondary', className)}
-            title={name}
-        >
-            {name}
-        </span>
+        <div className={cn('relative min-w-0', className)}>
+            {isEditing ? (
+                <>
+                    <input
+                        ref={inputRef}
+                        type="text"
+                        value={editValue}
+                        onChange={(e) => {
+                            setEditValue(e.target.value);
+                            setError(null);
+                        }}
+                        onKeyDown={handleKeyDown}
+                        onBlur={handleBlur}
+                        className={cn(
+                            'absolute inset-y-0 left-0 right-0',
+                            'px-2 py-1 text-sm',
+                            'bg-bg-primary rounded',
+                            'border border-solid',
+                            error ? 'border-red-500' : 'border-primary-500',
+                            'focus:outline-none focus:ring-1 focus:ring-primary-500'
+                        )}
+                        style={{ margin: '-2px -4px', width: 'calc(100% + 8px)' }}
+                    />
+                    {/* Invisible text to maintain height - actual width comes from container */}
+                    <span className="block truncate invisible" aria-hidden="true">
+                        {name || 'X'}
+                    </span>
+                    {error && (
+                        <div className="absolute left-0 top-full mt-1 px-2 py-1 text-xs text-white bg-red-500 rounded shadow-lg whitespace-nowrap z-50">
+                            {error}
+                        </div>
+                    )}
+                </>
+            ) : (
+                <span
+                    onDoubleClick={startEditing}
+                    className={cn('block truncate cursor-default', isActive ? 'text-text-primary' : 'text-text-secondary')}
+                    title={name}
+                >
+                    {name}
+                </span>
+            )}
+        </div>
     );
 }
