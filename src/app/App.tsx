@@ -7,12 +7,17 @@ import { TabBar } from '@/components/tabs';
 import { Toolbar } from '@/components/toolbar';
 import { DropOverlay } from '@/components/ui';
 import { useAutoSave, useDragAndDrop, useFileImport, useTheme } from '@/hooks';
-import { useDocumentStore, useUIStore } from '@/stores';
+import { usePreviewSync } from '@/hooks/useBroadcastChannel';
+import { useDocumentStore, useSettingsStore, useUIStore } from '@/stores';
 import type { EditorView } from '@codemirror/view';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export function App() {
+    const { t } = useTranslation();
     useTheme();
+
+    const theme = useSettingsStore((state) => state.theme);
 
     const documents = useDocumentStore((state) => state.documents);
     const activeDocumentId = useDocumentStore((state) => state.activeDocumentId);
@@ -23,6 +28,9 @@ export function App() {
     const sidebarOpen = useUIStore((state) => state.sidebarOpen);
     const setSidebarOpen = useUIStore((state) => state.setSidebarOpen);
     const toggleSidebar = useUIStore((state) => state.toggleSidebar);
+    const zenMode = useUIStore((state) => state.zenMode);
+    const toggleZenMode = useUIStore((state) => state.toggleZenMode);
+    const setZenMode = useUIStore((state) => state.setZenMode);
     const activeModal = useUIStore((state) => state.activeModal);
     const openModal = useUIStore((state) => state.openModal);
     const closeModal = useUIStore((state) => state.closeModal);
@@ -30,6 +38,41 @@ export function App() {
     const activeDocument = activeDocumentId ? (documents.get(activeDocumentId) ?? null) : null;
     const [editorView, setEditorView] = useState<EditorView | null>(null);
     const [compareVersionId, setCompareVersionId] = useState<string | null>(null);
+
+    // Refs for preview sync to avoid circular dependencies
+    const syncContentRef = useRef<((content: string, theme: 'light' | 'dark') => void) | null>(null);
+    const activeContentRef = useRef<string>('');
+    const themeRef = useRef(theme);
+
+    // Keep refs updated
+    useEffect(() => {
+        activeContentRef.current = activeDocument?.content ?? '';
+    }, [activeDocument?.content]);
+
+    useEffect(() => {
+        themeRef.current = theme;
+    }, [theme]);
+
+    // Helper to get effective theme
+    const getEffectiveTheme = useCallback((): 'light' | 'dark' => {
+        const currentTheme = themeRef.current;
+        return currentTheme === 'system' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : currentTheme;
+    }, []);
+
+    // Callback for when preview window requests content
+    const handleContentRequest = useCallback(() => {
+        if (syncContentRef.current && activeContentRef.current) {
+            syncContentRef.current(activeContentRef.current, getEffectiveTheme());
+        }
+    }, [getEffectiveTheme]);
+
+    // Preview sync with content request handler
+    const { syncContent } = usePreviewSync(true, handleContentRequest);
+
+    // Store syncContent in ref
+    useEffect(() => {
+        syncContentRef.current = syncContent;
+    }, [syncContent]);
 
     // Auto-save
     const { isSaving, save } = useAutoSave(activeDocument);
@@ -50,6 +93,13 @@ export function App() {
             createDocument();
         }
     }, [documents.size, createDocument]);
+
+    // Sync content with preview windows when content changes
+    useEffect(() => {
+        if (activeDocument?.content !== undefined) {
+            syncContent(activeDocument.content, getEffectiveTheme());
+        }
+    }, [activeDocument?.content, getEffectiveTheme, syncContent]);
 
     // Global keyboard shortcuts
     useEffect(() => {
@@ -100,17 +150,41 @@ export function App() {
                 return;
             }
 
-            // Escape - Close modal
-            if (e.key === 'Escape' && activeModal) {
+            // F11 or Ctrl+Shift+Z - Toggle Zen mode
+            if (e.key === 'F11' || (isMod && e.shiftKey && e.key.toLowerCase() === 'z')) {
                 e.preventDefault();
-                closeModal();
+                toggleZenMode();
+                return;
+            }
+
+            // Escape - Close modal or exit Zen mode
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                if (activeModal) {
+                    closeModal();
+                } else if (zenMode) {
+                    setZenMode(false);
+                }
                 return;
             }
         };
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [activeDocumentId, documents.size, createDocument, closeDocument, toggleSidebar, openModal, closeModal, activeModal, save]);
+    }, [
+        activeDocumentId,
+        documents.size,
+        createDocument,
+        closeDocument,
+        toggleSidebar,
+        openModal,
+        closeModal,
+        activeModal,
+        save,
+        zenMode,
+        toggleZenMode,
+        setZenMode
+    ]);
 
     // Handle editor view ready
     const handleEditorViewReady = useCallback((view: EditorView | null) => {
@@ -184,40 +258,56 @@ export function App() {
     return (
         <div className="flex h-screen flex-col bg-bg-primary text-text-primary">
             {/* Header with logo and file menu */}
-            <Header onImport={openFileDialog} onSave={save} className="shrink-0" />
+            {!zenMode && <Header onImport={openFileDialog} onSave={save} className="shrink-0" />}
 
             {/* Tab bar */}
-            <TabBar className="shrink-0" />
+            {!zenMode && <TabBar className="shrink-0" />}
 
             {/* Document formatting toolbar */}
-            <Toolbar editorView={editorView} className="shrink-0" />
+            {!zenMode && <Toolbar editorView={editorView} className="shrink-0" />}
 
             {/* Main content */}
             <div className="flex flex-1 min-h-0 overflow-hidden">
                 {/* Sidebar */}
-                <Sidebar
-                    content={activeDocument?.content}
-                    activeLine={activeDocument?.cursor?.line}
-                    onNavigate={handleNavigate}
-                    onReplace={handleReplace}
-                    isCollapsed={!sidebarOpen}
-                    onCollapsedChange={(collapsed) => setSidebarOpen(!collapsed)}
-                    className="shrink-0"
-                />
+                {!zenMode && (
+                    <Sidebar
+                        content={activeDocument?.content}
+                        activeLine={activeDocument?.cursor?.line}
+                        onNavigate={handleNavigate}
+                        onReplace={handleReplace}
+                        isCollapsed={!sidebarOpen}
+                        onCollapsedChange={(collapsed) => setSidebarOpen(!collapsed)}
+                        className="shrink-0"
+                    />
+                )}
 
                 {/* Editor and Preview */}
                 <MainLayout className="flex-1 min-w-0" onEditorViewReady={handleEditorViewReady} />
             </div>
 
             {/* Status bar */}
-            <StatusBar
-                line={activeDocument?.cursor?.line}
-                column={activeDocument?.cursor?.column}
-                content={activeDocument?.content}
-                isModified={activeDocument?.isModified}
-                isSaving={isSaving}
-                className="shrink-0"
-            />
+            {!zenMode && (
+                <StatusBar
+                    line={activeDocument?.cursor?.line}
+                    column={activeDocument?.cursor?.column}
+                    content={activeDocument?.content}
+                    isModified={activeDocument?.isModified}
+                    isSaving={isSaving}
+                    className="shrink-0"
+                />
+            )}
+
+            {/* Zen mode exit hint */}
+            {zenMode && (
+                <button
+                    type="button"
+                    onClick={() => setZenMode(false)}
+                    className="fixed top-4 right-4 z-50 px-3 py-1.5 text-xs text-text-muted bg-bg-secondary/80 backdrop-blur-sm rounded-full opacity-0 hover:opacity-100 focus:opacity-100 transition-opacity duration-300"
+                    title={`${t('zen.title')} - ESC/F11`}
+                >
+                    {t('zen.exit')}
+                </button>
+            )}
 
             {/* Modals */}
             <KeyboardShortcutsModal isOpen={activeModal === 'shortcuts'} onClose={closeModal} />
