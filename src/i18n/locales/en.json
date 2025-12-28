@@ -202,5 +202,13 @@
         "image": "Image",
         "table": "Table",
         "horizontalRule": "Horizontal Rule"
+    },
+    "zoom": {
+        "zoom": "Zoom",
+        "zoomIn": "Zoom In",
+        "zoomOut": "Zoom Out",
+        "resetZoom": "Reset Zoom",
+        "controls": "Zoom controls",
+        "currentZoom": "Current zoom"
     }
 }

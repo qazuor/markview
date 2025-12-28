@@ -202,5 +202,13 @@
         "image": "Imagen",
         "table": "Tabla",
         "horizontalRule": "Línea Horizontal"
+    },
+    "zoom": {
+        "zoom": "Zoom",
+        "zoomIn": "Aumentar Zoom",
+        "zoomOut": "Reducir Zoom",
+        "resetZoom": "Restablecer Zoom",
+        "controls": "Controles de zoom",
+        "currentZoom": "Zoom actual"
     }
 }
