@@ -16,8 +16,11 @@ import {
     Image,
     Info,
     Keyboard,
+    Minus,
     PanelLeft,
     PanelRight,
+    Plus,
+    RotateCcw,
     Save,
     Settings
 } from 'lucide-react';
@@ -57,6 +60,10 @@ export function Header({ onImport, onSave, className }: HeaderProps) {
     const openModal = useUIStore((s) => s.openModal);
     const setViewMode = useUIStore((s) => s.setViewMode);
     const theme = useSettingsStore((s) => s.theme);
+    const zoomIn = useSettingsStore((s) => s.zoomIn);
+    const zoomOut = useSettingsStore((s) => s.zoomOut);
+    const resetZoom = useSettingsStore((s) => s.resetZoom);
+    const getZoomPercentage = useSettingsStore((s) => s.getZoomPercentage);
 
     const closeMenu = useCallback(() => setActiveMenu(null), []);
 
@@ -113,6 +120,21 @@ export function Header({ onImport, onSave, className }: HeaderProps) {
         },
         [setViewMode, closeMenu]
     );
+
+    const handleZoomIn = useCallback(() => {
+        zoomIn();
+        closeMenu();
+    }, [zoomIn, closeMenu]);
+
+    const handleZoomOut = useCallback(() => {
+        zoomOut();
+        closeMenu();
+    }, [zoomOut, closeMenu]);
+
+    const handleResetZoom = useCallback(() => {
+        resetZoom();
+        closeMenu();
+    }, [resetZoom, closeMenu]);
 
     const handleExport = useCallback(
         async (format: ExportFormat) => {
@@ -199,6 +221,28 @@ export function Header({ onImport, onSave, className }: HeaderProps) {
             onClick: () => handleSetViewMode('preview')
         },
         { id: 'sep-view', type: 'separator', label: '' },
+        {
+            id: 'zoom-in',
+            icon: Plus,
+            label: `${t('zoom.zoomIn')} (${getZoomPercentage()}%)`,
+            shortcut: 'Ctrl++',
+            onClick: handleZoomIn
+        },
+        {
+            id: 'zoom-out',
+            icon: Minus,
+            label: t('zoom.zoomOut'),
+            shortcut: 'Ctrl+-',
+            onClick: handleZoomOut
+        },
+        {
+            id: 'reset-zoom',
+            icon: RotateCcw,
+            label: t('zoom.resetZoom'),
+            shortcut: 'Ctrl+0',
+            onClick: handleResetZoom
+        },
+        { id: 'sep-view-2', type: 'separator', label: '' },
         {
             id: 'preview-window',
             icon: ExternalLink,
