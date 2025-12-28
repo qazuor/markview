@@ -4,9 +4,13 @@ import {
     ContextMenuItem,
     ContextMenuSeparator,
     ContextMenuShortcut,
+    ContextMenuSub,
+    ContextMenuSubContent,
+    ContextMenuSubTrigger,
     ContextMenuTrigger
 } from '@/components/ui';
-import { ClipboardCopy, FileText, SquareCheck } from 'lucide-react';
+import { useSettingsStore } from '@/stores/settingsStore';
+import { ClipboardCopy, FileText, Minus, Plus, RotateCcw, SquareCheck, ZoomIn } from 'lucide-react';
 import type React from 'react';
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -21,6 +25,10 @@ interface PreviewContextMenuProps {
  */
 export function PreviewContextMenu({ children, containerRef }: PreviewContextMenuProps) {
     const { t } = useTranslation();
+    const zoomPreviewIn = useSettingsStore((s) => s.zoomPreviewIn);
+    const zoomPreviewOut = useSettingsStore((s) => s.zoomPreviewOut);
+    const resetPreviewZoom = useSettingsStore((s) => s.resetPreviewZoom);
+    const previewFontSize = useSettingsStore((s) => s.previewFontSize);
 
     const handleCopy = useCallback(async () => {
         const selection = window.getSelection();
@@ -76,6 +84,37 @@ export function PreviewContextMenu({ children, containerRef }: PreviewContextMen
                     {t('contextMenu.selectAll')}
                     <ContextMenuShortcut>Ctrl+A</ContextMenuShortcut>
                 </ContextMenuItem>
+
+                <ContextMenuSeparator />
+
+                {/* Zoom submenu */}
+                <ContextMenuSub>
+                    <ContextMenuSubTrigger>
+                        <ZoomIn className="mr-2 h-4 w-4" />
+                        {t('zoom.zoom')} ({previewFontSize}px)
+                    </ContextMenuSubTrigger>
+                    <ContextMenuSubContent className="w-48">
+                        <ContextMenuItem onClick={zoomPreviewIn}>
+                            <Plus className="mr-2 h-4 w-4" />
+                            {t('zoom.zoomIn')}
+                            <ContextMenuShortcut>Ctrl++</ContextMenuShortcut>
+                        </ContextMenuItem>
+
+                        <ContextMenuItem onClick={zoomPreviewOut}>
+                            <Minus className="mr-2 h-4 w-4" />
+                            {t('zoom.zoomOut')}
+                            <ContextMenuShortcut>Ctrl+-</ContextMenuShortcut>
+                        </ContextMenuItem>
+
+                        <ContextMenuSeparator />
+
+                        <ContextMenuItem onClick={resetPreviewZoom}>
+                            <RotateCcw className="mr-2 h-4 w-4" />
+                            {t('zoom.resetZoom')}
+                            <ContextMenuShortcut>Ctrl+0</ContextMenuShortcut>
+                        </ContextMenuItem>
+                    </ContextMenuSubContent>
+                </ContextMenuSub>
             </ContextMenuContent>
         </ContextMenu>
     );
