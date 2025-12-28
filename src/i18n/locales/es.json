@@ -61,6 +61,11 @@
     },
     "settings": {
         "title": "Configuración",
+        "tabs": {
+            "appearance": "Apariencia",
+            "editor": "Editor",
+            "behavior": "Comportamiento"
+        },
         "appearance": "Apariencia",
         "editor": "Editor",
         "behavior": "Comportamiento",
@@ -79,7 +84,21 @@
         "autoSave": "Guardado Automático",
         "formatOnSave": "Formatear al Guardar",
         "lintOnType": "Validar al Escribir",
-        "reset": "Restablecer Valores"
+        "autoSaveInterval": "Intervalo de Guardado",
+        "editorFontSize": "Tamaño de Fuente del Editor",
+        "previewFontSize": "Tamaño de Fuente de Vista Previa",
+        "reset": "Restablecer Valores",
+        "done": "Listo",
+        "descriptions": {
+            "wordWrap": "Ajustar líneas largas al ancho del editor",
+            "lineNumbers": "Mostrar números de línea en el margen",
+            "minimap": "Mostrar un minimapa del documento",
+            "syncScroll": "Sincronizar scroll entre editor y vista previa",
+            "autoSave": "Guardar cambios automáticamente",
+            "autoSaveInterval": "Tiempo entre guardados automáticos",
+            "formatOnSave": "Formatear documento al guardar",
+            "lintOnType": "Verificar errores mientras escribes"
+        }
     },
     "export": {
         "title": "Exportar",

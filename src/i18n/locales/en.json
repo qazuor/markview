@@ -61,6 +61,11 @@
     },
     "settings": {
         "title": "Settings",
+        "tabs": {
+            "appearance": "Appearance",
+            "editor": "Editor",
+            "behavior": "Behavior"
+        },
         "appearance": "Appearance",
         "editor": "Editor",
         "behavior": "Behavior",
@@ -79,7 +84,21 @@
         "autoSave": "Auto Save",
         "formatOnSave": "Format on Save",
         "lintOnType": "Lint while typing",
-        "reset": "Reset to Defaults"
+        "autoSaveInterval": "Auto Save Interval",
+        "editorFontSize": "Editor Font Size",
+        "previewFontSize": "Preview Font Size",
+        "reset": "Reset to Defaults",
+        "done": "Done",
+        "descriptions": {
+            "wordWrap": "Wrap long lines to fit the editor width",
+            "lineNumbers": "Show line numbers in the gutter",
+            "minimap": "Show a minimap of the document",
+            "syncScroll": "Synchronize scroll between editor and preview",
+            "autoSave": "Automatically save changes",
+            "autoSaveInterval": "Time between auto saves",
+            "formatOnSave": "Format document when saving",
+            "lintOnType": "Check for errors as you type"
+        }
     },
     "export": {
         "title": "Export",

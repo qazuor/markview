@@ -2,7 +2,8 @@ import { Modal } from '@/components/ui';
 import { useSettingsStore } from '@/stores/settingsStore';
 import type { Language, PreviewStyle, Theme } from '@/types/settings';
 import { cn } from '@/utils/cn';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface SettingsModalProps {
     isOpen: boolean;
@@ -38,6 +39,7 @@ const fontFamilies = ['JetBrains Mono', 'Fira Code', 'Source Code Pro', 'Consola
  */
 export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
     const [activeTab, setActiveTab] = useState<SettingsTab>('appearance');
+    const { t, i18n } = useTranslation();
 
     const settings = useSettingsStore();
     const {
@@ -59,14 +61,21 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
         resetSettings
     } = settings;
 
+    // Sync language with i18n
+    useEffect(() => {
+        if (i18n.language !== language) {
+            i18n.changeLanguage(language);
+        }
+    }, [language, i18n]);
+
     const tabs: { id: SettingsTab; label: string }[] = [
-        { id: 'appearance', label: 'Appearance' },
-        { id: 'editor', label: 'Editor' },
-        { id: 'behavior', label: 'Behavior' }
+        { id: 'appearance', label: t('settings.tabs.appearance') },
+        { id: 'editor', label: t('settings.tabs.editor') },
+        { id: 'behavior', label: t('settings.tabs.behavior') }
     ];
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title="Settings" size="lg">
+        <Modal isOpen={isOpen} onClose={onClose} title={t('settings.title')} size="lg">
             {/* Tabs */}
             <div className="flex border-b border-border mb-4">
                 {tabs.map((tab) => (
@@ -92,11 +101,11 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                 {/* Appearance Tab */}
                 {activeTab === 'appearance' && (
                     <>
-                        <SettingGroup title="Theme">
+                        <SettingGroup title={t('settings.theme')}>
                             <Select value={theme} onChange={(v) => updateSetting('theme', v as Theme)} options={themes} />
                         </SettingGroup>
 
-                        <SettingGroup title="Preview Style">
+                        <SettingGroup title={t('settings.previewStyle')}>
                             <Select
                                 value={previewStyle}
                                 onChange={(v) => updateSetting('previewStyle', v as PreviewStyle)}
@@ -104,7 +113,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                             />
                         </SettingGroup>
 
-                        <SettingGroup title="Font Family">
+                        <SettingGroup title={t('settings.fontFamily')}>
                             <Select
                                 value={fontFamily}
                                 onChange={(v) => updateSetting('fontFamily', v)}
@@ -112,7 +121,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                             />
                         </SettingGroup>
 
-                        <SettingGroup title="Editor Font Size">
+                        <SettingGroup title={t('settings.editorFontSize')}>
                             <NumberInput
                                 value={editorFontSize}
                                 onChange={(v) => updateSetting('editorFontSize', v)}
@@ -122,7 +131,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                             />
                         </SettingGroup>
 
-                        <SettingGroup title="Preview Font Size">
+                        <SettingGroup title={t('settings.previewFontSize')}>
                             <NumberInput
                                 value={previewFontSize}
                                 onChange={(v) => updateSetting('previewFontSize', v)}
@@ -132,7 +141,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                             />
                         </SettingGroup>
 
-                        <SettingGroup title="Language">
+                        <SettingGroup title={t('settings.language')}>
                             <Select value={language} onChange={(v) => updateSetting('language', v as Language)} options={languages} />
                         </SettingGroup>
                     </>
@@ -141,19 +150,19 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                 {/* Editor Tab */}
                 {activeTab === 'editor' && (
                     <>
-                        <SettingGroup title="Word Wrap" description="Wrap long lines to fit the editor width">
+                        <SettingGroup title={t('settings.wordWrap')} description={t('settings.descriptions.wordWrap')}>
                             <Toggle checked={wordWrap} onChange={(v) => updateSetting('wordWrap', v)} />
                         </SettingGroup>
 
-                        <SettingGroup title="Line Numbers" description="Show line numbers in the gutter">
+                        <SettingGroup title={t('settings.lineNumbers')} description={t('settings.descriptions.lineNumbers')}>
                             <Toggle checked={lineNumbers} onChange={(v) => updateSetting('lineNumbers', v)} />
                         </SettingGroup>
 
-                        <SettingGroup title="Minimap" description="Show a minimap of the document">
+                        <SettingGroup title={t('settings.minimap')} description={t('settings.descriptions.minimap')}>
                             <Toggle checked={minimap} onChange={(v) => updateSetting('minimap', v)} />
                         </SettingGroup>
 
-                        <SettingGroup title="Sync Scroll" description="Synchronize scroll between editor and preview">
+                        <SettingGroup title={t('settings.syncScroll')} description={t('settings.descriptions.syncScroll')}>
                             <Toggle checked={syncScroll} onChange={(v) => updateSetting('syncScroll', v)} />
                         </SettingGroup>
                     </>
@@ -162,11 +171,11 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                 {/* Behavior Tab */}
                 {activeTab === 'behavior' && (
                     <>
-                        <SettingGroup title="Auto Save" description="Automatically save changes">
+                        <SettingGroup title={t('settings.autoSave')} description={t('settings.descriptions.autoSave')}>
                             <Toggle checked={autoSave} onChange={(v) => updateSetting('autoSave', v)} />
                         </SettingGroup>
 
-                        <SettingGroup title="Auto Save Interval" description="Time between auto saves">
+                        <SettingGroup title={t('settings.autoSaveInterval')} description={t('settings.descriptions.autoSaveInterval')}>
                             <NumberInput
                                 value={autoSaveInterval}
                                 onChange={(v) => updateSetting('autoSaveInterval', v)}
@@ -178,11 +187,11 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                             />
                         </SettingGroup>
 
-                        <SettingGroup title="Format on Save" description="Format document when saving">
+                        <SettingGroup title={t('settings.formatOnSave')} description={t('settings.descriptions.formatOnSave')}>
                             <Toggle checked={formatOnSave} onChange={(v) => updateSetting('formatOnSave', v)} />
                         </SettingGroup>
 
-                        <SettingGroup title="Lint on Type" description="Check for errors as you type">
+                        <SettingGroup title={t('settings.lintOnType')} description={t('settings.descriptions.lintOnType')}>
                             <Toggle checked={lintOnType} onChange={(v) => updateSetting('lintOnType', v)} />
                         </SettingGroup>
                     </>
@@ -200,7 +209,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                         'transition-colors'
                     )}
                 >
-                    Reset to Defaults
+                    {t('settings.reset')}
                 </button>
                 <button
                     type="button"
@@ -212,7 +221,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                         'transition-colors'
                     )}
                 >
-                    Done
+                    {t('settings.done')}
                 </button>
             </div>
         </Modal>
