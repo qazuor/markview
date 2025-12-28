@@ -6,6 +6,7 @@ import { processChecklists, toggleCheckboxInContent } from './Checklist';
 import { processCodeBlocks } from './CodeBlock';
 import { processMermaidBlocks } from './Mermaid';
 import { PreviewLoading } from './PreviewLoading';
+import { PreviewContextMenu } from './context-menus';
 import { useMarkdown, usePreviewTheme } from './hooks';
 
 interface PreviewProps {
@@ -114,19 +115,21 @@ export function Preview({ content, className, onScroll, onScrollToReady, onConte
     }
 
     return (
-        <div
-            ref={containerRef}
-            onScroll={handleScroll}
-            className={cn('h-full overflow-auto', 'bg-white dark:bg-secondary-950', themeClass, isDark && 'dark', className)}
-        >
+        <PreviewContextMenu containerRef={contentRef}>
             <div
-                ref={contentRef}
-                data-preview-content
-                className={cn('preview-content prose max-w-none p-6', isDark && 'prose-invert')}
-                style={contentStyle}
-                // biome-ignore lint/security/noDangerouslySetInnerHtml: Content is sanitized by rehype-sanitize
-                dangerouslySetInnerHTML={{ __html: html }}
-            />
-        </div>
+                ref={containerRef}
+                onScroll={handleScroll}
+                className={cn('h-full overflow-auto', 'bg-white dark:bg-secondary-950', themeClass, isDark && 'dark', className)}
+            >
+                <div
+                    ref={contentRef}
+                    data-preview-content
+                    className={cn('preview-content prose max-w-none p-6', isDark && 'prose-invert')}
+                    style={contentStyle}
+                    // biome-ignore lint/security/noDangerouslySetInnerHtml: Content is sanitized by rehype-sanitize
+                    dangerouslySetInnerHTML={{ __html: html }}
+                />
+            </div>
+        </PreviewContextMenu>
     );
 }
