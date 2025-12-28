@@ -1,8 +1,10 @@
+import { useSettingsStore } from '@/stores/settingsStore';
 import { cn } from '@/utils/cn';
 import data from '@emoji-mart/data';
 import Picker from '@emoji-mart/react';
 import { Smile } from 'lucide-react';
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 
 interface EmojiPickerProps {
@@ -18,7 +20,10 @@ interface EmojiData {
 export function EmojiPicker({ onEmojiSelect, className }: EmojiPickerProps) {
     const { t } = useTranslation();
     const [isOpen, setIsOpen] = useState(false);
-    const buttonRef = useRef<HTMLButtonElement>(null);
+    const theme = useSettingsStore((s) => s.theme);
+
+    // Determine picker theme based on app theme
+    const pickerTheme = theme === 'dark' ? 'dark' : theme === 'light' ? 'light' : 'auto';
 
     const handleEmojiSelect = useCallback(
         (emoji: EmojiData) => {
@@ -31,7 +36,6 @@ export function EmojiPicker({ onEmojiSelect, className }: EmojiPickerProps) {
     return (
         <div className={cn('relative', className)}>
             <button
-                ref={buttonRef}
                 type="button"
                 onClick={() => setIsOpen(!isOpen)}
                 className={cn(
@@ -46,26 +50,35 @@ export function EmojiPicker({ onEmojiSelect, className }: EmojiPickerProps) {
                 <Smile className="h-4 w-4" />
             </button>
 
-            {isOpen && (
-                <>
-                    {/* Backdrop */}
-                    {/* biome-ignore lint/a11y/useKeyWithClickEvents: Backdrop is purely visual */}
-                    <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
+            {isOpen &&
+                createPortal(
+                    <>
+                        {/* Backdrop with semi-transparent background */}
+                        {/* biome-ignore lint/a11y/useKeyWithClickEvents: Backdrop is purely visual */}
+                        <div className="fixed inset-0 z-[9998] bg-black/20 backdrop-blur-[1px]" onClick={() => setIsOpen(false)} />
 
-                    {/* Picker */}
-                    <div className={cn('absolute top-full right-0 mt-1 z-50', 'animate-in fade-in slide-in-from-top-2 duration-150')}>
-                        <Picker
-                            data={data}
-                            onEmojiSelect={handleEmojiSelect}
-                            theme="auto"
-                            previewPosition="none"
-                            skinTonePosition="none"
-                            maxFrequentRows={2}
-                            perLine={8}
-                        />
-                    </div>
-                </>
-            )}
+                        {/* Centered Picker with fade-in animation */}
+                        <div
+                            className={cn(
+                                'fixed z-[9999]',
+                                'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2',
+                                'animate-in fade-in duration-200',
+                                'rounded-xl shadow-2xl overflow-hidden'
+                            )}
+                        >
+                            <Picker
+                                data={data}
+                                onEmojiSelect={handleEmojiSelect}
+                                theme={pickerTheme}
+                                previewPosition="none"
+                                skinTonePosition="none"
+                                maxFrequentRows={2}
+                                perLine={9}
+                            />
+                        </div>
+                    </>,
+                    document.body
+                )}
         </div>
     );
 }
