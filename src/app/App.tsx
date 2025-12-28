@@ -6,7 +6,7 @@ import { StatusBar } from '@/components/statusbar';
 import { TabBar } from '@/components/tabs';
 import { Toolbar } from '@/components/toolbar';
 import { DropOverlay } from '@/components/ui';
-import { useAutoSave, useDragAndDrop, useFileImport, useTheme } from '@/hooks';
+import { useAutoSave, useDragAndDrop, useFileImport, useTheme, useZoom } from '@/hooks';
 import { usePreviewSync } from '@/hooks/useBroadcastChannel';
 import { useDocumentStore, useSettingsStore, useUIStore } from '@/stores';
 import type { EditorView } from '@codemirror/view';
@@ -16,6 +16,7 @@ import { useTranslation } from 'react-i18next';
 export function App() {
     const { t } = useTranslation();
     useTheme();
+    useZoom(); // Global zoom keyboard shortcuts and mouse wheel
 
     const theme = useSettingsStore((state) => state.theme);
 
