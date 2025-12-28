@@ -55,7 +55,7 @@ export function Sidebar({
             <SidebarNav activeSection={activeSection} onSectionChange={setActiveSection} className="border-r border-border" />
 
             {/* Content */}
-            <div className="flex-1 flex flex-col min-w-[200px]">
+            <div className="flex-1 flex flex-col w-[200px] max-w-[200px]">
                 {/* Section content */}
                 <div className="flex-1 overflow-hidden">
                     {activeSection === 'explorer' && <FileExplorer />}
