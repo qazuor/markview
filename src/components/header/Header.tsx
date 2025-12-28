@@ -221,9 +221,10 @@ export function Header({ onImport, onSave, className }: HeaderProps) {
                         'text-white font-bold text-sm'
                     )}
                 >
-                    M
+                    Q
                 </div>
                 <span className="font-semibold text-text-primary hidden sm:inline">{t('app.name')}</span>
+                <span className="text-xs text-text-muted hidden md:inline">{t('app.version')}</span>
             </div>
 
             {/* Menu bar */}

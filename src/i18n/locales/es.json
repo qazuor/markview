@@ -1,7 +1,8 @@
 {
     "app": {
-        "name": "MarkView",
-        "tagline": "Markdown, visualizado"
+        "name": "Qazuor MarkView",
+        "tagline": "Markdown, visualizado",
+        "version": "v0.1.0"
     },
     "common": {
         "save": "Guardar",
