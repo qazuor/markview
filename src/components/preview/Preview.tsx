@@ -121,6 +121,7 @@ export function Preview({ content, className, onScroll, onScrollToReady, onConte
         >
             <div
                 ref={contentRef}
+                data-preview-content
                 className={cn('preview-content prose max-w-none p-6', isDark && 'prose-invert')}
                 style={contentStyle}
                 // biome-ignore lint/security/noDangerouslySetInnerHtml: Content is sanitized by rehype-sanitize
