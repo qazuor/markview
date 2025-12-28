@@ -1,8 +1,9 @@
+import { EditableTabName } from '@/components/tabs/EditableTabName';
 import { IconButton, Tooltip } from '@/components/ui';
 import { useDocumentStore } from '@/stores/documentStore';
 import { cn } from '@/utils/cn';
-import { File, FolderOpen, Plus, Search } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { File, FolderOpen, Plus, Search, X } from 'lucide-react';
+import { useCallback, useMemo, useState } from 'react';
 import { FileContextMenu } from './FileContextMenu';
 
 interface FileExplorerProps {
@@ -13,7 +14,7 @@ interface FileExplorerProps {
  * File explorer showing local and GitHub files
  */
 export function FileExplorer({ className }: FileExplorerProps) {
-    const { documents, activeDocumentId, openDocument, createDocument } = useDocumentStore();
+    const { documents, activeDocumentId, openDocument, createDocument, closeDocument } = useDocumentStore();
     const [filter, setFilter] = useState('');
 
     const filteredDocuments = useMemo(() => {
@@ -27,6 +28,14 @@ export function FileExplorer({ className }: FileExplorerProps) {
     const handleNewFile = () => {
         createDocument();
     };
+
+    const handleCloseDocument = useCallback(
+        (e: React.MouseEvent, docId: string) => {
+            e.stopPropagation();
+            closeDocument(docId);
+        },
+        [closeDocument]
+    );
 
     return (
         <div className={cn('flex flex-col h-full', className)}>
@@ -74,11 +83,11 @@ export function FileExplorer({ className }: FileExplorerProps) {
                     ) : (
                         filteredDocuments.map((doc) => (
                             <FileContextMenu key={doc.id} documentId={doc.id}>
-                                <button
-                                    type="button"
+                                {/* biome-ignore lint/a11y/useKeyWithClickEvents: keyboard handled by child elements */}
+                                <div
                                     onClick={() => openDocument(doc.id)}
                                     className={cn(
-                                        'w-full flex items-center gap-2 px-2 py-1.5 rounded-md',
+                                        'group w-full flex items-center gap-1.5 pl-1 pr-2 py-1.5 rounded-md cursor-pointer',
                                         'text-sm text-left',
                                         'hover:bg-bg-tertiary',
                                         'transition-colors',
@@ -86,9 +95,38 @@ export function FileExplorer({ className }: FileExplorerProps) {
                                     )}
                                 >
                                     <File className="h-4 w-4 shrink-0" />
-                                    <span className="truncate flex-1">{doc.name}</span>
-                                    {doc.isModified && <span className="h-2 w-2 rounded-full bg-primary-500 shrink-0" />}
-                                </button>
+
+                                    {/* Document name - double-click to rename */}
+                                    <EditableTabName
+                                        documentId={doc.id}
+                                        name={doc.name}
+                                        isActive={doc.id === activeDocumentId}
+                                        className="flex-1 min-w-0"
+                                    />
+
+                                    {/* Modified indicator (shows dot) or Close button on hover */}
+                                    <div className="w-4 h-4 shrink-0 flex items-center justify-center relative">
+                                        {/* Modified dot - hidden on hover */}
+                                        {doc.isModified && (
+                                            <span className="h-2 w-2 rounded-full bg-primary-500 group-hover:opacity-0 transition-opacity" />
+                                        )}
+                                        {/* Close button - visible on hover */}
+                                        <button
+                                            type="button"
+                                            onClick={(e) => handleCloseDocument(e, doc.id)}
+                                            className={cn(
+                                                'absolute inset-0 flex items-center justify-center rounded-sm',
+                                                'opacity-0 group-hover:opacity-100',
+                                                'hover:bg-bg-secondary',
+                                                'transition-opacity duration-150',
+                                                'focus:outline-none focus-visible:opacity-100'
+                                            )}
+                                            aria-label={`Close ${doc.name}`}
+                                        >
+                                            <X className="h-3 w-3" />
+                                        </button>
+                                    </div>
+                                </div>
                             </FileContextMenu>
                         ))
                     )}
