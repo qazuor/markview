@@ -12,3 +12,4 @@ export { useDragAndDrop } from './useDragAndDrop';
 export { useFileImport, type FileImportResult } from './useFileImport';
 export { useLocalStorage } from './useLocalStorage';
 export { useTheme } from './useTheme';
+export { useZoom } from './useZoom';
