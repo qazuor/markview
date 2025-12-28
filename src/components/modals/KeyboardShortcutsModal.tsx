@@ -71,7 +71,9 @@ const shortcutGroups: ShortcutGroup[] = [
         shortcuts: [
             { keys: 'Ctrl+/', description: 'Show keyboard shortcuts' },
             { keys: 'Ctrl+B', description: 'Toggle sidebar' },
-            { keys: 'Ctrl+Shift+P', description: 'Preview mode' }
+            { keys: 'Ctrl+,', description: 'Settings' },
+            { keys: 'F11', description: 'Zen mode (distraction-free)' },
+            { keys: 'Ctrl+Shift+Z', description: 'Toggle Zen mode' }
         ]
     }
 ];
