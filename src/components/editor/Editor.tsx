@@ -2,6 +2,7 @@ import { useSettingsStore } from '@/stores/settingsStore';
 import { cn } from '@/utils/cn';
 import type { EditorView } from '@codemirror/view';
 import { useEffect, useRef } from 'react';
+import { EditorContextMenu } from './EditorContextMenu';
 import { useCodeMirror } from './hooks/useCodeMirror';
 import { useEditorSync } from './hooks/useEditorSync';
 import { useEditorTheme } from './hooks/useEditorTheme';
@@ -69,18 +70,20 @@ export function Editor({ className, onViewReady, onScroll, onScrollToReady }: Ed
     }, [documentId, focus]);
 
     return (
-        <div
-            className={cn(
-                'h-full w-full min-w-0 overflow-hidden',
-                'bg-white dark:bg-secondary-900',
-                'border-r border-secondary-200 dark:border-secondary-700',
-                className
-            )}
-        >
+        <EditorContextMenu editorView={view}>
             <div
-                ref={editorRef as React.RefObject<HTMLDivElement>}
-                className="h-full w-full [&_.cm-editor]:h-full [&_.cm-editor]:overflow-hidden [&_.cm-scroller]:overflow-auto"
-            />
-        </div>
+                className={cn(
+                    'h-full w-full min-w-0 overflow-hidden',
+                    'bg-white dark:bg-secondary-900',
+                    'border-r border-secondary-200 dark:border-secondary-700',
+                    className
+                )}
+            >
+                <div
+                    ref={editorRef as React.RefObject<HTMLDivElement>}
+                    className="h-full w-full [&_.cm-editor]:h-full [&_.cm-editor]:overflow-hidden [&_.cm-scroller]:overflow-auto"
+                />
+            </div>
+        </EditorContextMenu>
     );
 }
