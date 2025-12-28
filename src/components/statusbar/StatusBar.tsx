@@ -4,6 +4,7 @@ import { Encoding } from './Encoding';
 import { LineEnding } from './LineEnding';
 import { SaveStatus } from './SaveStatus';
 import { WordCount } from './WordCount';
+import { ZoomControls } from './ZoomControls';
 
 interface StatusBarProps {
     line?: number;
@@ -36,6 +37,7 @@ export function StatusBar({ line = 1, column = 1, content = '', isModified = fal
 
             {/* Right section */}
             <div className="flex items-center gap-4">
+                <ZoomControls />
                 <SaveStatus isModified={isModified} isSaving={isSaving} />
                 <LineEnding />
                 <Encoding />
