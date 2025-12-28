@@ -1,4 +1,4 @@
-import type { ModalType, SaveStatus, SearchResult, SidebarSection, UIState } from '@/types/ui';
+import type { ModalType, SaveStatus, SearchResult, SidebarSection, UIState, ViewMode } from '@/types/ui';
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 
@@ -8,6 +8,9 @@ interface UIActions {
     setSidebarOpen: (open: boolean) => void;
     setSidebarSection: (section: SidebarSection) => void;
     setSidebarWidth: (width: number) => void;
+
+    // View mode
+    setViewMode: (mode: ViewMode) => void;
 
     // Modals
     openModal: (modal: ModalType) => void;
@@ -36,6 +39,7 @@ const initialState: UIState = {
     sidebarOpen: true,
     sidebarSection: 'explorer',
     sidebarWidth: 280,
+    viewMode: 'split',
     zenMode: false,
     activeModal: null,
     searchQuery: '',
@@ -67,6 +71,10 @@ export const useUIStore = create<UIStore>()(
 
                 setSidebarWidth: (width) => {
                     set({ sidebarWidth: Math.max(200, Math.min(500, width)) });
+                },
+
+                setViewMode: (mode) => {
+                    set({ viewMode: mode });
                 },
 
                 openModal: (modal) => {
@@ -126,7 +134,8 @@ export const useUIStore = create<UIStore>()(
                 partialize: (state) => ({
                     sidebarOpen: state.sidebarOpen,
                     sidebarSection: state.sidebarSection,
-                    sidebarWidth: state.sidebarWidth
+                    sidebarWidth: state.sidebarWidth,
+                    viewMode: state.viewMode
                 })
             }
         ),
