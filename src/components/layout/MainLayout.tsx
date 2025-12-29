@@ -55,15 +55,19 @@ export function MainLayout({ className, onEditorViewReady }: MainLayoutProps) {
     const syncScroll = useSettingsStore((state) => state.syncScroll);
     const editorScrollToRef = useRef<((percent: number) => void) | null>(null);
     const previewScrollToRef = useRef<((percent: number) => void) | null>(null);
+    const editorScrollToLineRef = useRef<((line: number) => void) | null>(null);
+    const previewScrollToLineRef = useRef<((line: number) => void) | null>(null);
     const isScrollingRef = useRef<'editor' | 'preview' | null>(null);
     const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    // Handle editor scroll - sync to preview
+    // Handle editor scroll - sync to preview (percentage-based, kept for fallback)
     const handleEditorScroll = useCallback(
         (percent: number) => {
             if (!syncScroll || isScrollingRef.current === 'preview') return;
-            isScrollingRef.current = 'editor';
+            // Only use percent if line-based sync is not available
+            if (previewScrollToLineRef.current) return;
 
+            isScrollingRef.current = 'editor';
             if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
             scrollTimeoutRef.current = setTimeout(() => {
                 isScrollingRef.current = null;
@@ -74,18 +78,52 @@ export function MainLayout({ className, onEditorViewReady }: MainLayoutProps) {
         [syncScroll]
     );
 
-    // Handle preview scroll - sync to editor
+    // Handle editor scroll line - sync to preview (line-based, preferred)
+    const handleEditorScrollLine = useCallback(
+        (line: number) => {
+            if (!syncScroll || isScrollingRef.current === 'preview') return;
+            isScrollingRef.current = 'editor';
+
+            if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+            scrollTimeoutRef.current = setTimeout(() => {
+                isScrollingRef.current = null;
+            }, 150);
+
+            previewScrollToLineRef.current?.(line);
+        },
+        [syncScroll]
+    );
+
+    // Handle preview scroll - sync to editor (percentage-based, kept for fallback)
     const handlePreviewScroll = useCallback(
         (percent: number) => {
             if (!syncScroll || isScrollingRef.current === 'editor') return;
-            isScrollingRef.current = 'preview';
+            // Only use percent if line-based sync is not available
+            if (editorScrollToLineRef.current) return;
 
+            isScrollingRef.current = 'preview';
             if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
             scrollTimeoutRef.current = setTimeout(() => {
                 isScrollingRef.current = null;
             }, 100);
 
             editorScrollToRef.current?.(percent);
+        },
+        [syncScroll]
+    );
+
+    // Handle preview scroll line - sync to editor (line-based, preferred)
+    const handlePreviewScrollLine = useCallback(
+        (line: number) => {
+            if (!syncScroll || isScrollingRef.current === 'editor') return;
+            isScrollingRef.current = 'preview';
+
+            if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+            scrollTimeoutRef.current = setTimeout(() => {
+                isScrollingRef.current = null;
+            }, 150);
+
+            editorScrollToLineRef.current?.(line);
         },
         [syncScroll]
     );
@@ -97,6 +135,14 @@ export function MainLayout({ className, onEditorViewReady }: MainLayoutProps) {
 
     const handlePreviewScrollToReady = useCallback((scrollTo: (percent: number) => void) => {
         previewScrollToRef.current = scrollTo;
+    }, []);
+
+    const handleEditorScrollToLineReady = useCallback((scrollToLine: (line: number) => void) => {
+        editorScrollToLineRef.current = scrollToLine;
+    }, []);
+
+    const handlePreviewScrollToLineReady = useCallback((scrollToLine: (line: number) => void) => {
+        previewScrollToLineRef.current = scrollToLine;
     }, []);
 
     // Check for mobile viewport
@@ -291,6 +337,8 @@ export function MainLayout({ className, onEditorViewReady }: MainLayoutProps) {
                         onViewReady={onEditorViewReady}
                         onScroll={handleEditorScroll}
                         onScrollToReady={handleEditorScrollToReady}
+                        onScrollLine={handleEditorScrollLine}
+                        onScrollToLineReady={handleEditorScrollToLineReady}
                     />
                 </div>
                 <CollapseButton direction="left" onClick={showSplit} tooltip={t('layout.showPreview')} icon={ChevronLeft} />
@@ -308,6 +356,8 @@ export function MainLayout({ className, onEditorViewReady }: MainLayoutProps) {
                         className="h-full"
                         onScroll={handlePreviewScroll}
                         onScrollToReady={handlePreviewScrollToReady}
+                        onScrollLine={handlePreviewScrollLine}
+                        onScrollToLineReady={handlePreviewScrollToLineReady}
                         onContentChange={handleContentChange}
                     />
                 </div>
@@ -328,6 +378,8 @@ export function MainLayout({ className, onEditorViewReady }: MainLayoutProps) {
                                 onViewReady={onEditorViewReady}
                                 onScroll={handleEditorScroll}
                                 onScrollToReady={handleEditorScrollToReady}
+                                onScrollLine={handleEditorScrollLine}
+                                onScrollToLineReady={handleEditorScrollToLineReady}
                             />
                         </div>
                         <CollapseButton direction="left" onClick={expandPreview} tooltip={t('layout.hideEditor')} icon={ChevronLeft} />
@@ -341,6 +393,8 @@ export function MainLayout({ className, onEditorViewReady }: MainLayoutProps) {
                                 className="h-full"
                                 onScroll={handlePreviewScroll}
                                 onScrollToReady={handlePreviewScrollToReady}
+                                onScrollLine={handlePreviewScrollLine}
+                                onScrollToLineReady={handlePreviewScrollToLineReady}
                                 onContentChange={handleContentChange}
                             />
                         </div>

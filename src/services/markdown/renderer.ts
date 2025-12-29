@@ -8,18 +8,21 @@ import remarkMath from 'remark-math';
 import remarkParse from 'remark-parse';
 import remarkRehype from 'remark-rehype';
 import { unified } from 'unified';
+import { rehypeLineNumbers } from './rehypeLineNumbers';
 
 export type SyntaxTheme = 'light' | 'dark';
 
-// Extended sanitization schema for Shiki output and KaTeX
+// Extended sanitization schema for Shiki output, KaTeX, and scroll sync
 const sanitizeSchema = {
     ...defaultSchema,
     attributes: {
         ...defaultSchema.attributes,
+        // Allow data-line on all block elements for scroll sync (camelCase for hast)
+        '*': [...(defaultSchema.attributes?.['*'] ?? []), 'dataLine'],
         code: [...(defaultSchema.attributes?.code ?? []), 'className', 'style'],
         span: [...(defaultSchema.attributes?.span ?? []), 'className', 'style', 'aria-hidden'],
         pre: [...(defaultSchema.attributes?.pre ?? []), 'className', 'style', 'tabindex'],
-        div: [...(defaultSchema.attributes?.div ?? []), 'className', 'data-line', 'data-language'],
+        div: [...(defaultSchema.attributes?.div ?? []), 'className', 'data-language'],
         // KaTeX elements
         math: ['xmlns', 'display'],
         semantics: [],
@@ -101,6 +104,7 @@ export async function createRendererProcessor(theme: SyntaxTheme = 'light') {
             theme: shikiTheme,
             fallbackLanguage: 'text'
         })
+        .use(rehypeLineNumbers)
         .use(rehypeSanitize, sanitizeSchema)
         .use(rehypeStringify);
 }
