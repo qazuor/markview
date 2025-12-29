@@ -17,7 +17,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 export function App() {
-    const { t, i18n } = useTranslation();
+    const { t } = useTranslation();
     useTheme();
     useZoom(); // Global zoom keyboard shortcuts and mouse wheel
 
@@ -104,7 +104,7 @@ export function App() {
     );
     const { isDragging } = useDragAndDrop({ onDrop: handleFileDrop });
 
-    // Create Welcome document on first visit, or empty document if all documents were closed
+    // Create Welcome documents on first visit, or empty document if all documents were closed
     const initialDocCreated = useRef(false);
     useEffect(() => {
         if (documents.size === 0 && !initialDocCreated.current) {
@@ -112,17 +112,20 @@ export function App() {
             const hasVisitedBefore = localStorage.getItem('markview:hasVisited') !== null;
 
             if (!hasVisitedBefore) {
-                // First visit: create Welcome document and mark as visited
+                // First visit: create both Welcome documents and mark as visited
                 localStorage.setItem('markview:hasVisited', 'true');
-                const welcomeContent = i18n.language === 'es' ? welcomeContentEs : welcomeContentEn;
-                const title = i18n.language === 'es' ? 'Bienvenido a MarkView' : 'Welcome to MarkView';
-                createDocument({ name: title, content: welcomeContent });
+
+                // Create Spanish welcome document
+                createDocument({ name: 'Bienvenido a MarkView', content: welcomeContentEs });
+
+                // Create English welcome document (will be active since it's created second)
+                createDocument({ name: 'Welcome to MarkView', content: welcomeContentEn });
             } else {
                 // Returning user with no documents: create empty document
                 createDocument();
             }
         }
-    }, [documents.size, createDocument, i18n.language]);
+    }, [documents.size, createDocument]);
 
     // Sync content with preview windows when content changes
     useEffect(() => {

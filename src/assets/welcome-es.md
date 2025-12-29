@@ -1,99 +1,193 @@
-# ¡Bienvenido a MarkView! 🎉
+# Bienvenido a MarkView!
 
-**MarkView** es un editor de Markdown moderno y potente con vista previa en vivo. Escribe documentación, notas y más con visualización en tiempo real.
+**MarkView** es un editor de Markdown moderno y potente con vista previa en vivo. Escribe documentacion, notas y mas con visualizacion en tiempo real.
 
 ---
 
-## Sintaxis Básica de Markdown
+## Tabla de Contenidos
+
+1. [Primeros Pasos](#primeros-pasos)
+2. [Sintaxis Markdown](#sintaxis-markdown)
+3. [Funciones Avanzadas](#funciones-avanzadas)
+4. [Opciones de Exportacion](#opciones-de-exportacion)
+5. [Modos de Vista](#modos-de-vista)
+6. [Atajos de Teclado](#atajos-de-teclado)
+7. [Configuracion y Personalizacion](#configuracion-y-personalizacion)
+
+---
+
+## Primeros Pasos
+
+### Creando Documentos
+
+- **Nuevo Documento**: `Ctrl+N` o **Archivo > Nuevo**
+- **Importar Archivos**: Arrastra y suelta archivos `.md` o usa **Archivo > Importar**
+- **Multiples Pestanas**: Trabaja con varios documentos a la vez
+
+### Guardando tu Trabajo
+
+- **Auto-guardado**: Tus cambios se guardan automaticamente
+- **Guardar Manual**: `Ctrl+S` o **Archivo > Guardar**
+- **Historial de Versiones**: Accede a versiones anteriores haciendo **clic derecho en la pestana**
+
+---
+
+## Sintaxis Markdown
+
+### Formato de Texto
+
+| Estilo | Sintaxis | Resultado |
+|--------|----------|-----------|
+| Negrita | `**texto**` | **texto** |
+| Cursiva | `*texto*` | *texto* |
+| Negrita y Cursiva | `***texto***` | ***texto*** |
+| Tachado | `~~texto~~` | ~~texto~~ |
+| Codigo en linea | `` `codigo` `` | `codigo` |
 
 ### Encabezados
-
-Usa `#` para encabezados. Más símbolos `#` crean encabezados más pequeños:
 
 ```markdown
 # Encabezado 1
 ## Encabezado 2
 ### Encabezado 3
+#### Encabezado 4
+##### Encabezado 5
+###### Encabezado 6
 ```
 
-### Formato de Texto
+### Listas
 
-Haz que el texto sea **negrita**, *cursiva*, o ***ambos***:
+**Lista con Vinetas:**
+- Primer elemento
+- Segundo elemento
+  - Elemento anidado
+
+**Lista Numerada:**
+1. Primer paso
+2. Segundo paso
+3. Tercer paso
+
+**Lista de Tareas:**
+- [x] Tarea completada
+- [ ] Tarea pendiente
+- [ ] Otra tarea
+
+### Enlaces e Imagenes
 
 ```markdown
-**texto en negrita**
-*texto en cursiva*
-***negrita y cursiva***
-~~tachado~~
+[Texto del Enlace](https://ejemplo.com)
+![Texto Alternativo](https://ejemplo.com/imagen.png)
 ```
 
-### Enlaces e Imágenes
+### Citas
 
-Crea [enlaces](https://github.com) e inserta imágenes:
+> Esta es una cita.
+> Puede ocupar varias lineas.
 
-```markdown
-[Texto del enlace](https://ejemplo.com)
-![Texto alternativo](https://via.placeholder.com/150)
-```
+### Linea Horizontal
+
+Usa `---` para crear una linea separadora horizontal.
 
 ---
 
-## Resaltado de Código
+## Funciones Avanzadas
 
-MarkView soporta resaltado de sintaxis para múltiples lenguajes:
+### Bloques de Codigo con Resaltado de Sintaxis
+
+MarkView soporta resaltado de sintaxis para mas de 100 lenguajes de programacion:
 
 ```javascript
-// Ejemplo de JavaScript
+// JavaScript
 function saludar(nombre) {
-  console.log(`¡Hola, ${nombre}!`);
+    return `Hola, ${nombre}!`;
 }
 
-saludar('Mundo');
+const usuarios = ['Alicia', 'Bruno', 'Carlos'];
+usuarios.forEach(usuario => console.log(saludar(usuario)));
 ```
 
 ```python
-# Ejemplo de Python
+# Python
 def fibonacci(n):
     if n <= 1:
         return n
-    return fibonacci(n-1) + fibonacci(n-2)
+    return fibonacci(n - 1) + fibonacci(n - 2)
+
+print([fibonacci(i) for i in range(10)])
 ```
 
----
+```typescript
+// TypeScript
+interface Usuario {
+    id: number;
+    nombre: string;
+    email: string;
+}
 
-## Diagramas Mermaid
+const crearUsuario = (datos: Partial<Usuario>): Usuario => ({
+    id: Date.now(),
+    nombre: 'Anonimo',
+    email: '',
+    ...datos
+});
+```
 
-Crea diagramas hermosos usando sintaxis Mermaid:
+### Diagramas Mermaid
+
+Crea diagramas de flujo, secuencia y mas:
+
+**Diagrama de Flujo:**
 
 ```mermaid
 graph TD
-    A[Inicio] --> B{¿Funciona?}
-    B -->|Sí| C[¡Genial!]
-    B -->|No| D[Depurar]
-    D --> B
+    A[Inicio] --> B{Decision}
+    B -->|Si| C[Accion 1]
+    B -->|No| D[Accion 2]
     C --> E[Fin]
+    D --> E
 ```
+
+**Diagrama de Secuencia:**
 
 ```mermaid
 sequenceDiagram
     participant Usuario
-    participant MarkView
-    participant Vista Previa
+    participant App
+    participant Servidor
 
-    Usuario->>MarkView: Escribir Markdown
-    MarkView->>Vista Previa: Renderizar
-    Vista Previa-->>Usuario: Mostrar Resultado
+    Usuario->>App: Escribir Markdown
+    App->>App: Vista Previa
+    Usuario->>App: Exportar Documento
+    App->>Servidor: Procesar Exportacion
+    Servidor-->>App: Devolver Archivo
+    App-->>Usuario: Descargar
 ```
 
----
+**Diagrama de Clases:**
 
-## Fórmulas Matemáticas (KaTeX)
+```mermaid
+classDiagram
+    class Documento {
+        +String id
+        +String nombre
+        +String contenido
+        +guardar()
+        +exportar()
+    }
+    class Editor {
+        +renderizar()
+        +formatear()
+    }
+    Documento --> Editor
+```
 
-Escribe ecuaciones matemáticas hermosas usando KaTeX:
+### Formulas Matematicas (KaTeX)
 
-Matemática en línea: $E = mc^2$
+Escribe ecuaciones matematicas:
 
-Matemática en bloque:
+**Matematica en linea:** La formula $E = mc^2$ cambio la fisica para siempre.
+
+**Matematica en bloque:**
 
 $$
 \int_{-\infty}^{\infty} e^{-x^2} dx = \sqrt{\pi}
@@ -103,64 +197,220 @@ $$
 f(x) = \sum_{n=0}^{\infty} \frac{f^{(n)}(a)}{n!}(x-a)^n
 $$
 
----
+$$
+\begin{pmatrix}
+a & b \\
+c & d
+\end{pmatrix}
+\begin{pmatrix}
+x \\
+y
+\end{pmatrix}
+=
+\begin{pmatrix}
+ax + by \\
+cx + dy
+\end{pmatrix}
+$$
 
-## Callouts
+### Callouts
 
-Usa callouts para resaltar información importante:
+Usa callouts para resaltar informacion importante:
 
-> **NOTA:** Este es un callout de nota. Úsalo para información adicional.
+> **NOTA:** Contenido informativo que proporciona contexto adicional.
 
-> **ADVERTENCIA:** Este es un callout de advertencia. Úsalo para advertencias importantes.
+> **CONSEJO:** Una sugerencia util para mejorar tu flujo de trabajo.
 
-> **CONSEJO:** Este es un callout de consejo. Úsalo para sugerencias útiles.
+> **ADVERTENCIA:** Informacion importante que requiere atencion.
 
-> **IMPORTANTE:** Este es un callout importante. Úsalo para información crítica.
+> **IMPORTANTE:** Informacion critica que no debes pasar por alto.
 
----
+> **PRECAUCION:** Procede con cuidado al seguir estas instrucciones.
 
-## Listas de Tareas Interactivas
+### Tablas
 
-Crea listas de tareas interactivas:
-
-- [x] Aprender sintaxis básica de Markdown
-- [x] Probar resaltado de código
-- [x] Crear un diagrama Mermaid
-- [ ] Escribir tu primer documento
-- [ ] Explorar todas las características
-
----
-
-## Consejos Rápidos
-
-### Atajos de Teclado
-
-- **Ctrl+B**: Texto en negrita
-- **Ctrl+I**: Texto en cursiva
-- **Ctrl+K**: Insertar enlace
-- **Ctrl+S**: Guardar documento
-- **Ctrl+/**: Ver todos los atajos
-
-### Modos de Vista
-
-- **Vista Dividida**: Ver editor y vista previa lado a lado
-- **Solo Editor**: Enfócate en escribir
-- **Solo Vista Previa**: Enfócate en leer
-
-### Características de la Barra Lateral
-
-- **Explorador**: Administra tus documentos
-- **Tabla de Contenidos**: Navega a través de los encabezados
-- **Búsqueda**: Encuentra texto en todos los documentos
+| Funcion | Descripcion | Atajo |
+|---------|-------------|-------|
+| Negrita | Hacer texto negrita | `Ctrl+B` |
+| Cursiva | Hacer texto cursiva | `Ctrl+I` |
+| Enlace | Insertar hipervinculo | `Ctrl+K` |
+| Codigo | Insertar bloque de codigo | `Ctrl+Shift+`` |
 
 ---
 
-## ¿Listo para Comenzar?
+## Opciones de Exportacion
 
-1. Crea un nuevo documento desde **Archivo > Nuevo** (Ctrl+N)
-2. Empieza a escribir en Markdown
-3. ¡Ve cómo tu contenido cobra vida en la vista previa!
+Exporta tus documentos en multiples formatos:
 
-¿Necesitas ayuda? Presiona **Ctrl+/** para ver los atajos de teclado o revisa el menú de **Ayuda**.
+| Formato | Descripcion | Caso de Uso |
+|---------|-------------|-------------|
+| **Markdown** (.md) | Archivo markdown sin procesar | Compartir, control de versiones |
+| **HTML** | Pagina web con estilos | Publicacion web |
+| **PDF** | Documento portable | Impresion, compartir |
+| **PNG** | Formato de imagen | Redes sociales, presentaciones |
+| **JPEG** | Imagen comprimida | Compartir rapido |
 
-¡Feliz escritura! ✨
+Accede a las exportaciones via **Archivo > Exportar** o menu contextual.
+
+---
+
+## Modos de Vista
+
+### Vista Dividida (Por defecto)
+
+Ve tu editor y vista previa lado a lado. Perfecto para escribir y verificar el formato simultaneamente.
+
+### Solo Editor
+
+Enfocate completamente en escribir. Oculta la vista previa para edicion sin distracciones.
+
+### Solo Vista Previa
+
+Revisa tu documento final sin el editor visible.
+
+### Vista Previa en Nueva Ventana
+
+Abre la vista previa en una ventana separada. Ideal para configuraciones de dos monitores.
+
+### Modo Zen
+
+Presiona `F11` para una experiencia de escritura completamente libre de distracciones. Todos los elementos de la interfaz se ocultan, dejando solo tu contenido.
+
+---
+
+## Atajos de Teclado
+
+### Formato de Texto
+
+| Atajo | Accion |
+|-------|--------|
+| `Ctrl+B` | Negrita |
+| `Ctrl+I` | Cursiva |
+| `Ctrl+Shift+S` | Tachado |
+| `Ctrl+`` | Codigo en linea |
+| `Ctrl+Shift+`` | Bloque de codigo |
+
+### Encabezados
+
+| Atajo | Accion |
+|-------|--------|
+| `Ctrl+1` | Encabezado 1 |
+| `Ctrl+2` | Encabezado 2 |
+| `Ctrl+3` | Encabezado 3 |
+| `Ctrl+4` a `Ctrl+6` | Encabezado 4-6 |
+
+### Listas
+
+| Atajo | Accion |
+|-------|--------|
+| `Ctrl+Shift+8` | Lista con vinetas |
+| `Ctrl+Shift+7` | Lista numerada |
+| `Ctrl+Shift+9` | Lista de tareas |
+
+### Insertar Elementos
+
+| Atajo | Accion |
+|-------|--------|
+| `Ctrl+K` | Insertar enlace |
+| `Ctrl+Shift+I` | Insertar imagen |
+| `Ctrl+Shift+Q` | Cita |
+
+### Navegacion y Busqueda
+
+| Atajo | Accion |
+|-------|--------|
+| `Ctrl+G` | Ir a linea |
+| `Ctrl+F` | Buscar |
+| `Ctrl+H` | Buscar y reemplazar |
+| `F3` | Buscar siguiente |
+| `Shift+F3` | Buscar anterior |
+
+### Aplicacion
+
+| Atajo | Accion |
+|-------|--------|
+| `Ctrl+N` | Nuevo documento |
+| `Ctrl+S` | Guardar |
+| `Ctrl+W` | Cerrar pestana |
+| `Ctrl+B` | Alternar barra lateral |
+| `Ctrl+,` | Configuracion |
+| `Ctrl+/` | Atajos de teclado |
+| `F11` | Modo Zen |
+| `Esc` | Salir Modo Zen / Cerrar modal |
+
+### Zoom
+
+| Atajo | Accion |
+|-------|--------|
+| `Ctrl++` | Acercar |
+| `Ctrl+-` | Alejar |
+| `Ctrl+0` | Restablecer zoom |
+| `Ctrl+Scroll` | Zoom con rueda del raton |
+
+---
+
+## Configuracion y Personalizacion
+
+Accede a la configuracion via `Ctrl+,` o **Archivo > Configuracion**:
+
+### Apariencia
+
+- **Tema**: Claro, Oscuro, o Sistema (auto-detectar)
+- **Estilo de Vista Previa**: GitHub o Por defecto
+- **Tamano de Fuente**: Ajustable para editor y vista previa
+
+### Editor
+
+- **Auto-guardado**: Guardar cambios automaticamente
+- **Formatear al Guardar**: Limpiar markdown al guardar
+- **Numeros de Linea**: Mostrar/ocultar numeros de linea
+- **Ajuste de Linea**: Habilitar/deshabilitar ajuste de texto
+
+### Idioma
+
+- English (Ingles)
+- Espanol
+
+---
+
+## Funciones de la Barra Lateral
+
+### Explorador de Archivos
+
+Administra todos tus documentos abiertos. Clic derecho para opciones:
+- Renombrar
+- Cerrar
+- Cerrar Otros
+- Cerrar Todos
+
+### Tabla de Contenidos
+
+Navega a traves de los encabezados de tu documento. Haz clic en cualquier encabezado para saltar a esa seccion.
+
+### Buscar y Reemplazar
+
+- **Buscar**: Busca dentro del documento actual
+- **Reemplazar**: Reemplaza una o todas las ocurrencias
+- **Opciones**: Distinguir mayusculas, Expresiones regulares
+
+---
+
+## Consejos y Trucos
+
+1. **Arrastrar y Soltar**: Suelta archivos `.md` directamente en el editor
+2. **Gestion de Pestanas**: Clic derecho en pestanas para acciones rapidas
+3. **Historial de Versiones**: Nunca pierdas tu trabajo con versionado automatico
+4. **Soporte de Emojis**: Usa el selector de emojis en la barra de herramientas
+5. **Encabezados Rapidos**: Usa el menu desplegable de encabezados en la barra de herramientas
+
+---
+
+## Necesitas Ayuda?
+
+- Presiona `Ctrl+/` para ver todos los atajos de teclado
+- Revisa el menu **Ayuda** para el tour de funciones
+- Visita nuestra [documentacion](https://github.com/qazuor/markview)
+
+---
+
+Feliz escritura!
