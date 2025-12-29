@@ -1,4 +1,5 @@
 import { Button, Modal, ModalFooter } from '@/components/ui';
+import { useTranslation } from 'react-i18next';
 
 interface CloseConfirmModalProps {
     isOpen: boolean;
@@ -10,24 +11,26 @@ interface CloseConfirmModalProps {
  * Modal to confirm closing an unsaved document
  */
 export function CloseConfirmModal({ isOpen, fileName, onAction }: CloseConfirmModalProps) {
+    const { t } = useTranslation();
+
     return (
         <Modal
             isOpen={isOpen}
             onClose={() => onAction('cancel')}
-            title="Unsaved changes"
-            description={`Do you want to save the changes you made to "${fileName}"?`}
+            title={t('confirm.unsavedChangesTitle')}
+            description={t('confirm.unsavedChangesDescription', { fileName })}
         >
-            <p className="text-sm text-text-secondary">Your changes will be lost if you don&apos;t save them.</p>
+            <p className="text-sm text-text-secondary">{t('confirm.unsavedChangesWarning')}</p>
 
             <ModalFooter>
                 <Button variant="ghost" onClick={() => onAction('cancel')}>
-                    Cancel
+                    {t('common.cancel')}
                 </Button>
                 <Button variant="outline" onClick={() => onAction('discard')}>
-                    Don&apos;t Save
+                    {t('confirm.dontSave')}
                 </Button>
                 <Button variant="primary" onClick={() => onAction('save')}>
-                    Save
+                    {t('common.save')}
                 </Button>
             </ModalFooter>
         </Modal>
