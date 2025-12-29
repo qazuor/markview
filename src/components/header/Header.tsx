@@ -1,10 +1,12 @@
-import { HelpButton } from '@/components/header/HelpButton';
+import welcomeContentEs from '@/assets/welcome-es.md?raw';
+import welcomeContentEn from '@/assets/welcome.md?raw';
 import { renderMarkdown } from '@/services/markdown';
 import { useDocumentStore } from '@/stores/documentStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useUIStore } from '@/stores/uiStore';
 import { cn } from '@/utils/cn';
 import {
+    BookOpen,
     ChevronDown,
     Columns2,
     Download,
@@ -31,7 +33,6 @@ import { useTranslation } from 'react-i18next';
 interface HeaderProps {
     onImport?: () => void;
     onSave?: () => void;
-    onShowShortcuts: () => void;
     onStartTour: () => void;
     className?: string;
 }
@@ -48,8 +49,8 @@ interface MenuItem {
     children?: MenuItem[];
 }
 
-export function Header({ onImport, onSave, onShowShortcuts, onStartTour, className }: HeaderProps) {
-    const { t } = useTranslation();
+export function Header({ onImport, onSave, onStartTour, className }: HeaderProps) {
+    const { t, i18n } = useTranslation();
     const [activeMenu, setActiveMenu] = useState<string | null>(null);
     const [isExporting, setIsExporting] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
@@ -94,6 +95,26 @@ export function Header({ onImport, onSave, onShowShortcuts, onStartTour, classNa
         openModal('shortcuts');
         closeMenu();
     }, [openModal, closeMenu]);
+
+    const handleShowWelcome = useCallback(() => {
+        const welcomeContent = i18n.language === 'es' ? welcomeContentEs : welcomeContentEn;
+        const title = i18n.language === 'es' ? 'Bienvenido a MarkView' : 'Welcome to MarkView';
+        createDocument({
+            name: title,
+            content: welcomeContent
+        });
+        closeMenu();
+    }, [i18n.language, createDocument, closeMenu]);
+
+    const handleRestartTour = useCallback(() => {
+        onStartTour();
+        closeMenu();
+    }, [onStartTour, closeMenu]);
+
+    const handleOpenDocs = useCallback(() => {
+        window.open('https://github.com/qazuor/markview', '_blank', 'noopener,noreferrer');
+        closeMenu();
+    }, [closeMenu]);
 
     const handleOpenPreviewWindow = useCallback(() => {
         const previewUrl = `${window.location.origin}${window.location.pathname}?preview`;
@@ -255,8 +276,12 @@ export function Header({ onImport, onSave, onShowShortcuts, onStartTour, classNa
     ];
 
     const helpMenuItems: MenuItem[] = [
-        { id: 'shortcuts-help', icon: Keyboard, label: t('shortcuts.title'), onClick: handleShortcuts },
+        { id: 'shortcuts-help', icon: Keyboard, label: t('help.shortcuts'), onClick: handleShortcuts },
+        { id: 'restart-tour', icon: RotateCcw, label: t('help.restartTour'), onClick: handleRestartTour },
         { id: 'sep-1', type: 'separator', label: '' },
+        { id: 'welcome', icon: BookOpen, label: t('help.welcome'), onClick: handleShowWelcome },
+        { id: 'documentation', icon: ExternalLink, label: t('help.documentation'), onClick: handleOpenDocs },
+        { id: 'sep-2', type: 'separator', label: '' },
         { id: 'about', icon: Info, label: t('common.about') || 'About' }
     ];
 
@@ -368,9 +393,6 @@ export function Header({ onImport, onSave, onShowShortcuts, onStartTour, classNa
 
             {/* Spacer */}
             <div className="flex-1" />
-
-            {/* Help Button */}
-            <HelpButton onShowShortcuts={onShowShortcuts} onStartTour={onStartTour} />
 
             {/* Backdrop */}
             {activeMenu && (
