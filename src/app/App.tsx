@@ -273,15 +273,7 @@ export function App() {
     return (
         <div className="flex h-screen flex-col bg-bg-primary text-text-primary">
             {/* Header with logo and file menu */}
-            {!zenMode && (
-                <Header
-                    onImport={openFileDialog}
-                    onSave={save}
-                    onShowShortcuts={() => openModal('shortcuts')}
-                    onStartTour={startTour}
-                    className="shrink-0"
-                />
-            )}
+            {!zenMode && <Header onImport={openFileDialog} onSave={save} onStartTour={startTour} className="shrink-0" />}
 
             {/* Tab bar */}
             {!zenMode && <TabBar className="shrink-0" />}
