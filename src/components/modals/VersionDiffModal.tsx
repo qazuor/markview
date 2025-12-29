@@ -2,6 +2,7 @@ import { Modal } from '@/components/ui';
 import { type VersionDiff, diffVersions, getVersion } from '@/services/storage/versions';
 import { cn } from '@/utils/cn';
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface VersionDiffModalProps {
     isOpen: boolean;
@@ -15,6 +16,8 @@ interface VersionDiffModalProps {
  * Modal for comparing document versions
  */
 export function VersionDiffModal({ isOpen, documentId, versionId, currentContent, onClose }: VersionDiffModalProps) {
+    const { t } = useTranslation();
+
     const version = useMemo(() => {
         if (!isOpen || !versionId) return null;
         return getVersion(documentId, versionId);
@@ -42,13 +45,13 @@ export function VersionDiffModal({ isOpen, documentId, versionId, currentContent
     }
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title="Compare Versions" size="xl">
+        <Modal isOpen={isOpen} onClose={onClose} title={t('versions.compareTitle')} size="xl">
             <div className="flex flex-col h-[70vh]">
                 {/* Stats bar */}
                 <div className="flex items-center gap-4 px-4 py-2 border-b border-border text-sm">
-                    <span className="text-text-muted">Comparing version from {formatDate(version.createdAt)} with current content</span>
-                    <span className="text-green-600">+{stats.added} added</span>
-                    <span className="text-red-600">-{stats.removed} removed</span>
+                    <span className="text-text-muted">{t('versions.comparingWith', { date: formatDate(version.createdAt) })}</span>
+                    <span className="text-green-600">{t('versions.addedCount', { count: stats.added })}</span>
+                    <span className="text-red-600">{t('versions.removedCount', { count: stats.removed })}</span>
                 </div>
 
                 {/* Diff view */}
@@ -66,11 +69,11 @@ export function VersionDiffModal({ isOpen, documentId, versionId, currentContent
                 <div className="flex items-center gap-4 px-4 py-2 border-t border-border text-xs text-text-muted">
                     <span className="flex items-center gap-1">
                         <span className="w-3 h-3 bg-green-100 dark:bg-green-900/30 border border-green-300 dark:border-green-700 rounded" />
-                        Added in current
+                        {t('versions.addedInCurrent')}
                     </span>
                     <span className="flex items-center gap-1">
                         <span className="w-3 h-3 bg-red-100 dark:bg-red-900/30 border border-red-300 dark:border-red-700 rounded" />
-                        Removed from version
+                        {t('versions.removedFromVersion')}
                     </span>
                 </div>
             </div>

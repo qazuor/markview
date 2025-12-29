@@ -3,6 +3,7 @@ import { type DocumentVersion, deleteVersion, getVersions, updateVersionLabel } 
 import { cn } from '@/utils/cn';
 import { Clock, Pencil, RotateCcw, Trash2 } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface VersionHistoryModalProps {
     isOpen: boolean;
@@ -17,6 +18,7 @@ interface VersionHistoryModalProps {
  * Modal for viewing and managing document version history
  */
 export function VersionHistoryModal({ isOpen, documentId, documentName, onClose, onRestore, onCompare }: VersionHistoryModalProps) {
+    const { t } = useTranslation();
     const [versions, setVersions] = useState<DocumentVersion[]>([]);
     const [selectedVersion, setSelectedVersion] = useState<string | null>(null);
     const [editingLabel, setEditingLabel] = useState<string | null>(null);
@@ -33,28 +35,26 @@ export function VersionHistoryModal({ isOpen, documentId, documentName, onClose,
 
     const handleRestore = useCallback(
         (version: DocumentVersion) => {
-            const confirmed = window.confirm(
-                `Restore to version from ${formatDate(version.createdAt)}?\n\nThis will replace your current content.`
-            );
+            const confirmed = window.confirm(t('versions.confirmRestore', { date: formatDate(version.createdAt) }));
 
             if (confirmed) {
                 onRestore(version.content);
                 onClose();
             }
         },
-        [onRestore, onClose]
+        [onRestore, onClose, t]
     );
 
     const handleDelete = useCallback(
         (versionId: string) => {
-            const confirmed = window.confirm('Delete this version? This cannot be undone.');
+            const confirmed = window.confirm(t('versions.confirmDelete'));
 
             if (confirmed) {
                 deleteVersion(documentId, versionId);
                 setVersions(getVersions(documentId));
             }
         },
-        [documentId]
+        [documentId, t]
     );
 
     const handleStartEdit = (version: DocumentVersion) => {
@@ -71,12 +71,12 @@ export function VersionHistoryModal({ isOpen, documentId, documentName, onClose,
     const selectedVersionData = selectedVersion ? versions.find((v) => v.id === selectedVersion) : null;
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title={`Version History - ${documentName}`} size="lg">
+        <Modal isOpen={isOpen} onClose={onClose} title={t('versions.titleWithName', { documentName })} size="lg">
             <div className="flex h-[60vh]">
                 {/* Version list */}
                 <div className="w-1/3 border-r border-border overflow-y-auto">
                     {versions.length === 0 ? (
-                        <div className="p-4 text-sm text-text-muted text-center">No saved versions yet. Use Ctrl+S to save a version.</div>
+                        <div className="p-4 text-sm text-text-muted text-center">{t('versions.noVersions')}</div>
                     ) : (
                         <ul className="p-2 space-y-1">
                             {versions.map((version) => (
@@ -134,7 +134,7 @@ export function VersionHistoryModal({ isOpen, documentId, documentName, onClose,
                                         type="button"
                                         onClick={() => handleStartEdit(selectedVersionData)}
                                         className="p-1.5 text-text-muted hover:text-text-primary hover:bg-bg-tertiary rounded"
-                                        title="Edit label"
+                                        title={t('versions.editLabel')}
                                     >
                                         <Pencil className="h-4 w-4" />
                                     </button>
@@ -144,7 +144,7 @@ export function VersionHistoryModal({ isOpen, documentId, documentName, onClose,
                                             onClick={() => onCompare(selectedVersionData.id)}
                                             className="px-2 py-1 text-xs bg-bg-tertiary hover:bg-bg-secondary rounded transition-colors"
                                         >
-                                            Compare
+                                            {t('versions.compare')}
                                         </button>
                                     )}
                                     <button
@@ -153,13 +153,13 @@ export function VersionHistoryModal({ isOpen, documentId, documentName, onClose,
                                         className="flex items-center gap-1 px-2 py-1 text-xs bg-primary-500 text-white hover:bg-primary-600 rounded transition-colors"
                                     >
                                         <RotateCcw className="h-3 w-3" />
-                                        Restore
+                                        {t('versions.restore')}
                                     </button>
                                     <button
                                         type="button"
                                         onClick={() => handleDelete(selectedVersionData.id)}
                                         className="p-1.5 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950 rounded"
-                                        title="Delete version"
+                                        title={t('versions.deleteVersion')}
                                     >
                                         <Trash2 className="h-4 w-4" />
                                     </button>
@@ -174,7 +174,7 @@ export function VersionHistoryModal({ isOpen, documentId, documentName, onClose,
                             </div>
                         </>
                     ) : (
-                        <div className="flex-1 flex items-center justify-center text-text-muted text-sm">Select a version to preview</div>
+                        <div className="flex-1 flex items-center justify-center text-text-muted text-sm">{t('versions.selectVersion')}</div>
                     )}
                 </div>
             </div>
