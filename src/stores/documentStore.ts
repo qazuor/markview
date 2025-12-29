@@ -274,11 +274,33 @@ export const useDocumentStore = create<DocumentState>()(
                         versions?: [string, Version[]][];
                     };
 
+                    // Rehydrate Date objects from persisted strings
+                    const rehydratedDocs = (persistedState.documents ?? []).map(([id, doc]) => {
+                        return [
+                            id,
+                            {
+                                ...doc,
+                                createdAt: doc.createdAt ? new Date(doc.createdAt) : new Date(),
+                                updatedAt: doc.updatedAt ? new Date(doc.updatedAt) : new Date()
+                            }
+                        ] as [string, Document];
+                    });
+
+                    const rehydratedVersions = (persistedState.versions ?? []).map(([id, versions]) => {
+                        return [
+                            id,
+                            versions.map((v) => ({
+                                ...v,
+                                createdAt: v.createdAt ? new Date(v.createdAt) : new Date()
+                            }))
+                        ] as [string, Version[]];
+                    });
+
                     return {
                         ...current,
-                        documents: new Map(persistedState.documents ?? []),
+                        documents: new Map(rehydratedDocs),
                         activeDocumentId: persistedState.activeDocumentId ?? null,
-                        versions: new Map(persistedState.versions ?? [])
+                        versions: new Map(rehydratedVersions)
                     };
                 }
             }

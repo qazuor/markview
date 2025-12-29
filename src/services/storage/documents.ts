@@ -32,6 +32,19 @@ export interface DocumentListItem {
 }
 
 /**
+ * Ensure a value is converted to ISO string format
+ */
+function toISOString(value: Date | string | unknown): string {
+    if (value instanceof Date) {
+        return value.toISOString();
+    }
+    if (typeof value === 'string') {
+        return value;
+    }
+    return new Date().toISOString();
+}
+
+/**
  * Save a document to localStorage
  */
 export function saveDocument(doc: Document): { success: boolean; error?: string } {
@@ -39,7 +52,7 @@ export function saveDocument(doc: Document): { success: boolean; error?: string 
         id: doc.id,
         name: doc.name,
         content: doc.content,
-        createdAt: doc.createdAt.toISOString(),
+        createdAt: toISOString(doc.createdAt),
         updatedAt: new Date().toISOString(),
         isManuallyNamed: doc.isManuallyNamed
     };
