@@ -124,44 +124,121 @@ export function MainLayout({ className, onEditorViewReady }: MainLayoutProps) {
         setSplitSize(size);
     }, []);
 
+    // Track scroll position for mobile tab sync
+    const lastScrollPercentRef = useRef<number>(0);
+    const pendingScrollRef = useRef<boolean>(false);
+
+    // Save scroll position when scrolling
+    const handleMobileEditorScroll = useCallback(
+        (percent: number) => {
+            lastScrollPercentRef.current = percent;
+            handleEditorScroll(percent);
+        },
+        [handleEditorScroll]
+    );
+
+    const handleMobilePreviewScroll = useCallback(
+        (percent: number) => {
+            lastScrollPercentRef.current = percent;
+            handlePreviewScroll(percent);
+        },
+        [handlePreviewScroll]
+    );
+
+    // Handle tab change - mark that we need to restore scroll
+    const handleTabChange = useCallback(
+        (newMode: 'editor' | 'preview') => {
+            if (syncScroll && isMobile) {
+                pendingScrollRef.current = true;
+            }
+            setViewMode(newMode);
+        },
+        [syncScroll, isMobile, setViewMode]
+    );
+
+    // When editor's scrollTo is ready, restore scroll if pending
+    const handleMobileEditorScrollToReady = useCallback(
+        (scrollTo: (percent: number) => void) => {
+            editorScrollToRef.current = scrollTo;
+            if (pendingScrollRef.current && syncScroll) {
+                const targetPercent = lastScrollPercentRef.current;
+                setTimeout(() => {
+                    scrollTo(targetPercent);
+                    pendingScrollRef.current = false;
+                }, 100);
+            }
+        },
+        [syncScroll]
+    );
+
+    // When preview's scrollTo is ready, restore scroll if pending
+    const handleMobilePreviewScrollToReady = useCallback(
+        (scrollTo: (percent: number) => void) => {
+            previewScrollToRef.current = scrollTo;
+            if (pendingScrollRef.current && syncScroll) {
+                const targetPercent = lastScrollPercentRef.current;
+                setTimeout(() => {
+                    scrollTo(targetPercent);
+                    pendingScrollRef.current = false;
+                }, 100);
+            }
+        },
+        [syncScroll]
+    );
+
     // Mobile tab view
     if (isMobile) {
         return (
             <div className={cn('flex h-full flex-col', className)}>
-                {/* Tab buttons */}
-                <div className="flex border-b border-secondary-200 dark:border-secondary-700">
+                {/* Tab buttons - larger for touch */}
+                <div className="flex border-b border-border bg-bg-secondary">
                     <button
                         type="button"
-                        onClick={() => setViewMode('editor')}
+                        onClick={() => handleTabChange('editor')}
                         className={cn(
-                            'flex-1 px-4 py-2 text-sm font-medium',
+                            'flex-1 px-4 py-3 text-base font-medium',
+                            'transition-colors touch-manipulation',
+                            'active:bg-bg-tertiary',
                             viewMode === 'editor'
-                                ? 'border-b-2 border-primary-500 text-primary-600 dark:text-primary-400'
-                                : 'text-secondary-500 hover:text-secondary-700 dark:text-secondary-400'
+                                ? 'border-b-2 border-primary-500 text-primary-600 dark:text-primary-400 bg-bg-tertiary/50'
+                                : 'text-text-secondary hover:text-text-primary hover:bg-bg-tertiary/30'
                         )}
                     >
-                        Editor
+                        {t('layout.editor')}
                     </button>
                     <button
                         type="button"
-                        onClick={() => setViewMode('preview')}
+                        onClick={() => handleTabChange('preview')}
                         className={cn(
-                            'flex-1 px-4 py-2 text-sm font-medium',
+                            'flex-1 px-4 py-3 text-base font-medium',
+                            'transition-colors touch-manipulation',
+                            'active:bg-bg-tertiary',
                             viewMode === 'preview'
-                                ? 'border-b-2 border-primary-500 text-primary-600 dark:text-primary-400'
-                                : 'text-secondary-500 hover:text-secondary-700 dark:text-secondary-400'
+                                ? 'border-b-2 border-primary-500 text-primary-600 dark:text-primary-400 bg-bg-tertiary/50'
+                                : 'text-text-secondary hover:text-text-primary hover:bg-bg-tertiary/30'
                         )}
                     >
-                        Preview
+                        {t('layout.preview')}
                     </button>
                 </div>
 
                 {/* Content */}
                 <div className="flex-1 overflow-hidden">
                     {viewMode === 'editor' ? (
-                        <Editor className="h-full" onViewReady={onEditorViewReady} />
+                        <Editor
+                            className="h-full"
+                            onViewReady={onEditorViewReady}
+                            onScroll={handleMobileEditorScroll}
+                            onScrollToReady={handleMobileEditorScrollToReady}
+                        />
                     ) : (
-                        <Preview content={content} className="h-full" onContentChange={handleContentChange} />
+                        <Preview
+                            content={content}
+                            className="h-full"
+                            onContentChange={handleContentChange}
+                            onScroll={handleMobilePreviewScroll}
+                            onScrollToReady={handleMobilePreviewScrollToReady}
+                        />
                     )}
                 </div>
             </div>
