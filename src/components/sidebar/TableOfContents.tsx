@@ -1,6 +1,7 @@
 import { type TocItem, extractToc } from '@/services/markdown/toc';
 import { cn } from '@/utils/cn';
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { TOCContextMenu } from './TOCContextMenu';
 
 interface TableOfContentsProps {
@@ -23,6 +24,7 @@ const levelIndent: Record<number, string> = {
  * Table of contents panel
  */
 export function TableOfContents({ content, activeLine, onNavigate, className }: TableOfContentsProps) {
+    const { t } = useTranslation();
     const toc = useMemo(() => extractToc(content), [content]);
 
     // Find active heading based on current line
@@ -45,10 +47,12 @@ export function TableOfContents({ content, activeLine, onNavigate, className }: 
         return (
             <div className={cn('flex flex-col h-full', className)}>
                 <div className="flex items-center justify-between px-3 py-2 border-b border-border">
-                    <span className="text-xs font-semibold uppercase text-text-muted">Table of Contents</span>
+                    <span className="text-xs font-semibold uppercase text-text-muted">{t('sidebar.toc')}</span>
                 </div>
                 <div className="flex-1 flex items-center justify-center p-4">
-                    <p className="text-sm text-text-muted text-center">No headings found. Add headings to see the table of contents.</p>
+                    <p className="text-sm text-text-muted text-center">
+                        {t('sidebar.noHeadings')} {t('sidebar.noHeadingsHint')}
+                    </p>
                 </div>
             </div>
         );
@@ -58,8 +62,8 @@ export function TableOfContents({ content, activeLine, onNavigate, className }: 
         <div className={cn('flex flex-col h-full', className)}>
             {/* Header */}
             <div className="flex items-center justify-between px-3 py-2 border-b border-border">
-                <span className="text-xs font-semibold uppercase text-text-muted">Table of Contents</span>
-                <span className="text-xs text-text-muted">{toc.length} headings</span>
+                <span className="text-xs font-semibold uppercase text-text-muted">{t('sidebar.toc')}</span>
+                <span className="text-xs text-text-muted">{t('sidebar.headingsCount', { count: toc.length })}</span>
             </div>
 
             {/* TOC list */}

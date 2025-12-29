@@ -2,6 +2,7 @@ import { IconButton, Tooltip } from '@/components/ui';
 import { cn } from '@/utils/cn';
 import { ChevronDown, ChevronRight, RefreshCw, Replace, Search, X } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface SearchResult {
     line: number;
@@ -21,6 +22,7 @@ interface SearchPanelProps {
  * Search and replace panel
  */
 export function SearchPanel({ content, onNavigate, onReplace, className }: SearchPanelProps) {
+    const { t } = useTranslation();
     const [searchQuery, setSearchQuery] = useState('');
     const [replaceQuery, setReplaceQuery] = useState('');
     const [showReplace, setShowReplace] = useState(false);
@@ -97,7 +99,7 @@ export function SearchPanel({ content, onNavigate, onReplace, className }: Searc
         <div className={cn('flex flex-col h-full', className)}>
             {/* Header */}
             <div className="flex items-center justify-between px-3 py-2 border-b border-border">
-                <span className="text-xs font-semibold uppercase text-text-muted">Search</span>
+                <span className="text-xs font-semibold uppercase text-text-muted">{t('searchPanel.title')}</span>
             </div>
 
             {/* Search inputs */}
@@ -109,7 +111,7 @@ export function SearchPanel({ content, onNavigate, onReplace, className }: Searc
                         onClick={() => setShowReplace(!showReplace)}
                         aria-expanded={showReplace}
                         aria-controls="replace-section"
-                        aria-label={showReplace ? 'Hide replace' : 'Show replace'}
+                        aria-label={showReplace ? t('searchPanel.hideReplace') : t('searchPanel.showReplace')}
                         className="p-1 hover:bg-bg-tertiary rounded transition-colors"
                     >
                         {showReplace ? (
@@ -121,13 +123,13 @@ export function SearchPanel({ content, onNavigate, onReplace, className }: Searc
 
                     <div className="relative flex-1">
                         <label htmlFor="search-input" className="sr-only">
-                            Search in document
+                            {t('searchPanel.searchInDocument')}
                         </label>
                         <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-text-muted" aria-hidden="true" />
                         <input
                             id="search-input"
                             type="text"
-                            placeholder="Search..."
+                            placeholder={t('searchPanel.searchPlaceholder')}
                             value={searchQuery}
                             onChange={(e) => {
                                 setSearchQuery(e.target.value);
@@ -146,7 +148,7 @@ export function SearchPanel({ content, onNavigate, onReplace, className }: Searc
                             <button
                                 type="button"
                                 onClick={() => setSearchQuery('')}
-                                aria-label="Clear search"
+                                aria-label={t('searchPanel.clearSearch')}
                                 className="absolute right-2 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary"
                             >
                                 <X className="h-3.5 w-3.5" aria-hidden="true" />
@@ -160,13 +162,13 @@ export function SearchPanel({ content, onNavigate, onReplace, className }: Searc
                     <div id="replace-section" className="flex items-center gap-1 pl-6">
                         <div className="relative flex-1">
                             <label htmlFor="replace-input" className="sr-only">
-                                Replace with
+                                {t('searchPanel.replaceWith')}
                             </label>
                             <Replace className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-text-muted" aria-hidden="true" />
                             <input
                                 id="replace-input"
                                 type="text"
-                                placeholder="Replace..."
+                                placeholder={t('searchPanel.replacePlaceholder')}
                                 value={replaceQuery}
                                 onChange={(e) => setReplaceQuery(e.target.value)}
                                 className={cn(
@@ -190,7 +192,7 @@ export function SearchPanel({ content, onNavigate, onReplace, className }: Searc
                             onChange={(e) => setCaseSensitive(e.target.checked)}
                             className="rounded border-border"
                         />
-                        <span>Case sensitive</span>
+                        <span>{t('searchPanel.caseSensitive')}</span>
                     </label>
                     <label className="flex items-center gap-1 cursor-pointer">
                         <input
@@ -199,7 +201,7 @@ export function SearchPanel({ content, onNavigate, onReplace, className }: Searc
                             onChange={(e) => setUseRegex(e.target.checked)}
                             className="rounded border-border"
                         />
-                        <span>Regex</span>
+                        <span>{t('searchPanel.useRegex')}</span>
                     </label>
                 </div>
 
@@ -207,22 +209,24 @@ export function SearchPanel({ content, onNavigate, onReplace, className }: Searc
                 {searchQuery && (
                     <div className="flex items-center justify-between">
                         <span id="search-results-count" className="text-xs text-text-muted" aria-live="polite">
-                            {results.length === 0 ? 'No results' : `${currentIndex + 1} of ${results.length} results`}
+                            {results.length === 0
+                                ? t('common.noResults')
+                                : t('searchPanel.matchCount', { current: currentIndex + 1, total: results.length })}
                         </span>
                         <div className="flex items-center gap-1">
-                            <Tooltip content="Previous match">
+                            <Tooltip content={t('searchPanel.previousMatch')}>
                                 <IconButton
                                     icon={<ChevronDown className="h-4 w-4 rotate-180" />}
-                                    label="Previous match"
+                                    label={t('searchPanel.previousMatch')}
                                     onClick={goToPrevious}
                                     size="sm"
                                     disabled={results.length === 0}
                                 />
                             </Tooltip>
-                            <Tooltip content="Next match">
+                            <Tooltip content={t('searchPanel.nextMatch')}>
                                 <IconButton
                                     icon={<ChevronDown className="h-4 w-4" />}
-                                    label="Next match"
+                                    label={t('searchPanel.nextMatch')}
                                     onClick={goToNext}
                                     size="sm"
                                     disabled={results.length === 0}
@@ -246,7 +250,7 @@ export function SearchPanel({ content, onNavigate, onReplace, className }: Searc
                                 'transition-colors'
                             )}
                         >
-                            Replace
+                            {t('common.replace')}
                         </button>
                         <button
                             type="button"
@@ -260,7 +264,7 @@ export function SearchPanel({ content, onNavigate, onReplace, className }: Searc
                             )}
                         >
                             <RefreshCw className="h-3 w-3 inline mr-1" />
-                            Replace All
+                            {t('common.replaceAll')}
                         </button>
                     </div>
                 )}

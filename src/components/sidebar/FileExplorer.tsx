@@ -4,6 +4,7 @@ import { useDocumentStore } from '@/stores/documentStore';
 import { cn } from '@/utils/cn';
 import { File, FolderOpen, Plus, Search, X } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { FileContextMenu } from './FileContextMenu';
 
 interface FileExplorerProps {
@@ -14,6 +15,7 @@ interface FileExplorerProps {
  * File explorer showing local and GitHub files
  */
 export function FileExplorer({ className }: FileExplorerProps) {
+    const { t } = useTranslation();
     const { documents, activeDocumentId, openDocument, createDocument, closeDocument } = useDocumentStore();
     const [filter, setFilter] = useState('');
 
@@ -41,9 +43,9 @@ export function FileExplorer({ className }: FileExplorerProps) {
         <div className={cn('flex flex-col h-full', className)}>
             {/* Header */}
             <div className="flex items-center justify-between px-3 py-2 border-b border-border">
-                <span className="text-xs font-semibold uppercase text-text-muted">Explorer</span>
-                <Tooltip content="New file">
-                    <IconButton icon={<Plus className="h-4 w-4" />} label="New file" onClick={handleNewFile} size="sm" />
+                <span className="text-xs font-semibold uppercase text-text-muted">{t('sidebar.explorer')}</span>
+                <Tooltip content={t('common.new')}>
+                    <IconButton icon={<Plus className="h-4 w-4" />} label={t('common.new')} onClick={handleNewFile} size="sm" />
                 </Tooltip>
             </div>
 
@@ -53,7 +55,7 @@ export function FileExplorer({ className }: FileExplorerProps) {
                     <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-text-muted" />
                     <input
                         type="text"
-                        placeholder="Filter files..."
+                        placeholder={t('fileExplorer.filterPlaceholder')}
                         value={filter}
                         onChange={(e) => setFilter(e.target.value)}
                         className={cn(
@@ -72,14 +74,16 @@ export function FileExplorer({ className }: FileExplorerProps) {
                 <div className="px-2 py-1">
                     <div className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-text-muted">
                         <FolderOpen className="h-3.5 w-3.5" />
-                        <span>LOCAL FILES</span>
+                        <span>{t('fileExplorer.localFiles')}</span>
                     </div>
                 </div>
 
                 {/* File list */}
                 <div className="px-2">
                     {filteredDocuments.length === 0 ? (
-                        <div className="px-2 py-4 text-center text-xs text-text-muted">{filter ? 'No matching files' : 'No files yet'}</div>
+                        <div className="px-2 py-4 text-center text-xs text-text-muted">
+                            {filter ? t('fileExplorer.noMatchingFiles') : t('sidebar.noFiles')}
+                        </div>
                     ) : (
                         filteredDocuments.map((doc) => (
                             <FileContextMenu key={doc.id} documentId={doc.id}>
