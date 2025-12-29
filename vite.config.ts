@@ -8,28 +8,58 @@ export default defineConfig({
         react(),
         VitePWA({
             registerType: 'autoUpdate',
-            includeAssets: ['favicon.ico', 'robots.txt', 'apple-touch-icon.png'],
+            includeAssets: ['favicon.svg', 'robots.txt', 'sitemap.xml'],
             manifest: {
-                name: 'MarkView',
+                name: 'MarkView - Modern Markdown Editor',
                 short_name: 'MarkView',
-                description: 'Markdown editor and previewer - Markdown, visualized',
-                theme_color: '#1a1a1a',
+                description:
+                    'A powerful, modern Markdown editor with live preview. Features syntax highlighting, Mermaid diagrams, KaTeX math formulas, and export to PDF, HTML, and images.',
+                theme_color: '#0ea5e9',
                 background_color: '#1a1a1a',
                 display: 'standalone',
                 start_url: '/',
-                orientation: 'portrait-primary',
+                scope: '/',
+                orientation: 'any',
+                lang: 'en',
+                dir: 'ltr',
+                categories: ['productivity', 'utilities', 'developer tools'],
+                iarc_rating_id: '',
+                prefer_related_applications: false,
                 icons: [
                     {
                         src: '/favicon.svg',
                         sizes: '192x192',
                         type: 'image/svg+xml',
-                        purpose: 'any maskable'
+                        purpose: 'any'
                     },
                     {
                         src: '/favicon.svg',
                         sizes: '512x512',
                         type: 'image/svg+xml',
-                        purpose: 'any maskable'
+                        purpose: 'any'
+                    },
+                    {
+                        src: '/favicon.svg',
+                        sizes: '512x512',
+                        type: 'image/svg+xml',
+                        purpose: 'maskable'
+                    }
+                ],
+                shortcuts: [
+                    {
+                        name: 'New Document',
+                        short_name: 'New',
+                        description: 'Create a new Markdown document',
+                        url: '/?action=new',
+                        icons: [{ src: '/favicon.svg', sizes: '192x192' }]
+                    }
+                ],
+                screenshots: [
+                    {
+                        src: '/og-image.png',
+                        sizes: '1200x630',
+                        type: 'image/png',
+                        label: 'MarkView Editor Interface'
                     }
                 ]
             },

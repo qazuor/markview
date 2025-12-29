@@ -2,13 +2,130 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8" />
-        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <meta name="description" content="MarkView - Markdown editor and previewer" />
-        <meta name="theme-color" content="#0ea5e9" />
-        <title>MarkView</title>
+
+        <!-- Primary Meta Tags -->
+        <title>MarkView - Modern Markdown Editor with Live Preview</title>
+        <meta name="title" content="MarkView - Modern Markdown Editor with Live Preview" />
+        <meta name="description" content="MarkView is a powerful, modern Markdown editor with live preview. Write documentation, notes, and more with real-time visualization. Features syntax highlighting, Mermaid diagrams, KaTeX math, and export to PDF, HTML, and images." />
+        <meta name="keywords" content="markdown editor, markdown preview, live preview, markdown viewer, mermaid diagrams, katex math, code syntax highlighting, documentation tool, note taking, markdown to pdf, markdown to html, open source editor" />
+        <meta name="author" content="Qazuor" />
+        <meta name="robots" content="index, follow" />
+        <meta name="language" content="English" />
+        <meta name="revisit-after" content="7 days" />
+
+        <!-- Canonical URL -->
+        <link rel="canonical" href="https://markview.qazuor.com/" />
+
+        <!-- Favicon and Icons -->
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="apple-touch-icon" href="/favicon.svg" />
+
+        <!-- Theme Color -->
+        <meta name="theme-color" content="#0ea5e9" media="(prefers-color-scheme: light)" />
+        <meta name="theme-color" content="#1a1a1a" media="(prefers-color-scheme: dark)" />
+        <meta name="color-scheme" content="light dark" />
+
+        <!-- Open Graph / Facebook -->
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://markview.qazuor.com/" />
+        <meta property="og:title" content="MarkView - Modern Markdown Editor with Live Preview" />
+        <meta property="og:description" content="A powerful, modern Markdown editor with live preview. Features syntax highlighting, Mermaid diagrams, KaTeX math formulas, and export to PDF, HTML, and images." />
+        <meta property="og:image" content="https://markview.qazuor.com/og-image.png" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:alt" content="MarkView - Markdown Editor Screenshot" />
+        <meta property="og:site_name" content="MarkView" />
+        <meta property="og:locale" content="en_US" />
+        <meta property="og:locale:alternate" content="es_ES" />
+
+        <!-- Twitter -->
+        <meta property="twitter:card" content="summary_large_image" />
+        <meta property="twitter:url" content="https://markview.qazuor.com/" />
+        <meta property="twitter:title" content="MarkView - Modern Markdown Editor with Live Preview" />
+        <meta property="twitter:description" content="A powerful, modern Markdown editor with live preview. Features syntax highlighting, Mermaid diagrams, KaTeX math formulas, and export to PDF, HTML, and images." />
+        <meta property="twitter:image" content="https://markview.qazuor.com/og-image.png" />
+        <meta property="twitter:image:alt" content="MarkView - Markdown Editor Screenshot" />
+        <meta name="twitter:creator" content="@qazuor" />
+
+        <!-- Additional SEO -->
+        <meta name="application-name" content="MarkView" />
+        <meta name="apple-mobile-web-app-title" content="MarkView" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="format-detection" content="telephone=no" />
+
+        <!-- Structured Data (JSON-LD) -->
+        <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "WebApplication",
+            "name": "MarkView",
+            "alternateName": "MarkView Markdown Editor",
+            "description": "A powerful, modern Markdown editor with live preview. Features syntax highlighting, Mermaid diagrams, KaTeX math formulas, and export to PDF, HTML, and images.",
+            "url": "https://markview.qazuor.com/",
+            "applicationCategory": "DeveloperApplication",
+            "operatingSystem": "Any",
+            "browserRequirements": "Requires JavaScript. Requires HTML5.",
+            "softwareVersion": "0.1.0",
+            "author": {
+                "@type": "Organization",
+                "name": "Qazuor",
+                "url": "https://github.com/qazuor"
+            },
+            "offers": {
+                "@type": "Offer",
+                "price": "0",
+                "priceCurrency": "USD"
+            },
+            "featureList": [
+                "Live Markdown Preview",
+                "Syntax Highlighting for 100+ Languages",
+                "Mermaid Diagram Support",
+                "KaTeX Math Formulas",
+                "Export to PDF, HTML, PNG, JPEG",
+                "Dark and Light Themes",
+                "Offline Support (PWA)",
+                "Multi-document Tabs",
+                "Version History",
+                "Keyboard Shortcuts"
+            ],
+            "screenshot": "https://markview.qazuor.com/og-image.png",
+            "aggregateRating": {
+                "@type": "AggregateRating",
+                "ratingValue": "5",
+                "ratingCount": "1"
+            }
+        }
+        </script>
+
+        <!-- Preconnect to external resources -->
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     </head>
     <body>
+        <!-- Noscript fallback for SEO -->
+        <noscript>
+            <div style="padding: 2rem; text-align: center; font-family: system-ui, sans-serif;">
+                <h1>MarkView - Modern Markdown Editor</h1>
+                <p>MarkView is a powerful, modern Markdown editor with live preview.</p>
+                <p>JavaScript is required to use this application. Please enable JavaScript in your browser settings.</p>
+                <h2>Features</h2>
+                <ul style="text-align: left; max-width: 600px; margin: 0 auto;">
+                    <li>Live Markdown preview with real-time rendering</li>
+                    <li>Syntax highlighting for 100+ programming languages</li>
+                    <li>Mermaid diagram support for flowcharts and sequences</li>
+                    <li>KaTeX math formula rendering</li>
+                    <li>Export to PDF, HTML, PNG, and JPEG</li>
+                    <li>Dark and light theme support</li>
+                    <li>Offline support as a Progressive Web App</li>
+                    <li>Multi-document editing with tabs</li>
+                    <li>Version history and document recovery</li>
+                    <li>Comprehensive keyboard shortcuts</li>
+                </ul>
+            </div>
+        </noscript>
         <div id="root"></div>
         <script type="module" src="/src/main.tsx"></script>
     </body>

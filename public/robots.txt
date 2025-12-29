@@ -1,0 +1,35 @@
+# robots.txt for MarkView
+# https://markview.qazuor.com
+
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://markview.qazuor.com/sitemap.xml
+
+# Crawl-delay (optional, be nice to crawlers)
+Crawl-delay: 1
+
+# Disallow development and build artifacts
+Disallow: /dev-dist/
+Disallow: /node_modules/
+Disallow: /.git/
+
+# Allow all major search engines
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Slurp
+Allow: /
+
+User-agent: DuckDuckBot
+Allow: /
+
+User-agent: Baiduspider
+Allow: /
+
+User-agent: YandexBot
+Allow: /
