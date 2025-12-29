@@ -25,7 +25,9 @@
         "loading": "Loading...",
         "error": "Error",
         "success": "Success",
-        "about": "About"
+        "about": "About",
+        "next": "Next",
+        "previous": "Previous"
     },
     "menu": {
         "file": "File",
@@ -210,5 +212,101 @@
         "resetZoom": "Reset Zoom",
         "controls": "Zoom controls",
         "currentZoom": "Current zoom"
+    },
+    "pwa": {
+        "install": {
+            "title": "Install MarkView",
+            "description": "Install this app on your device for a better experience and offline access.",
+            "button": "Install App"
+        },
+        "offline": {
+            "message": "You are currently offline. Some features may be limited.",
+            "reconnected": "You are back online!"
+        },
+        "update": {
+            "title": "Update Available",
+            "description": "A new version of MarkView is available. Update now to get the latest features.",
+            "button": "Update Now",
+            "later": "Later"
+        }
+    },
+    "onboarding": {
+        "welcome": {
+            "title": "Welcome to MarkView!",
+            "subtitle": "Your powerful Markdown editor",
+            "description": "MarkView is a modern Markdown editor with live preview, syntax highlighting, diagrams, and more. Let's take a quick tour to get you started!",
+            "features": {
+                "title": "What you can do:",
+                "realtime": "Real-time preview as you type",
+                "syntax": "Syntax highlighting for code blocks",
+                "diagrams": "Create diagrams with Mermaid",
+                "math": "Write mathematical formulas with KaTeX"
+            }
+        },
+        "features": {
+            "title": "Key Features",
+            "subtitle": "Everything you need for great documentation",
+            "editor": {
+                "title": "Powerful Editor",
+                "description": "Write Markdown with syntax highlighting and autocomplete"
+            },
+            "preview": {
+                "title": "Live Preview",
+                "description": "See your formatted content in real-time"
+            },
+            "toc": {
+                "title": "Table of Contents",
+                "description": "Navigate through your document structure easily"
+            },
+            "search": {
+                "title": "Quick Search",
+                "description": "Find anything across all your documents"
+            }
+        },
+        "shortcuts": {
+            "title": "Keyboard Shortcuts",
+            "subtitle": "Work faster with these essential shortcuts",
+            "bold": "Make text bold",
+            "italic": "Make text italic",
+            "link": "Insert a link",
+            "save": "Save your document",
+            "allShortcuts": "View all keyboard shortcuts",
+            "tip": "Pro Tip",
+            "tipText": "Press Ctrl+/ anytime to see all available shortcuts!"
+        },
+        "dontShowAgain": "Don't show this again",
+        "skip": "Skip",
+        "getStarted": "Get Started",
+        "startTour": "Start Tour"
+    },
+    "tour": {
+        "editor": {
+            "title": "Editor",
+            "description": "This is where you write your Markdown. Use the toolbar above for quick formatting or type Markdown syntax directly."
+        },
+        "preview": {
+            "title": "Preview",
+            "description": "See your formatted content here in real-time. The preview updates as you type and supports code highlighting, diagrams, and math."
+        },
+        "toolbar": {
+            "title": "Toolbar",
+            "description": "Quick access to common formatting options. Click any button to insert Markdown syntax at your cursor position."
+        },
+        "sidebar": {
+            "title": "Sidebar",
+            "description": "Access your files, table of contents, and search from here. Switch between sections using the tabs at the top."
+        },
+        "statusbar": {
+            "title": "Status Bar",
+            "description": "See document statistics like word count, character count, and estimated reading time."
+        },
+        "skip": "Skip Tour",
+        "finish": "Finish Tour"
+    },
+    "help": {
+        "shortcuts": "Keyboard Shortcuts",
+        "restartTour": "Restart Tour",
+        "welcome": "Welcome Document",
+        "documentation": "Documentation"
     }
 }

@@ -25,7 +25,9 @@
         "loading": "Cargando...",
         "error": "Error",
         "success": "Éxito",
-        "about": "Acerca de"
+        "about": "Acerca de",
+        "next": "Siguiente",
+        "previous": "Anterior"
     },
     "menu": {
         "file": "Archivo",
@@ -210,5 +212,101 @@
         "resetZoom": "Restablecer Zoom",
         "controls": "Controles de zoom",
         "currentZoom": "Zoom actual"
+    },
+    "pwa": {
+        "install": {
+            "title": "Instalar MarkView",
+            "description": "Instala esta aplicación en tu dispositivo para una mejor experiencia y acceso sin conexión.",
+            "button": "Instalar Aplicación"
+        },
+        "offline": {
+            "message": "Estás sin conexión. Algunas funciones pueden estar limitadas.",
+            "reconnected": "¡Estás de vuelta en línea!"
+        },
+        "update": {
+            "title": "Actualización Disponible",
+            "description": "Hay una nueva versión de MarkView disponible. Actualiza ahora para obtener las últimas funciones.",
+            "button": "Actualizar Ahora",
+            "later": "Más Tarde"
+        }
+    },
+    "onboarding": {
+        "welcome": {
+            "title": "¡Bienvenido a MarkView!",
+            "subtitle": "Tu potente editor de Markdown",
+            "description": "MarkView es un editor moderno de Markdown con vista previa en vivo, resaltado de sintaxis, diagramas y más. ¡Hagamos un recorrido rápido para comenzar!",
+            "features": {
+                "title": "Lo que puedes hacer:",
+                "realtime": "Vista previa en tiempo real mientras escribes",
+                "syntax": "Resaltado de sintaxis para bloques de código",
+                "diagrams": "Crear diagramas con Mermaid",
+                "math": "Escribir fórmulas matemáticas con KaTeX"
+            }
+        },
+        "features": {
+            "title": "Características Principales",
+            "subtitle": "Todo lo que necesitas para una gran documentación",
+            "editor": {
+                "title": "Editor Potente",
+                "description": "Escribe Markdown con resaltado de sintaxis y autocompletado"
+            },
+            "preview": {
+                "title": "Vista Previa en Vivo",
+                "description": "Ve tu contenido formateado en tiempo real"
+            },
+            "toc": {
+                "title": "Tabla de Contenidos",
+                "description": "Navega fácilmente por la estructura de tu documento"
+            },
+            "search": {
+                "title": "Búsqueda Rápida",
+                "description": "Encuentra cualquier cosa en todos tus documentos"
+            }
+        },
+        "shortcuts": {
+            "title": "Atajos de Teclado",
+            "subtitle": "Trabaja más rápido con estos atajos esenciales",
+            "bold": "Poner texto en negrita",
+            "italic": "Poner texto en cursiva",
+            "link": "Insertar un enlace",
+            "save": "Guardar tu documento",
+            "allShortcuts": "Ver todos los atajos de teclado",
+            "tip": "Consejo",
+            "tipText": "¡Presiona Ctrl+/ en cualquier momento para ver todos los atajos disponibles!"
+        },
+        "dontShowAgain": "No mostrar de nuevo",
+        "skip": "Saltar",
+        "getStarted": "Comenzar",
+        "startTour": "Iniciar Recorrido"
+    },
+    "tour": {
+        "editor": {
+            "title": "Editor",
+            "description": "Aquí es donde escribes tu Markdown. Usa la barra de herramientas arriba para formato rápido o escribe la sintaxis de Markdown directamente."
+        },
+        "preview": {
+            "title": "Vista Previa",
+            "description": "Ve tu contenido formateado aquí en tiempo real. La vista previa se actualiza mientras escribes y soporta resaltado de código, diagramas y matemáticas."
+        },
+        "toolbar": {
+            "title": "Barra de Herramientas",
+            "description": "Acceso rápido a opciones de formato comunes. Haz clic en cualquier botón para insertar sintaxis de Markdown en la posición del cursor."
+        },
+        "sidebar": {
+            "title": "Barra Lateral",
+            "description": "Accede a tus archivos, tabla de contenidos y búsqueda desde aquí. Cambia entre secciones usando las pestañas en la parte superior."
+        },
+        "statusbar": {
+            "title": "Barra de Estado",
+            "description": "Ve las estadísticas del documento como conteo de palabras, caracteres y tiempo estimado de lectura."
+        },
+        "skip": "Saltar Recorrido",
+        "finish": "Finalizar Recorrido"
+    },
+    "help": {
+        "shortcuts": "Atajos de Teclado",
+        "restartTour": "Reiniciar Recorrido",
+        "welcome": "Documento de Bienvenida",
+        "documentation": "Documentación"
     }
 }
