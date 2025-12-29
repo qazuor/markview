@@ -27,7 +27,21 @@
         "success": "Éxito",
         "about": "Acerca de",
         "next": "Siguiente",
-        "previous": "Anterior"
+        "previous": "Anterior",
+        "more": "Más",
+        "replaceAll": "Reemplazar Todo",
+        "noResults": "Sin resultados",
+        "clear": "Limpiar",
+        "filter": "Filtrar"
+    },
+    "aria": {
+        "editorStatus": "Estado del editor",
+        "sidebarNavigation": "Navegación de la barra lateral",
+        "sidebarSections": "Secciones de la barra lateral",
+        "formattingToolbar": "Barra de herramientas de formato",
+        "mainMenu": "Menú principal",
+        "markdownPreview": "Vista previa de Markdown",
+        "markdownEditor": "Editor de Markdown"
     },
     "menu": {
         "file": "Archivo",
@@ -61,9 +75,13 @@
         "numberedList": "Lista Numerada",
         "taskList": "Lista de Tareas",
         "horizontalRule": "Línea Horizontal",
-        "emoji": "Insertar Emoji",
+        "emoji": "Emoji",
         "mermaid": "Insertar Diagrama",
-        "format": "Formatear Documento"
+        "format": "Formatear Documento",
+        "moreOptions": "Más Opciones",
+        "text": "Texto",
+        "insert": "Insertar",
+        "lists": "Listas"
     },
     "sidebar": {
         "explorer": "Explorador",
@@ -72,7 +90,13 @@
         "local": "Archivos Locales",
         "github": "GitHub",
         "noFiles": "Sin archivos aún",
-        "noHeadings": "Sin encabezados"
+        "noHeadings": "Sin encabezados",
+        "noHeadingsHint": "Agrega encabezados para ver la tabla de contenidos.",
+        "headingsCount": "{{count}} encabezados",
+        "collapse": "Colapsar",
+        "expand": "Expandir",
+        "collapseSidebar": "Colapsar barra lateral",
+        "expandSidebar": "Expandir barra lateral"
     },
     "settings": {
         "title": "Configuración",
@@ -131,9 +155,14 @@
         "waitingForEditor": "Esperando al Editor",
         "openEditorHint": "Abre la ventana principal del editor para ver la vista previa",
         "notSupported": "No Soportado",
-        "browserNotSupported": "Tu navegador no soporta comunicación entre ventanas"
+        "browserNotSupported": "Tu navegador no soporta comunicación entre ventanas",
+        "loading": "Cargando vista previa...",
+        "emptyState": "Empieza a escribir para ver la vista previa...",
+        "errorTitle": "Error al renderizar Markdown"
     },
     "layout": {
+        "editor": "Editor",
+        "preview": "Vista Previa",
         "showEditor": "Mostrar Editor",
         "showPreview": "Mostrar Vista Previa",
         "hideEditor": "Ocultar Editor",
@@ -153,24 +182,103 @@
         "title": "Atajos de Teclado",
         "formatting": "Formato",
         "navigation": "Navegación",
-        "general": "General"
+        "general": "General",
+        "searchPlaceholder": "Buscar atajos...",
+        "noShortcutsFound": "No se encontraron atajos",
+        "press": "Presiona",
+        "toClose": "para cerrar",
+        "groups": {
+            "textFormatting": "Formato de Texto",
+            "headings": "Encabezados",
+            "lists": "Listas",
+            "insert": "Insertar",
+            "editor": "Editor",
+            "view": "Vista"
+        },
+        "actions": {
+            "bold": "Negrita",
+            "italic": "Cursiva",
+            "strikethrough": "Tachado",
+            "inlineCode": "Código en línea",
+            "heading1": "Encabezado 1",
+            "heading2": "Encabezado 2",
+            "heading3": "Encabezado 3",
+            "heading4": "Encabezado 4",
+            "heading5": "Encabezado 5",
+            "heading6": "Encabezado 6",
+            "bulletList": "Lista con viñetas",
+            "numberedList": "Lista numerada",
+            "taskList": "Lista de tareas",
+            "link": "Insertar enlace",
+            "image": "Insertar imagen",
+            "codeBlock": "Bloque de código",
+            "blockquote": "Cita",
+            "horizontalRule": "Línea horizontal",
+            "table": "Insertar tabla",
+            "newFile": "Nuevo archivo",
+            "openFile": "Abrir archivo",
+            "saveFile": "Guardar archivo",
+            "find": "Buscar",
+            "findAndReplace": "Buscar y reemplazar",
+            "undo": "Deshacer",
+            "redo": "Rehacer",
+            "toggleSidebar": "Alternar barra lateral",
+            "togglePreview": "Alternar vista previa",
+            "settings": "Abrir configuración",
+            "shortcuts": "Mostrar atajos",
+            "zenMode": "Modo zen",
+            "goToLine": "Ir a línea",
+            "findNext": "Buscar siguiente",
+            "findPrevious": "Buscar anterior",
+            "saveAs": "Guardar como",
+            "closeTab": "Cerrar pestaña",
+            "toggleZenMode": "Alternar modo Zen"
+        }
     },
     "status": {
         "words": "palabras",
         "characters": "caracteres",
         "lines": "líneas",
-        "readingTime": "min de lectura"
+        "readingTime": "min de lectura",
+        "goToLine": "Ir a línea",
+        "selectLineEnding": "Seleccionar fin de línea",
+        "selectEncoding": "Seleccionar codificación"
     },
     "errors": {
         "saveFailed": "Error al guardar",
         "loadFailed": "Error al cargar",
         "exportFailed": "Error al exportar",
-        "githubError": "Error de GitHub"
+        "githubError": "Error de GitHub",
+        "mermaidError": "Error de Mermaid",
+        "mermaidDiagramError": "Error en Diagrama Mermaid",
+        "unknownError": "Error desconocido"
     },
     "confirm": {
         "unsavedChanges": "Tienes cambios sin guardar. ¿Quieres guardarlos?",
         "deleteFile": "¿Estás seguro de que quieres eliminar este archivo?",
-        "deleteVersion": "¿Estás seguro de que quieres eliminar esta versión?"
+        "deleteVersion": "¿Estás seguro de que quieres eliminar esta versión?",
+        "unsavedChangesTitle": "Cambios sin guardar",
+        "unsavedChangesDescription": "¿Quieres guardar los cambios que hiciste en {{fileName}}?",
+        "unsavedChangesWarning": "Tus cambios se perderán si no los guardas.",
+        "dontSave": "No Guardar"
+    },
+    "versions": {
+        "title": "Historial de Versiones",
+        "titleWithName": "Historial de Versiones - {{documentName}}",
+        "compareTitle": "Comparar Versiones",
+        "editLabel": "Editar etiqueta",
+        "deleteVersion": "Eliminar versión",
+        "compare": "Comparar",
+        "restore": "Restaurar",
+        "noVersions": "Aún no hay versiones guardadas. Usa Ctrl+S para guardar una versión.",
+        "selectVersion": "Selecciona una versión para previsualizar",
+        "confirmRestore": "¿Restaurar a la versión de {{date}}?\n\nEsto reemplazará tu contenido actual.",
+        "confirmDelete": "¿Eliminar esta versión? Esto no se puede deshacer.",
+        "comparingWith": "Comparando versión de {{date}} con el contenido actual",
+        "addedCount": "+{{count}} añadidas",
+        "removedCount": "-{{count}} eliminadas",
+        "addedInCurrent": "Añadido en actual",
+        "removedFromVersion": "Eliminado de versión"
     },
     "contextMenu": {
         "cut": "Cortar",
@@ -308,5 +416,25 @@
         "restartTour": "Reiniciar Recorrido",
         "welcome": "Documento de Bienvenida",
         "documentation": "Documentación"
+    },
+    "searchPanel": {
+        "title": "Buscar",
+        "searchPlaceholder": "Buscar...",
+        "replacePlaceholder": "Reemplazar...",
+        "searchInDocument": "Buscar en el documento",
+        "replaceWith": "Reemplazar con",
+        "hideReplace": "Ocultar reemplazar",
+        "showReplace": "Mostrar reemplazar",
+        "clearSearch": "Limpiar búsqueda",
+        "previousMatch": "Coincidencia anterior",
+        "nextMatch": "Siguiente coincidencia",
+        "caseSensitive": "Distinguir mayúsculas",
+        "useRegex": "Regex",
+        "matchCount": "{{current}} de {{total}}"
+    },
+    "fileExplorer": {
+        "filterPlaceholder": "Filtrar archivos...",
+        "noMatchingFiles": "Sin archivos coincidentes",
+        "localFiles": "ARCHIVOS LOCALES"
     }
 }
