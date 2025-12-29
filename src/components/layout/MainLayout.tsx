@@ -208,12 +208,14 @@ export function MainLayout({ className, onEditorViewReady }: MainLayoutProps) {
     if (!isMobile && viewMode === 'editor') {
         return (
             <div className={cn('h-full w-full min-w-0 overflow-hidden relative', className)}>
-                <Editor
-                    className="h-full"
-                    onViewReady={onEditorViewReady}
-                    onScroll={handleEditorScroll}
-                    onScrollToReady={handleEditorScrollToReady}
-                />
+                <div data-tour="editor" className="h-full">
+                    <Editor
+                        className="h-full"
+                        onViewReady={onEditorViewReady}
+                        onScroll={handleEditorScroll}
+                        onScrollToReady={handleEditorScrollToReady}
+                    />
+                </div>
                 <CollapseButton direction="left" onClick={showSplit} tooltip={t('layout.showPreview')} icon={ChevronLeft} />
             </div>
         );
@@ -223,13 +225,15 @@ export function MainLayout({ className, onEditorViewReady }: MainLayoutProps) {
     if (!isMobile && viewMode === 'preview') {
         return (
             <div className={cn('h-full w-full min-w-0 overflow-hidden relative', className)}>
-                <Preview
-                    content={content}
-                    className="h-full"
-                    onScroll={handlePreviewScroll}
-                    onScrollToReady={handlePreviewScrollToReady}
-                    onContentChange={handleContentChange}
-                />
+                <div data-tour="preview" className="h-full">
+                    <Preview
+                        content={content}
+                        className="h-full"
+                        onScroll={handlePreviewScroll}
+                        onScrollToReady={handlePreviewScrollToReady}
+                        onContentChange={handleContentChange}
+                    />
+                </div>
                 <CollapseButton direction="right" onClick={showSplit} tooltip={t('layout.showEditor')} icon={ChevronRight} />
             </div>
         );
@@ -241,24 +245,28 @@ export function MainLayout({ className, onEditorViewReady }: MainLayoutProps) {
             <SplitPane
                 left={
                     <div className="relative h-full">
-                        <Editor
-                            className="h-full"
-                            onViewReady={onEditorViewReady}
-                            onScroll={handleEditorScroll}
-                            onScrollToReady={handleEditorScrollToReady}
-                        />
+                        <div data-tour="editor" className="h-full">
+                            <Editor
+                                className="h-full"
+                                onViewReady={onEditorViewReady}
+                                onScroll={handleEditorScroll}
+                                onScrollToReady={handleEditorScrollToReady}
+                            />
+                        </div>
                         <CollapseButton direction="left" onClick={expandPreview} tooltip={t('layout.hideEditor')} icon={ChevronLeft} />
                     </div>
                 }
                 right={
                     <div className="relative h-full">
-                        <Preview
-                            content={content}
-                            className="h-full"
-                            onScroll={handlePreviewScroll}
-                            onScrollToReady={handlePreviewScrollToReady}
-                            onContentChange={handleContentChange}
-                        />
+                        <div data-tour="preview" className="h-full">
+                            <Preview
+                                content={content}
+                                className="h-full"
+                                onScroll={handlePreviewScroll}
+                                onScrollToReady={handlePreviewScrollToReady}
+                                onContentChange={handleContentChange}
+                            />
+                        </div>
                         <CollapseButton direction="right" onClick={expandEditor} tooltip={t('layout.hidePreview')} icon={ChevronRight} />
                     </div>
                 }

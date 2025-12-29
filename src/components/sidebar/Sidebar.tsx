@@ -50,7 +50,7 @@ export function Sidebar({
     }
 
     return (
-        <div className={cn('flex bg-bg-secondary border-r border-border', className)}>
+        <div data-tour="sidebar" className={cn('flex bg-bg-secondary border-r border-border', className)}>
             {/* Navigation */}
             <SidebarNav activeSection={activeSection} onSectionChange={setActiveSection} className="border-r border-border" />
 

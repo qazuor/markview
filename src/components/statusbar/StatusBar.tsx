@@ -21,6 +21,7 @@ interface StatusBarProps {
 export function StatusBar({ line = 1, column = 1, content = '', isModified = false, isSaving = false, className }: StatusBarProps) {
     return (
         <footer
+            data-tour="statusbar"
             className={cn(
                 'flex items-center justify-between px-3 py-1',
                 'bg-bg-secondary border-t border-border',
