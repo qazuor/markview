@@ -12,18 +12,23 @@ interface EditorProps {
     onViewReady?: (view: EditorView | null) => void;
     onScroll?: (scrollPercent: number) => void;
     onScrollToReady?: (scrollTo: (percent: number) => void) => void;
+    /** Called when scroll changes, with the first visible line number */
+    onScrollLine?: (line: number) => void;
+    /** Called when scrollToLine function is ready */
+    onScrollToLineReady?: (scrollToLine: (line: number) => void) => void;
 }
 
-export function Editor({ className, onViewReady, onScroll, onScrollToReady }: EditorProps) {
+export function Editor({ className, onViewReady, onScroll, onScrollToReady, onScrollLine, onScrollToLineReady }: EditorProps) {
     const theme = useEditorTheme();
     const { lineNumbers, wordWrap, minimap, editorFontSize, fontFamily, lintOnType } = useSettingsStore();
     const { content, documentId, handleChange, handleCursorChange } = useEditorSync();
 
-    const { editorRef, view, setValue, focus, scrollToPercent } = useCodeMirror({
+    const { editorRef, view, setValue, focus, scrollToPercent, scrollToLine } = useCodeMirror({
         initialContent: content,
         onChange: handleChange,
         onCursorChange: handleCursorChange,
         onScroll,
+        onScrollLine,
         theme,
         lineNumbers,
         wordWrap,
@@ -42,6 +47,11 @@ export function Editor({ className, onViewReady, onScroll, onScrollToReady }: Ed
     useEffect(() => {
         onScrollToReady?.(scrollToPercent);
     }, [scrollToPercent, onScrollToReady]);
+
+    // Expose scrollToLine to parent
+    useEffect(() => {
+        onScrollToLineReady?.(scrollToLine);
+    }, [scrollToLine, onScrollToLineReady]);
 
     // Store content in ref to avoid triggering effect on every content change
     const contentRef = useRef(content);

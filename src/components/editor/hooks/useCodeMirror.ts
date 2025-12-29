@@ -37,6 +37,8 @@ export interface UseCodeMirrorOptions {
     onChange?: (content: string) => void;
     onCursorChange?: (line: number, column: number) => void;
     onScroll?: (scrollPercent: number) => void;
+    /** Called when scroll changes, with the first visible line number */
+    onScrollLine?: (line: number) => void;
     theme?: 'light' | 'dark';
     lineNumbers?: boolean;
     wordWrap?: boolean;
@@ -55,6 +57,10 @@ export interface UseCodeMirrorReturn {
     setValue: (value: string) => void;
     scrollToPercent: (percent: number) => void;
     getScrollPercent: () => number;
+    /** Scroll editor to show the specified line at the top */
+    scrollToLine: (line: number) => void;
+    /** Get the first visible line number */
+    getFirstVisibleLine: () => number;
 }
 
 export function useCodeMirror(options: UseCodeMirrorOptions = {}): UseCodeMirrorReturn {
@@ -63,6 +69,7 @@ export function useCodeMirror(options: UseCodeMirrorOptions = {}): UseCodeMirror
         onChange,
         onCursorChange,
         onScroll,
+        onScrollLine,
         theme = 'light',
         lineNumbers = true,
         wordWrap = true,
@@ -86,9 +93,11 @@ export function useCodeMirror(options: UseCodeMirrorOptions = {}): UseCodeMirror
     const onChangeRef = useRef(onChange);
     const onCursorChangeRef = useRef(onCursorChange);
     const onScrollRef = useRef(onScroll);
+    const onScrollLineRef = useRef(onScrollLine);
     onChangeRef.current = onChange;
     onCursorChangeRef.current = onCursorChange;
     onScrollRef.current = onScroll;
+    onScrollLineRef.current = onScrollLine;
 
     // Store initial values in refs
     const initialContentRef = useRef(initialContent);
@@ -117,14 +126,31 @@ export function useCodeMirror(options: UseCodeMirrorOptions = {}): UseCodeMirror
             }
         });
 
+        // Throttle scroll events for performance
+        let lastScrollTime = 0;
+        const SCROLL_THROTTLE_MS = 16; // ~60fps
+
         // Scroll event handler
         const scrollHandler = EditorView.domEventHandlers({
             scroll: (_event, view) => {
+                const now = Date.now();
+                if (now - lastScrollTime < SCROLL_THROTTLE_MS) return false;
+                lastScrollTime = now;
+
+                const scroller = view.scrollDOM;
+                const scrollHeight = scroller.scrollHeight - scroller.clientHeight;
+
+                // Report scroll percent
                 if (onScrollRef.current) {
-                    const scroller = view.scrollDOM;
-                    const scrollHeight = scroller.scrollHeight - scroller.clientHeight;
                     const percent = scrollHeight > 0 ? scroller.scrollTop / scrollHeight : 0;
                     onScrollRef.current(percent);
+                }
+
+                // Report first visible line
+                if (onScrollLineRef.current) {
+                    const firstVisiblePos = view.lineBlockAtHeight(view.scrollDOM.scrollTop).from;
+                    const firstVisibleLine = view.state.doc.lineAt(firstVisiblePos).number;
+                    onScrollLineRef.current(firstVisibleLine);
                 }
                 return false;
             }
@@ -270,6 +296,31 @@ export function useCodeMirror(options: UseCodeMirrorOptions = {}): UseCodeMirror
         return scrollHeight > 0 ? scroller.scrollTop / scrollHeight : 0;
     }, []);
 
+    const scrollToLine = useCallback((line: number) => {
+        if (!viewRef.current) return;
+
+        const view = viewRef.current;
+        const doc = view.state.doc;
+
+        // Clamp line number to valid range
+        const targetLine = Math.max(1, Math.min(line, doc.lines));
+        const lineInfo = doc.line(targetLine);
+
+        // Get the top position of the line
+        const lineBlock = view.lineBlockAt(lineInfo.from);
+
+        // Scroll to put this line at the top
+        view.scrollDOM.scrollTop = lineBlock.top;
+    }, []);
+
+    const getFirstVisibleLine = useCallback(() => {
+        if (!viewRef.current) return 1;
+
+        const view = viewRef.current;
+        const firstVisiblePos = view.lineBlockAtHeight(view.scrollDOM.scrollTop).from;
+        return view.state.doc.lineAt(firstVisiblePos).number;
+    }, []);
+
     return {
         editorRef,
         view: viewRef.current,
@@ -277,6 +328,8 @@ export function useCodeMirror(options: UseCodeMirrorOptions = {}): UseCodeMirror
         getValue,
         setValue,
         scrollToPercent,
-        getScrollPercent
+        getScrollPercent,
+        scrollToLine,
+        getFirstVisibleLine
     };
 }

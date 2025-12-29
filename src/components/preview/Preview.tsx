@@ -1,3 +1,4 @@
+import { buildScrollMap, findEditorLine, findPreviewPosition } from '@/services/markdown';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { cn } from '@/utils/cn';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
@@ -15,12 +16,24 @@ interface PreviewProps {
     onScroll?: (scrollPercent: number) => void;
     onScrollToReady?: (scrollTo: (percent: number) => void) => void;
     onContentChange?: (newContent: string) => void;
+    /** Called when scroll changes, with the estimated source line number */
+    onScrollLine?: (line: number) => void;
+    /** Called when scrollToLine function is ready */
+    onScrollToLineReady?: (scrollToLine: (line: number) => void) => void;
 }
 
 /**
  * Markdown preview component
  */
-export function Preview({ content, className, onScroll, onScrollToReady, onContentChange }: PreviewProps) {
+export function Preview({
+    content,
+    className,
+    onScroll,
+    onScrollToReady,
+    onContentChange,
+    onScrollLine,
+    onScrollToLineReady
+}: PreviewProps) {
     const { themeClass, isDark } = usePreviewTheme();
     const { previewFontSize, fontFamily } = useSettingsStore();
     const { html, isLoading, error } = useMarkdown(content, {
@@ -31,6 +44,7 @@ export function Preview({ content, className, onScroll, onScrollToReady, onConte
     const containerRef = useRef<HTMLDivElement>(null);
     const contentRef = useRef<HTMLDivElement>(null);
     const contentRefForChecklist = useRef(content);
+    const scrollMapRef = useRef<Map<number, number>>(new Map());
 
     // Keep content ref updated for checklist handler
     useEffect(() => {
@@ -57,15 +71,38 @@ export function Preview({ content, className, onScroll, onScrollToReady, onConte
         }
     }, [html, isDark, handleChecklistToggle]);
 
+    // Rebuild scroll map when content changes
+    useEffect(() => {
+        if (contentRef.current && html && !isLoading) {
+            // Small delay to ensure DOM is fully rendered
+            const timer = setTimeout(() => {
+                if (contentRef.current) {
+                    scrollMapRef.current = buildScrollMap(contentRef.current);
+                }
+            }, 100);
+            return () => clearTimeout(timer);
+        }
+    }, [html, isLoading]);
+
     // Handle scroll events
     const handleScroll = useCallback(() => {
-        if (containerRef.current && onScroll) {
-            const el = containerRef.current;
-            const scrollHeight = el.scrollHeight - el.clientHeight;
+        if (!containerRef.current) return;
+
+        const el = containerRef.current;
+        const scrollHeight = el.scrollHeight - el.clientHeight;
+
+        // Report scroll percent
+        if (onScroll) {
             const percent = scrollHeight > 0 ? el.scrollTop / scrollHeight : 0;
             onScroll(percent);
         }
-    }, [onScroll]);
+
+        // Report estimated source line
+        if (onScrollLine && scrollMapRef.current.size > 0) {
+            const line = findEditorLine(el.scrollTop, scrollMapRef.current);
+            onScrollLine(line);
+        }
+    }, [onScroll, onScrollLine]);
 
     // Scroll to percent function
     const scrollToPercent = useCallback((percent: number) => {
@@ -76,12 +113,27 @@ export function Preview({ content, className, onScroll, onScrollToReady, onConte
         }
     }, []);
 
+    // Scroll to line function using scroll map
+    const scrollToLine = useCallback((line: number) => {
+        if (!containerRef.current || scrollMapRef.current.size === 0) return;
+
+        const position = findPreviewPosition(line, scrollMapRef.current);
+        containerRef.current.scrollTop = position;
+    }, []);
+
     // Expose scrollToPercent to parent - only when container is ready
     useEffect(() => {
         if (containerRef.current && html && !isLoading) {
             onScrollToReady?.(scrollToPercent);
         }
     }, [scrollToPercent, onScrollToReady, html, isLoading]);
+
+    // Expose scrollToLine to parent - only when container and scroll map are ready
+    useEffect(() => {
+        if (containerRef.current && html && !isLoading && scrollMapRef.current.size > 0) {
+            onScrollToLineReady?.(scrollToLine);
+        }
+    }, [scrollToLine, onScrollToLineReady, html, isLoading]);
 
     // Font styles for preview content
     const contentStyle = useMemo(
