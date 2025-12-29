@@ -9,7 +9,7 @@ interface DocumentState {
     versions: Map<string, Version[]>;
 
     // Document operations
-    createDocument: () => string;
+    createDocument: (options?: { name?: string; content?: string }) => string;
     openDocument: (id: string) => void;
     closeDocument: (id: string) => void;
     updateContent: (id: string, content: string) => void;
@@ -55,8 +55,18 @@ export const useDocumentStore = create<DocumentState>()(
                 activeDocumentId: null,
                 versions: new Map(),
 
-                createDocument: () => {
+                createDocument: (options) => {
                     const doc = createEmptyDocument();
+
+                    // Apply options if provided
+                    if (options?.name) {
+                        doc.name = options.name;
+                        doc.isManuallyNamed = true;
+                    }
+                    if (options?.content) {
+                        doc.content = options.content;
+                    }
+
                     set((state) => {
                         const newDocs = new Map(state.documents);
                         newDocs.set(doc.id, doc);
