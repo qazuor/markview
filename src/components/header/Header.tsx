@@ -1,5 +1,6 @@
 import welcomeContentEs from '@/assets/welcome-es.md?raw';
 import welcomeContentEn from '@/assets/welcome.md?raw';
+import { useMobile } from '@/hooks';
 import { renderMarkdown } from '@/services/markdown';
 import { useDocumentStore } from '@/stores/documentStore';
 import { useSettingsStore } from '@/stores/settingsStore';
@@ -19,6 +20,7 @@ import {
     Image,
     Info,
     Keyboard,
+    Menu,
     Minus,
     PanelLeft,
     PanelRight,
@@ -51,6 +53,7 @@ interface MenuItem {
 
 export function Header({ onImport, onSave, onStartTour, className }: HeaderProps) {
     const { t, i18n } = useTranslation();
+    const { isMobile } = useMobile();
     const [activeMenu, setActiveMenu] = useState<string | null>(null);
     const [isExporting, setIsExporting] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
@@ -63,6 +66,7 @@ export function Header({ onImport, onSave, onStartTour, className }: HeaderProps
 
     const openModal = useUIStore((s) => s.openModal);
     const setViewMode = useUIStore((s) => s.setViewMode);
+    const toggleSidebar = useUIStore((s) => s.toggleSidebar);
     const theme = useSettingsStore((s) => s.theme);
     const zoomIn = useSettingsStore((s) => s.zoomIn);
     const zoomOut = useSettingsStore((s) => s.zoomOut);
@@ -382,6 +386,23 @@ export function Header({ onImport, onSave, onStartTour, className }: HeaderProps
 
     return (
         <header ref={menuRef} className={cn('flex items-center gap-1 px-2 h-10', 'bg-bg-secondary border-b border-border', className)}>
+            {/* Mobile hamburger menu */}
+            {isMobile && (
+                <button
+                    type="button"
+                    onClick={toggleSidebar}
+                    className={cn(
+                        'p-2 -ml-1 rounded-lg',
+                        'text-text-secondary hover:text-text-primary',
+                        'hover:bg-bg-tertiary active:bg-bg-tertiary',
+                        'transition-colors touch-manipulation'
+                    )}
+                    aria-label={t('common.menu')}
+                >
+                    <Menu className="h-5 w-5" />
+                </button>
+            )}
+
             {/* Logo and App Name */}
             <div className="flex items-center gap-2 px-2">
                 <div
@@ -397,15 +418,47 @@ export function Header({ onImport, onSave, onStartTour, className }: HeaderProps
                 <span className="text-xs text-text-muted hidden md:inline">{t('app.version')}</span>
             </div>
 
-            {/* Menu bar */}
-            <nav aria-label="Main menu" className="flex items-center gap-0.5 ml-2" role="menubar">
+            {/* Menu bar - hidden on mobile */}
+            <nav aria-label="Main menu" className="hidden sm:flex items-center gap-0.5 ml-2" role="menubar">
                 {renderMenu('file', t('menu.file') || 'File', fileMenuItems)}
                 {renderMenu('view', t('menu.view') || 'View', viewMenuItems)}
                 {renderMenu('help', t('menu.help') || 'Help', helpMenuItems)}
             </nav>
 
-            {/* Spacer */}
-            <div className="flex-1" />
+            {/* Mobile quick actions */}
+            {isMobile && (
+                <div className="flex items-center gap-1 ml-auto">
+                    <button
+                        type="button"
+                        onClick={handleSave}
+                        className={cn(
+                            'p-2 rounded-lg',
+                            'text-text-secondary hover:text-text-primary',
+                            'hover:bg-bg-tertiary active:bg-bg-tertiary',
+                            'transition-colors touch-manipulation'
+                        )}
+                        aria-label={t('common.save')}
+                    >
+                        <Save className="h-5 w-5" />
+                    </button>
+                    <button
+                        type="button"
+                        onClick={handleSettings}
+                        className={cn(
+                            'p-2 rounded-lg',
+                            'text-text-secondary hover:text-text-primary',
+                            'hover:bg-bg-tertiary active:bg-bg-tertiary',
+                            'transition-colors touch-manipulation'
+                        )}
+                        aria-label={t('common.settings')}
+                    >
+                        <Settings className="h-5 w-5" />
+                    </button>
+                </div>
+            )}
+
+            {/* Spacer - only on desktop */}
+            {!isMobile && <div className="flex-1" />}
 
             {/* Backdrop */}
             {activeMenu && (

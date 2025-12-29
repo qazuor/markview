@@ -87,6 +87,66 @@
     .scrollbar-hide::-webkit-scrollbar {
         display: none;
     }
+
+    /* Touch-friendly utilities */
+    .touch-manipulation {
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Hover states for bg-bg-hover */
+    .bg-bg-hover {
+        background-color: rgb(var(--color-bg-tertiary) / 0.5);
+    }
+
+    /* Dynamic viewport height with fallback */
+    .h-dvh {
+        height: 100vh; /* Fallback for older browsers */
+        height: 100dvh; /* Dynamic viewport height */
+    }
+
+    .min-h-dvh {
+        min-height: 100vh;
+        min-height: 100dvh;
+    }
+
+    .max-h-dvh {
+        max-height: 100vh;
+        max-height: 100dvh;
+    }
+}
+
+/* Mobile-specific optimizations */
+@media (max-width: 768px) {
+    /* Prevent text selection on UI elements */
+    button,
+    [role="button"],
+    [role="tab"],
+    [role="menuitem"] {
+        -webkit-user-select: none;
+        user-select: none;
+    }
+
+    /* Larger tap targets */
+    button:not(.no-touch-target),
+    [role="button"]:not(.no-touch-target) {
+        min-height: 44px;
+        min-width: 44px;
+    }
+
+    /* Prevent zoom on input focus (iOS) */
+    input,
+    textarea,
+    select {
+        font-size: 16px;
+    }
+
+    /* Smooth scrolling momentum */
+    .overflow-auto,
+    .overflow-y-auto,
+    .overflow-x-auto {
+        -webkit-overflow-scrolling: touch;
+    }
 }
 
 /* Respect reduced motion preference */

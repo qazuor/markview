@@ -9,10 +9,12 @@ import { StatusBar } from '@/components/statusbar';
 import { TabBar } from '@/components/tabs';
 import { Toolbar } from '@/components/toolbar';
 import { DropOverlay } from '@/components/ui';
-import { useAutoSave, useDragAndDrop, useFileImport, useOnboarding, useTheme, useZoom } from '@/hooks';
+import { useAutoSave, useDragAndDrop, useFileImport, useMobile, useOnboarding, useTheme, useZoom } from '@/hooks';
 import { usePreviewSync } from '@/hooks/useBroadcastChannel';
 import { useDocumentStore, useSettingsStore, useUIStore } from '@/stores';
+import { cn } from '@/utils/cn';
 import type { EditorView } from '@codemirror/view';
+import { X } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -21,6 +23,8 @@ export function App() {
     useTheme();
     useZoom(); // Global zoom keyboard shortcuts and mouse wheel
 
+    const { isMobile } = useMobile();
+    const prevIsMobileRef = useRef(isMobile);
     const theme = useSettingsStore((state) => state.theme);
 
     // Onboarding
@@ -126,6 +130,15 @@ export function App() {
             }
         }
     }, [documents.size, createDocument]);
+
+    // Close sidebar when switching to mobile view
+    useEffect(() => {
+        if (isMobile && !prevIsMobileRef.current) {
+            // Just switched to mobile, close sidebar
+            setSidebarOpen(false);
+        }
+        prevIsMobileRef.current = isMobile;
+    }, [isMobile, setSidebarOpen]);
 
     // Sync content with preview windows when content changes
     useEffect(() => {
@@ -289,7 +302,7 @@ export function App() {
     }, []);
 
     return (
-        <div className="flex h-screen flex-col bg-bg-primary text-text-primary">
+        <div className="flex h-dvh flex-col bg-bg-primary text-text-primary">
             {/* Header with logo and file menu */}
             {!zenMode && <Header onImport={openFileDialog} onSave={save} onStartTour={startTour} className="shrink-0" />}
 
@@ -300,9 +313,58 @@ export function App() {
             {!zenMode && <Toolbar editorView={editorView} className="shrink-0" />}
 
             {/* Main content */}
-            <main className="flex flex-1 min-h-0 overflow-hidden">
-                {/* Sidebar */}
-                {!zenMode && (
+            <main className="flex flex-1 min-h-0 overflow-hidden relative">
+                {/* Mobile Sidebar Overlay */}
+                {isMobile && sidebarOpen && !zenMode && (
+                    <>
+                        {/* Backdrop */}
+                        <div
+                            className="fixed inset-0 bg-black/50 z-40 animate-in fade-in duration-200"
+                            onClick={() => setSidebarOpen(false)}
+                            onKeyDown={(e) => e.key === 'Escape' && setSidebarOpen(false)}
+                            role="button"
+                            tabIndex={0}
+                            aria-label={t('common.close')}
+                        />
+                        {/* Drawer */}
+                        <div
+                            className={cn(
+                                'fixed left-0 top-0 bottom-0 z-50 w-72 max-w-[85vw]',
+                                'bg-bg-secondary shadow-xl',
+                                'animate-in slide-in-from-left duration-200'
+                            )}
+                        >
+                            {/* Close button */}
+                            <button
+                                type="button"
+                                onClick={() => setSidebarOpen(false)}
+                                className={cn(
+                                    'absolute top-2 right-2 p-2 rounded-lg z-10',
+                                    'text-text-muted hover:text-text-primary',
+                                    'hover:bg-bg-tertiary transition-colors'
+                                )}
+                                aria-label={t('common.close')}
+                            >
+                                <X className="h-5 w-5" />
+                            </button>
+                            <Sidebar
+                                content={activeDocument?.content}
+                                activeLine={activeDocument?.cursor?.line}
+                                onNavigate={(line, column) => {
+                                    handleNavigate(line, column);
+                                    setSidebarOpen(false);
+                                }}
+                                onReplace={handleReplace}
+                                isCollapsed={false}
+                                onCollapsedChange={() => setSidebarOpen(false)}
+                                className="h-full"
+                            />
+                        </div>
+                    </>
+                )}
+
+                {/* Desktop Sidebar */}
+                {!isMobile && !zenMode && (
                     <Sidebar
                         content={activeDocument?.content}
                         activeLine={activeDocument?.cursor?.line}

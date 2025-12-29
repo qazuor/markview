@@ -1,4 +1,5 @@
 export { useAutoSave } from './useAutoSave';
+export { useMobile, useTouch, BREAKPOINTS, type Breakpoint } from './useMobile';
 export { useBroadcastChannel, usePreviewSync, type PreviewSyncMessage } from './useBroadcastChannel';
 export {
     useContextMenu,

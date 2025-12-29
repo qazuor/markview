@@ -76,10 +76,12 @@ export function Preview({ content, className, onScroll, onScrollToReady, onConte
         }
     }, []);
 
-    // Expose scrollToPercent to parent
+    // Expose scrollToPercent to parent - only when container is ready
     useEffect(() => {
-        onScrollToReady?.(scrollToPercent);
-    }, [scrollToPercent, onScrollToReady]);
+        if (containerRef.current && html && !isLoading) {
+            onScrollToReady?.(scrollToPercent);
+        }
+    }, [scrollToPercent, onScrollToReady, html, isLoading]);
 
     // Font styles for preview content
     const contentStyle = useMemo(
