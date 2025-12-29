@@ -1,3 +1,5 @@
+import welcomeContentEs from '@/assets/welcome-es.md?raw';
+import welcomeContentEn from '@/assets/welcome.md?raw';
 import { Header } from '@/components/header';
 import { MainLayout } from '@/components/layout';
 import { KeyboardShortcutsModal, OnboardingModal, SettingsModal, VersionDiffModal, VersionHistoryModal } from '@/components/modals';
@@ -15,7 +17,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 export function App() {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     useTheme();
     useZoom(); // Global zoom keyboard shortcuts and mouse wheel
 
@@ -102,12 +104,25 @@ export function App() {
     );
     const { isDragging } = useDragAndDrop({ onDrop: handleFileDrop });
 
-    // Create initial document if none exists
+    // Create Welcome document on first visit, or empty document if all documents were closed
+    const initialDocCreated = useRef(false);
     useEffect(() => {
-        if (documents.size === 0) {
-            createDocument();
+        if (documents.size === 0 && !initialDocCreated.current) {
+            initialDocCreated.current = true;
+            const hasVisitedBefore = localStorage.getItem('markview:hasVisited') !== null;
+
+            if (!hasVisitedBefore) {
+                // First visit: create Welcome document and mark as visited
+                localStorage.setItem('markview:hasVisited', 'true');
+                const welcomeContent = i18n.language === 'es' ? welcomeContentEs : welcomeContentEn;
+                const title = i18n.language === 'es' ? 'Bienvenido a MarkView' : 'Welcome to MarkView';
+                createDocument({ name: title, content: welcomeContent });
+            } else {
+                // Returning user with no documents: create empty document
+                createDocument();
+            }
         }
-    }, [documents.size, createDocument]);
+    }, [documents.size, createDocument, i18n.language]);
 
     // Sync content with preview windows when content changes
     useEffect(() => {
