@@ -116,9 +116,11 @@ export function Preview({ content, className, onScroll, onScrollToReady, onConte
 
     return (
         <PreviewContextMenu containerRef={contentRef}>
-            <div
+            <section
                 ref={containerRef}
                 onScroll={handleScroll}
+                aria-label="Markdown preview"
+                aria-busy={isLoading}
                 className={cn(
                     'h-full overflow-auto relative',
                     'bg-white dark:bg-secondary-950',
@@ -130,9 +132,16 @@ export function Preview({ content, className, onScroll, onScrollToReady, onConte
             >
                 {/* Loading overlay with spinner */}
                 {isLoading && (
-                    <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/50 dark:bg-secondary-950/50 backdrop-blur-[1px]">
-                        <div className="h-8 w-8 animate-spin rounded-full border-4 border-secondary-300 border-t-primary-500" />
-                    </div>
+                    <output
+                        className="absolute inset-0 z-10 flex items-center justify-center bg-white/50 dark:bg-secondary-950/50 backdrop-blur-[1px]"
+                        aria-live="polite"
+                    >
+                        <div
+                            className="h-8 w-8 animate-spin rounded-full border-4 border-secondary-300 border-t-primary-500"
+                            aria-hidden="true"
+                        />
+                        <span className="sr-only">Loading preview...</span>
+                    </output>
                 )}
                 <div
                     ref={contentRef}
@@ -142,7 +151,7 @@ export function Preview({ content, className, onScroll, onScrollToReady, onConte
                     // biome-ignore lint/security/noDangerouslySetInnerHtml: Content is sanitized by rehype-sanitize
                     dangerouslySetInnerHTML={{ __html: html }}
                 />
-            </div>
+            </section>
         </PreviewContextMenu>
     );
 }

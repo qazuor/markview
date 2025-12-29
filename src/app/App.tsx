@@ -300,7 +300,7 @@ export function App() {
             {!zenMode && <Toolbar editorView={editorView} className="shrink-0" />}
 
             {/* Main content */}
-            <div className="flex flex-1 min-h-0 overflow-hidden">
+            <main className="flex flex-1 min-h-0 overflow-hidden">
                 {/* Sidebar */}
                 {!zenMode && (
                     <Sidebar
@@ -316,7 +316,7 @@ export function App() {
 
                 {/* Editor and Preview */}
                 <MainLayout className="flex-1 min-w-0" onEditorViewReady={handleEditorViewReady} />
-            </div>
+            </main>
 
             {/* Status bar */}
             {!zenMode && (

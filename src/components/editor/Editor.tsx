@@ -71,7 +71,8 @@ export function Editor({ className, onViewReady, onScroll, onScrollToReady }: Ed
 
     return (
         <EditorContextMenu editorView={view}>
-            <div
+            <section
+                aria-label="Markdown editor"
                 className={cn(
                     'h-full w-full min-w-0 overflow-hidden',
                     'bg-white dark:bg-secondary-900',
@@ -83,7 +84,7 @@ export function Editor({ className, onViewReady, onScroll, onScrollToReady }: Ed
                     ref={editorRef as React.RefObject<HTMLDivElement>}
                     className="h-full w-full [&_.cm-editor]:h-full [&_.cm-editor]:overflow-hidden [&_.cm-scroller]:overflow-auto"
                 />
-            </div>
+            </section>
         </EditorContextMenu>
     );
 }

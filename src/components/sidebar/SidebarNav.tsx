@@ -21,7 +21,7 @@ const sections = [
  */
 export function SidebarNav({ activeSection, onSectionChange, className }: SidebarNavProps) {
     return (
-        <div className={cn('flex flex-col items-center gap-1 p-1', className)}>
+        <nav aria-label="Sidebar sections" className={cn('flex flex-col items-center gap-1 p-1', className)}>
             {sections.map((section) => {
                 const Icon = section.icon;
                 const isActive = activeSection === section.id;
@@ -38,6 +38,6 @@ export function SidebarNav({ activeSection, onSectionChange, className }: Sideba
                     </Tooltip>
                 );
             })}
-        </div>
+        </nav>
     );
 }

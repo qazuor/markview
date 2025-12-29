@@ -287,7 +287,7 @@ export function Header({ onImport, onSave, onStartTour, className }: HeaderProps
 
     const renderMenuItem = (item: MenuItem, isSubmenu = false) => {
         if (item.type === 'separator') {
-            return <div key={item.id} className="my-1 border-t border-border" />;
+            return <hr key={item.id} className="my-1 border-t border-border" />;
         }
 
         if (item.type === 'submenu' && item.children) {
@@ -295,16 +295,20 @@ export function Header({ onImport, onSave, onStartTour, className }: HeaderProps
                 <div key={item.id} className="relative group">
                     <button
                         type="button"
+                        role="menuitem"
+                        aria-haspopup="menu"
                         className={cn(
                             'w-full flex items-center gap-3 px-3 py-2 text-sm text-left',
                             'hover:bg-bg-hover transition-colors duration-150'
                         )}
                     >
-                        {item.icon && <item.icon className="h-4 w-4 text-text-muted" />}
+                        {item.icon && <item.icon className="h-4 w-4 text-text-muted" aria-hidden="true" />}
                         <span className="flex-1">{item.label}</span>
-                        <ChevronDown className="h-3 w-3 text-text-muted -rotate-90" />
+                        <ChevronDown className="h-3 w-3 text-text-muted -rotate-90" aria-hidden="true" />
                     </button>
                     <div
+                        role="menu"
+                        aria-label={item.label}
                         className={cn(
                             'absolute left-full top-0 ml-1',
                             'min-w-[160px] py-1',
@@ -323,6 +327,7 @@ export function Header({ onImport, onSave, onStartTour, className }: HeaderProps
             <button
                 key={item.id}
                 type="button"
+                role="menuitem"
                 onClick={item.onClick}
                 disabled={isExporting && item.id.startsWith('export')}
                 className={cn(
@@ -331,7 +336,7 @@ export function Header({ onImport, onSave, onStartTour, className }: HeaderProps
                     'disabled:opacity-50 disabled:cursor-not-allowed'
                 )}
             >
-                {item.icon && <item.icon className="h-4 w-4 text-text-muted" />}
+                {item.icon && <item.icon className="h-4 w-4 text-text-muted" aria-hidden="true" />}
                 <span className="flex-1">{item.label}</span>
                 {item.shortcut && !isSubmenu && <span className="text-xs text-text-muted">{item.shortcut}</span>}
             </button>
@@ -340,11 +345,16 @@ export function Header({ onImport, onSave, onStartTour, className }: HeaderProps
 
     const renderMenu = (id: string, label: string, items: MenuItem[]) => {
         const isOpen = activeMenu === id;
+        const menuId = `menu-${id}`;
 
         return (
             <div className="relative">
                 <button
                     type="button"
+                    role="menuitem"
+                    aria-haspopup="menu"
+                    aria-expanded={isOpen}
+                    aria-controls={isOpen ? menuId : undefined}
                     onClick={() => setActiveMenu(isOpen ? null : id)}
                     className={cn('px-3 py-1 text-sm rounded', 'hover:bg-bg-hover transition-colors duration-150', isOpen && 'bg-bg-hover')}
                 >
@@ -353,6 +363,9 @@ export function Header({ onImport, onSave, onStartTour, className }: HeaderProps
 
                 {isOpen && (
                     <div
+                        id={menuId}
+                        role="menu"
+                        aria-label={label}
                         className={cn(
                             'absolute top-full left-0 mt-1 z-50',
                             'min-w-[200px] py-1',
@@ -385,7 +398,7 @@ export function Header({ onImport, onSave, onStartTour, className }: HeaderProps
             </div>
 
             {/* Menu bar */}
-            <nav className="flex items-center gap-0.5 ml-2">
+            <nav aria-label="Main menu" className="flex items-center gap-0.5 ml-2" role="menubar">
                 {renderMenu('file', t('menu.file') || 'File', fileMenuItems)}
                 {renderMenu('view', t('menu.view') || 'View', viewMenuItems)}
                 {renderMenu('help', t('menu.help') || 'Help', helpMenuItems)}

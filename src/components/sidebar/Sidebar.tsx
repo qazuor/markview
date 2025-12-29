@@ -33,7 +33,7 @@ export function Sidebar({
 
     if (isCollapsed) {
         return (
-            <div className={cn('flex flex-col bg-bg-secondary border-r border-border', className)}>
+            <aside aria-label="Sidebar navigation" className={cn('flex flex-col bg-bg-secondary border-r border-border', className)}>
                 <SidebarNav activeSection={activeSection} onSectionChange={setActiveSection} />
                 <div className="flex-1" />
                 <div className="p-1">
@@ -45,12 +45,12 @@ export function Sidebar({
                         />
                     </Tooltip>
                 </div>
-            </div>
+            </aside>
         );
     }
 
     return (
-        <div data-tour="sidebar" className={cn('flex bg-bg-secondary border-r border-border', className)}>
+        <aside data-tour="sidebar" aria-label="Sidebar navigation" className={cn('flex bg-bg-secondary border-r border-border', className)}>
             {/* Navigation */}
             <SidebarNav activeSection={activeSection} onSectionChange={setActiveSection} className="border-r border-border" />
 
@@ -72,6 +72,7 @@ export function Sidebar({
                     <button
                         type="button"
                         onClick={() => onCollapsedChange?.(true)}
+                        aria-label="Collapse sidebar"
                         className={cn(
                             'w-full flex items-center justify-center gap-1 py-1',
                             'text-xs text-text-muted hover:text-text-secondary',
@@ -83,6 +84,6 @@ export function Sidebar({
                     </button>
                 </div>
             </div>
-        </div>
+        </aside>
     );
 }
