@@ -107,14 +107,25 @@ export function SearchPanel({ content, onNavigate, onReplace, className }: Searc
                     <button
                         type="button"
                         onClick={() => setShowReplace(!showReplace)}
+                        aria-expanded={showReplace}
+                        aria-controls="replace-section"
+                        aria-label={showReplace ? 'Hide replace' : 'Show replace'}
                         className="p-1 hover:bg-bg-tertiary rounded transition-colors"
                     >
-                        {showReplace ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
+                        {showReplace ? (
+                            <ChevronDown className="h-3.5 w-3.5" aria-hidden="true" />
+                        ) : (
+                            <ChevronRight className="h-3.5 w-3.5" aria-hidden="true" />
+                        )}
                     </button>
 
                     <div className="relative flex-1">
-                        <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-text-muted" />
+                        <label htmlFor="search-input" className="sr-only">
+                            Search in document
+                        </label>
+                        <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-text-muted" aria-hidden="true" />
                         <input
+                            id="search-input"
                             type="text"
                             placeholder="Search..."
                             value={searchQuery}
@@ -122,6 +133,7 @@ export function SearchPanel({ content, onNavigate, onReplace, className }: Searc
                                 setSearchQuery(e.target.value);
                                 setCurrentIndex(0);
                             }}
+                            aria-describedby={searchQuery ? 'search-results-count' : undefined}
                             className={cn(
                                 'w-full pl-7 pr-8 py-1.5',
                                 'text-sm bg-bg-tertiary rounded-md',
@@ -134,9 +146,10 @@ export function SearchPanel({ content, onNavigate, onReplace, className }: Searc
                             <button
                                 type="button"
                                 onClick={() => setSearchQuery('')}
+                                aria-label="Clear search"
                                 className="absolute right-2 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary"
                             >
-                                <X className="h-3.5 w-3.5" />
+                                <X className="h-3.5 w-3.5" aria-hidden="true" />
                             </button>
                         )}
                     </div>
@@ -144,10 +157,14 @@ export function SearchPanel({ content, onNavigate, onReplace, className }: Searc
 
                 {/* Replace row */}
                 {showReplace && (
-                    <div className="flex items-center gap-1 pl-6">
+                    <div id="replace-section" className="flex items-center gap-1 pl-6">
                         <div className="relative flex-1">
-                            <Replace className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-text-muted" />
+                            <label htmlFor="replace-input" className="sr-only">
+                                Replace with
+                            </label>
+                            <Replace className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-text-muted" aria-hidden="true" />
                             <input
+                                id="replace-input"
                                 type="text"
                                 placeholder="Replace..."
                                 value={replaceQuery}
@@ -189,7 +206,7 @@ export function SearchPanel({ content, onNavigate, onReplace, className }: Searc
                 {/* Result count and navigation */}
                 {searchQuery && (
                     <div className="flex items-center justify-between">
-                        <span className="text-xs text-text-muted">
+                        <span id="search-results-count" className="text-xs text-text-muted" aria-live="polite">
                             {results.length === 0 ? 'No results' : `${currentIndex + 1} of ${results.length} results`}
                         </span>
                         <div className="flex items-center gap-1">
