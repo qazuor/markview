@@ -1,4 +1,5 @@
 import '@/i18n';
+import { InstallPrompt, OfflineIndicator, UpdatePrompt } from '@/components/pwa';
 import type { ReactNode } from 'react';
 
 interface ProvidersProps {
@@ -6,5 +7,12 @@ interface ProvidersProps {
 }
 
 export function Providers({ children }: ProvidersProps) {
-    return <>{children}</>;
+    return (
+        <>
+            {children}
+            <InstallPrompt />
+            <OfflineIndicator />
+            <UpdatePrompt />
+        </>
+    );
 }
