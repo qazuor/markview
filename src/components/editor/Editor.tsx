@@ -2,6 +2,7 @@ import { useSettingsStore } from '@/stores/settingsStore';
 import { cn } from '@/utils/cn';
 import type { EditorView } from '@codemirror/view';
 import { useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { EditorContextMenu } from './EditorContextMenu';
 import { useCodeMirror } from './hooks/useCodeMirror';
 import { useEditorSync } from './hooks/useEditorSync';
@@ -19,6 +20,7 @@ interface EditorProps {
 }
 
 export function Editor({ className, onViewReady, onScroll, onScrollToReady, onScrollLine, onScrollToLineReady }: EditorProps) {
+    const { t } = useTranslation();
     const theme = useEditorTheme();
     const { lineNumbers, wordWrap, minimap, editorFontSize, fontFamily, lintOnType } = useSettingsStore();
     const { content, documentId, handleChange, handleCursorChange } = useEditorSync();
@@ -82,7 +84,7 @@ export function Editor({ className, onViewReady, onScroll, onScrollToReady, onSc
     return (
         <EditorContextMenu editorView={view}>
             <section
-                aria-label="Markdown editor"
+                aria-label={t('aria.markdownEditor')}
                 className={cn(
                     'h-full w-full min-w-0 overflow-hidden',
                     'bg-white dark:bg-secondary-900',

@@ -1,6 +1,7 @@
 import { IconButton, Tooltip } from '@/components/ui';
 import { cn } from '@/utils/cn';
 import { FileText, List, Search } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export type SidebarSection = 'explorer' | 'toc' | 'search';
 
@@ -10,27 +11,30 @@ interface SidebarNavProps {
     className?: string;
 }
 
-const sections = [
-    { id: 'explorer' as const, icon: FileText, label: 'Explorer' },
-    { id: 'toc' as const, icon: List, label: 'Table of Contents' },
-    { id: 'search' as const, icon: Search, label: 'Search' }
-];
-
 /**
  * Sidebar navigation icons
  */
 export function SidebarNav({ activeSection, onSectionChange, className }: SidebarNavProps) {
+    const { t } = useTranslation();
+
+    const sections = [
+        { id: 'explorer' as const, icon: FileText, labelKey: 'sidebar.explorer' },
+        { id: 'toc' as const, icon: List, labelKey: 'sidebar.toc' },
+        { id: 'search' as const, icon: Search, labelKey: 'sidebar.search' }
+    ];
+
     return (
-        <nav aria-label="Sidebar sections" className={cn('flex flex-col items-center gap-1 p-1', className)}>
+        <nav aria-label={t('aria.sidebarSections')} className={cn('flex flex-col items-center gap-1 p-1', className)}>
             {sections.map((section) => {
                 const Icon = section.icon;
                 const isActive = activeSection === section.id;
+                const label = t(section.labelKey);
 
                 return (
-                    <Tooltip key={section.id} content={section.label} side="right">
+                    <Tooltip key={section.id} content={label} side="right">
                         <IconButton
                             icon={<Icon className="h-5 w-5" />}
-                            label={section.label}
+                            label={label}
                             onClick={() => onSectionChange(section.id)}
                             variant={isActive ? 'default' : 'ghost'}
                             className={cn(isActive && 'bg-bg-tertiary text-primary-500')}

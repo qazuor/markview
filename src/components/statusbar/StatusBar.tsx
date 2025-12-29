@@ -1,5 +1,6 @@
 import { useMobile } from '@/hooks';
 import { cn } from '@/utils/cn';
+import { useTranslation } from 'react-i18next';
 import { CursorPosition } from './CursorPosition';
 import { Encoding } from './Encoding';
 import { LineEnding } from './LineEnding';
@@ -20,6 +21,7 @@ interface StatusBarProps {
  * Status bar with document information
  */
 export function StatusBar({ line = 1, column = 1, content = '', isModified = false, isSaving = false, className }: StatusBarProps) {
+    const { t } = useTranslation();
     const { isMobile } = useMobile();
 
     // Mobile: show only essential info
@@ -33,7 +35,7 @@ export function StatusBar({ line = 1, column = 1, content = '', isModified = fal
                     'text-xs text-text-muted',
                     className
                 )}
-                aria-label="Editor status"
+                aria-label={t('aria.editorStatus')}
             >
                 {/* Left section - minimal info */}
                 <div className="flex items-center gap-3">
@@ -57,7 +59,7 @@ export function StatusBar({ line = 1, column = 1, content = '', isModified = fal
                 'text-xs text-text-muted',
                 className
             )}
-            aria-label="Editor status"
+            aria-label={t('aria.editorStatus')}
         >
             {/* Left section */}
             <div className="flex items-center gap-4">

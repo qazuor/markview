@@ -419,7 +419,7 @@ export function Header({ onImport, onSave, onStartTour, className }: HeaderProps
             </div>
 
             {/* Menu bar - hidden on mobile */}
-            <nav aria-label="Main menu" className="hidden sm:flex items-center gap-0.5 ml-2" role="menubar">
+            <nav aria-label={t('aria.mainMenu')} className="hidden sm:flex items-center gap-0.5 ml-2" role="menubar">
                 {renderMenu('file', t('menu.file') || 'File', fileMenuItems)}
                 {renderMenu('view', t('menu.view') || 'View', viewMenuItems)}
                 {renderMenu('help', t('menu.help') || 'Help', helpMenuItems)}

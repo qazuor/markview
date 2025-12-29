@@ -2,6 +2,7 @@ import { cn } from '@/utils/cn';
 import * as Dialog from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
 import type React from 'react';
+import { useTranslation } from 'react-i18next';
 
 type ModalSize = 'sm' | 'md' | 'lg' | 'xl';
 
@@ -26,6 +27,8 @@ interface ModalProps {
  * Modal dialog component using Radix UI
  */
 export function Modal({ isOpen, onClose, title, description, children, size = 'md', className }: ModalProps) {
+    const { t } = useTranslation();
+
     return (
         <Dialog.Root open={isOpen} onOpenChange={(open) => !open && onClose()}>
             <Dialog.Portal>
@@ -60,7 +63,7 @@ export function Modal({ isOpen, onClose, title, description, children, size = 'm
                                 'transition-colors',
                                 'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500'
                             )}
-                            aria-label="Close"
+                            aria-label={t('common.close')}
                         >
                             <X className="h-4 w-4" />
                         </button>

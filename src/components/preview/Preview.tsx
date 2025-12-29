@@ -2,6 +2,7 @@ import { buildScrollMap, findEditorLine, findPreviewPosition } from '@/services/
 import { useSettingsStore } from '@/stores/settingsStore';
 import { cn } from '@/utils/cn';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { processCallouts } from './Callout';
 import { processChecklists, toggleCheckboxInContent } from './Checklist';
 import { processCodeBlocks } from './CodeBlock';
@@ -34,6 +35,7 @@ export function Preview({
     onScrollLine,
     onScrollToLineReady
 }: PreviewProps) {
+    const { t } = useTranslation();
     const { themeClass, isDark } = usePreviewTheme();
     const { previewFontSize, fontFamily } = useSettingsStore();
     const { html, isLoading, error } = useMarkdown(content, {
@@ -153,7 +155,7 @@ export function Preview({
     if (error) {
         return (
             <div className={cn('p-6 text-red-500', className)}>
-                <p className="font-medium">Error rendering Markdown</p>
+                <p className="font-medium">{t('preview.errorTitle')}</p>
                 <p className="text-sm">{error.message}</p>
             </div>
         );
@@ -163,7 +165,7 @@ export function Preview({
     if (!content) {
         return (
             <div className={cn('flex items-center justify-center p-6 text-secondary-400', className)}>
-                <p>Start writing to see the preview...</p>
+                <p>{t('preview.emptyState')}</p>
             </div>
         );
     }
@@ -173,7 +175,7 @@ export function Preview({
             <section
                 ref={containerRef}
                 onScroll={handleScroll}
-                aria-label="Markdown preview"
+                aria-label={t('aria.markdownPreview')}
                 aria-busy={isLoading}
                 className={cn(
                     'h-full overflow-auto relative',
@@ -194,7 +196,7 @@ export function Preview({
                             className="h-8 w-8 animate-spin rounded-full border-4 border-secondary-300 border-t-primary-500"
                             aria-hidden="true"
                         />
-                        <span className="sr-only">Loading preview...</span>
+                        <span className="sr-only">{t('preview.loading')}</span>
                     </output>
                 )}
                 <div
