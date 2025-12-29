@@ -34,6 +34,7 @@ export function Toolbar({ editorView, className }: ToolbarProps) {
 
     return (
         <div
+            data-tour="toolbar"
             className={cn(
                 'flex items-center gap-1 px-2 py-1.5',
                 'bg-bg-tertiary border-b border-border',
