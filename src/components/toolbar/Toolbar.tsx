@@ -35,11 +35,13 @@ function MobileBottomSheet({
     isOpen,
     onClose,
     title,
+    closeLabel,
     children
 }: {
     isOpen: boolean;
     onClose: () => void;
     title: string;
+    closeLabel: string;
     children: React.ReactNode;
 }) {
     if (!isOpen) return null;
@@ -53,7 +55,7 @@ function MobileBottomSheet({
                 onKeyDown={(e) => e.key === 'Escape' && onClose()}
                 role="button"
                 tabIndex={0}
-                aria-label="Close"
+                aria-label={closeLabel}
             />
             {/* Sheet */}
             <div
@@ -161,7 +163,7 @@ export function Toolbar({ editorView, className }: ToolbarProps) {
                     data-tour="toolbar"
                     className={cn('flex items-center gap-1 px-2 py-1.5', 'bg-bg-tertiary border-b border-border', className)}
                     role="toolbar"
-                    aria-label="Formatting toolbar"
+                    aria-label={t('aria.formattingToolbar')}
                 >
                     {/* Frequent actions - always visible */}
                     <FormatButtonGroup>
@@ -215,7 +217,7 @@ export function Toolbar({ editorView, className }: ToolbarProps) {
                 </div>
 
                 {/* Bottom sheet with more options */}
-                <MobileBottomSheet isOpen={moreOpen} onClose={closeMore} title={t('toolbar.moreOptions')}>
+                <MobileBottomSheet isOpen={moreOpen} onClose={closeMore} title={t('toolbar.moreOptions')} closeLabel={t('common.close')}>
                     <div className="space-y-4">
                         {/* Text formatting */}
                         <div>
@@ -288,7 +290,7 @@ export function Toolbar({ editorView, className }: ToolbarProps) {
 
                         {/* Emoji */}
                         <div>
-                            <p className="text-xs text-text-muted mb-2 uppercase tracking-wide">Emoji</p>
+                            <p className="text-xs text-text-muted mb-2 uppercase tracking-wide">{t('toolbar.emoji')}</p>
                             <EmojiPicker
                                 onEmojiSelect={(emoji) => {
                                     handleEmojiInsert(emoji);
@@ -313,7 +315,7 @@ export function Toolbar({ editorView, className }: ToolbarProps) {
                 className
             )}
             role="toolbar"
-            aria-label="Formatting toolbar"
+            aria-label={t('aria.formattingToolbar')}
         >
             {/* Heading dropdown */}
             <HeadingDropdown onHeading={handleHeading} />

@@ -1,79 +1,80 @@
 import { Modal } from '@/components/ui';
 import { cn } from '@/utils/cn';
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface ShortcutGroup {
-    name: string;
-    shortcuts: { keys: string; description: string }[];
+    nameKey: string;
+    shortcuts: { keys: string; descriptionKey: string }[];
 }
 
 const shortcutGroups: ShortcutGroup[] = [
     {
-        name: 'Text Formatting',
+        nameKey: 'shortcuts.groups.textFormatting',
         shortcuts: [
-            { keys: 'Ctrl+B', description: 'Bold' },
-            { keys: 'Ctrl+I', description: 'Italic' },
-            { keys: 'Ctrl+Shift+S', description: 'Strikethrough' },
-            { keys: 'Ctrl+`', description: 'Inline code' },
-            { keys: 'Ctrl+Shift+`', description: 'Code block' }
+            { keys: 'Ctrl+B', descriptionKey: 'shortcuts.actions.bold' },
+            { keys: 'Ctrl+I', descriptionKey: 'shortcuts.actions.italic' },
+            { keys: 'Ctrl+Shift+S', descriptionKey: 'shortcuts.actions.strikethrough' },
+            { keys: 'Ctrl+`', descriptionKey: 'shortcuts.actions.inlineCode' },
+            { keys: 'Ctrl+Shift+`', descriptionKey: 'shortcuts.actions.codeBlock' }
         ]
     },
     {
-        name: 'Headings',
+        nameKey: 'shortcuts.groups.headings',
         shortcuts: [
-            { keys: 'Ctrl+1', description: 'Heading 1' },
-            { keys: 'Ctrl+2', description: 'Heading 2' },
-            { keys: 'Ctrl+3', description: 'Heading 3' },
-            { keys: 'Ctrl+4', description: 'Heading 4' },
-            { keys: 'Ctrl+5', description: 'Heading 5' },
-            { keys: 'Ctrl+6', description: 'Heading 6' }
+            { keys: 'Ctrl+1', descriptionKey: 'shortcuts.actions.heading1' },
+            { keys: 'Ctrl+2', descriptionKey: 'shortcuts.actions.heading2' },
+            { keys: 'Ctrl+3', descriptionKey: 'shortcuts.actions.heading3' },
+            { keys: 'Ctrl+4', descriptionKey: 'shortcuts.actions.heading4' },
+            { keys: 'Ctrl+5', descriptionKey: 'shortcuts.actions.heading5' },
+            { keys: 'Ctrl+6', descriptionKey: 'shortcuts.actions.heading6' }
         ]
     },
     {
-        name: 'Lists',
+        nameKey: 'shortcuts.groups.lists',
         shortcuts: [
-            { keys: 'Ctrl+Shift+8', description: 'Bullet list' },
-            { keys: 'Ctrl+Shift+7', description: 'Numbered list' },
-            { keys: 'Ctrl+Shift+9', description: 'Task list' }
+            { keys: 'Ctrl+Shift+8', descriptionKey: 'shortcuts.actions.bulletList' },
+            { keys: 'Ctrl+Shift+7', descriptionKey: 'shortcuts.actions.numberedList' },
+            { keys: 'Ctrl+Shift+9', descriptionKey: 'shortcuts.actions.taskList' }
         ]
     },
     {
-        name: 'Insert',
+        nameKey: 'shortcuts.groups.insert',
         shortcuts: [
-            { keys: 'Ctrl+K', description: 'Insert link' },
-            { keys: 'Ctrl+Shift+I', description: 'Insert image' },
-            { keys: 'Ctrl+Shift+Q', description: 'Blockquote' }
+            { keys: 'Ctrl+K', descriptionKey: 'shortcuts.actions.link' },
+            { keys: 'Ctrl+Shift+I', descriptionKey: 'shortcuts.actions.image' },
+            { keys: 'Ctrl+Shift+Q', descriptionKey: 'shortcuts.actions.blockquote' }
         ]
     },
     {
-        name: 'Navigation',
+        nameKey: 'shortcuts.navigation',
         shortcuts: [
-            { keys: 'Ctrl+G', description: 'Go to line' },
-            { keys: 'Ctrl+F', description: 'Find' },
-            { keys: 'Ctrl+H', description: 'Find and replace' },
-            { keys: 'F3', description: 'Find next' },
-            { keys: 'Shift+F3', description: 'Find previous' }
+            { keys: 'Ctrl+G', descriptionKey: 'shortcuts.actions.goToLine' },
+            { keys: 'Ctrl+F', descriptionKey: 'shortcuts.actions.find' },
+            { keys: 'Ctrl+H', descriptionKey: 'shortcuts.actions.findAndReplace' },
+            { keys: 'F3', descriptionKey: 'shortcuts.actions.findNext' },
+            { keys: 'Shift+F3', descriptionKey: 'shortcuts.actions.findPrevious' }
         ]
     },
     {
-        name: 'Editor',
+        nameKey: 'shortcuts.groups.editor',
         shortcuts: [
-            { keys: 'Ctrl+Z', description: 'Undo' },
-            { keys: 'Ctrl+Shift+Z', description: 'Redo' },
-            { keys: 'Ctrl+S', description: 'Save' },
-            { keys: 'Ctrl+Shift+S', description: 'Save as' },
-            { keys: 'Ctrl+N', description: 'New document' },
-            { keys: 'Ctrl+W', description: 'Close tab' }
+            { keys: 'Ctrl+Z', descriptionKey: 'shortcuts.actions.undo' },
+            { keys: 'Ctrl+Shift+Z', descriptionKey: 'shortcuts.actions.redo' },
+            { keys: 'Ctrl+S', descriptionKey: 'shortcuts.actions.saveFile' },
+            { keys: 'Ctrl+Shift+S', descriptionKey: 'shortcuts.actions.saveAs' },
+            { keys: 'Ctrl+N', descriptionKey: 'shortcuts.actions.newFile' },
+            { keys: 'Ctrl+W', descriptionKey: 'shortcuts.actions.closeTab' }
         ]
     },
     {
-        name: 'View',
+        nameKey: 'shortcuts.groups.view',
         shortcuts: [
-            { keys: 'Ctrl+/', description: 'Show keyboard shortcuts' },
-            { keys: 'Ctrl+B', description: 'Toggle sidebar' },
-            { keys: 'Ctrl+,', description: 'Settings' },
-            { keys: 'F11', description: 'Zen mode (distraction-free)' },
-            { keys: 'Ctrl+Shift+Z', description: 'Toggle Zen mode' }
+            { keys: 'Ctrl+/', descriptionKey: 'shortcuts.actions.shortcuts' },
+            { keys: 'Ctrl+B', descriptionKey: 'shortcuts.actions.toggleSidebar' },
+            { keys: 'Ctrl+,', descriptionKey: 'shortcuts.actions.settings' },
+            { keys: 'F11', descriptionKey: 'shortcuts.actions.zenMode' },
+            { keys: 'Ctrl+Shift+Z', descriptionKey: 'shortcuts.actions.toggleZenMode' }
         ]
     }
 ];
@@ -87,6 +88,7 @@ interface KeyboardShortcutsModalProps {
  * Modal showing all keyboard shortcuts
  */
 export function KeyboardShortcutsModal({ isOpen, onClose }: KeyboardShortcutsModalProps) {
+    const { t } = useTranslation();
     const [filter, setFilter] = useState('');
 
     const filteredGroups = useMemo(() => {
@@ -97,19 +99,19 @@ export function KeyboardShortcutsModal({ isOpen, onClose }: KeyboardShortcutsMod
             .map((group) => ({
                 ...group,
                 shortcuts: group.shortcuts.filter(
-                    (s) => s.description.toLowerCase().includes(lowerFilter) || s.keys.toLowerCase().includes(lowerFilter)
+                    (s) => t(s.descriptionKey).toLowerCase().includes(lowerFilter) || s.keys.toLowerCase().includes(lowerFilter)
                 )
             }))
             .filter((group) => group.shortcuts.length > 0);
-    }, [filter]);
+    }, [filter, t]);
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title="Keyboard Shortcuts" size="lg">
+        <Modal isOpen={isOpen} onClose={onClose} title={t('shortcuts.title')} size="lg">
             {/* Search */}
             <div className="mb-4">
                 <input
                     type="text"
-                    placeholder="Search shortcuts..."
+                    placeholder={t('shortcuts.searchPlaceholder')}
                     value={filter}
                     onChange={(e) => setFilter(e.target.value)}
                     className={cn(
@@ -125,15 +127,15 @@ export function KeyboardShortcutsModal({ isOpen, onClose }: KeyboardShortcutsMod
             {/* Shortcut groups */}
             <div className="space-y-6 overflow-y-auto max-h-[60vh] pr-2">
                 {filteredGroups.map((group) => (
-                    <div key={group.name}>
-                        <h3 className="text-sm font-semibold text-text-primary mb-2">{group.name}</h3>
+                    <div key={group.nameKey}>
+                        <h3 className="text-sm font-semibold text-text-primary mb-2">{t(group.nameKey)}</h3>
                         <div className="space-y-1">
                             {group.shortcuts.map((shortcut) => (
                                 <div
                                     key={shortcut.keys}
                                     className="flex items-center justify-between py-1 px-2 rounded hover:bg-bg-tertiary"
                                 >
-                                    <span className="text-sm text-text-secondary">{shortcut.description}</span>
+                                    <span className="text-sm text-text-secondary">{t(shortcut.descriptionKey)}</span>
                                     <kbd className={cn('px-2 py-1 text-xs font-mono', 'bg-bg-tertiary rounded', 'border border-border')}>
                                         {shortcut.keys}
                                     </kbd>
@@ -143,12 +145,13 @@ export function KeyboardShortcutsModal({ isOpen, onClose }: KeyboardShortcutsMod
                     </div>
                 ))}
 
-                {filteredGroups.length === 0 && <div className="text-center py-8 text-text-muted">No shortcuts found</div>}
+                {filteredGroups.length === 0 && <div className="text-center py-8 text-text-muted">{t('shortcuts.noShortcutsFound')}</div>}
             </div>
 
             {/* Footer hint */}
             <div className="mt-4 pt-4 border-t border-border text-xs text-text-muted text-center">
-                Press <kbd className="px-1 py-0.5 bg-bg-tertiary rounded border border-border">Esc</kbd> to close
+                {t('shortcuts.press')} <kbd className="px-1 py-0.5 bg-bg-tertiary rounded border border-border">Esc</kbd>{' '}
+                {t('shortcuts.toClose')}
             </div>
         </Modal>
     );
