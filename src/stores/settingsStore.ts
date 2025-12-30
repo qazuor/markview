@@ -211,7 +211,11 @@ export const useSettingsStore = create<SettingsState>()(
                         autoSaveInterval: state.autoSaveInterval,
                         formatOnSave: state.formatOnSave,
                         lintOnType: state.lintOnType,
-                        language: state.language
+                        language: state.language,
+                        cloudSyncEnabled: state.cloudSyncEnabled,
+                        cloudSyncDebounceMs: state.cloudSyncDebounceMs,
+                        cloudSyncOnAppOpen: state.cloudSyncOnAppOpen,
+                        cloudSyncConflictResolution: state.cloudSyncConflictResolution
                     };
                 }
             }),
@@ -232,7 +236,11 @@ export const useSettingsStore = create<SettingsState>()(
                     autoSaveInterval: state.autoSaveInterval,
                     formatOnSave: state.formatOnSave,
                     lintOnType: state.lintOnType,
-                    language: state.language
+                    language: state.language,
+                    cloudSyncEnabled: state.cloudSyncEnabled,
+                    cloudSyncDebounceMs: state.cloudSyncDebounceMs,
+                    cloudSyncOnAppOpen: state.cloudSyncOnAppOpen,
+                    cloudSyncConflictResolution: state.cloudSyncConflictResolution
                 })
             }
         ),

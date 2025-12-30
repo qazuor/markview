@@ -1,6 +1,7 @@
+import { useAuth } from '@/components/auth/AuthProvider';
 import { Modal } from '@/components/ui';
 import { useSettingsStore } from '@/stores/settingsStore';
-import type { Language, PreviewStyle, Theme } from '@/types/settings';
+import type { ConflictResolution, Language, PreviewStyle, Theme } from '@/types/settings';
 import { cn } from '@/utils/cn';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -10,7 +11,7 @@ interface SettingsModalProps {
     onClose: () => void;
 }
 
-type SettingsTab = 'appearance' | 'editor' | 'behavior';
+type SettingsTab = 'appearance' | 'editor' | 'behavior' | 'sync';
 
 const themes: { value: Theme; label: string }[] = [
     { value: 'light', label: 'Light' },
@@ -34,12 +35,19 @@ const languages: { value: Language; label: string }[] = [
 
 const fontFamilies = ['JetBrains Mono', 'Fira Code', 'Source Code Pro', 'Consolas', 'Monaco', 'monospace'];
 
+const conflictResolutions: { value: ConflictResolution; labelKey: string }[] = [
+    { value: 'ask', labelKey: 'settings.sync.conflictAsk' },
+    { value: 'local', labelKey: 'settings.sync.conflictLocal' },
+    { value: 'server', labelKey: 'settings.sync.conflictServer' }
+];
+
 /**
  * Settings modal for app configuration
  */
 export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
     const [activeTab, setActiveTab] = useState<SettingsTab>('appearance');
     const { t, i18n } = useTranslation();
+    const { isAuthenticated } = useAuth();
 
     const settings = useSettingsStore();
     const {
@@ -57,6 +65,10 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
         formatOnSave,
         lintOnType,
         language,
+        cloudSyncEnabled,
+        cloudSyncDebounceMs,
+        cloudSyncOnAppOpen,
+        cloudSyncConflictResolution,
         updateSetting,
         resetSettings
     } = settings;
@@ -68,17 +80,20 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
         }
     }, [language, i18n]);
 
-    const tabs: { id: SettingsTab; label: string }[] = [
+    const tabs: { id: SettingsTab; label: string; requiresAuth?: boolean }[] = [
         { id: 'appearance', label: t('settings.tabs.appearance') },
         { id: 'editor', label: t('settings.tabs.editor') },
-        { id: 'behavior', label: t('settings.tabs.behavior') }
+        { id: 'behavior', label: t('settings.tabs.behavior') },
+        { id: 'sync', label: t('settings.tabs.sync'), requiresAuth: true }
     ];
+
+    const visibleTabs = tabs.filter((tab) => !tab.requiresAuth || isAuthenticated);
 
     return (
         <Modal isOpen={isOpen} onClose={onClose} title={t('settings.title')} size="lg">
             {/* Tabs */}
             <div className="flex border-b border-border mb-4">
-                {tabs.map((tab) => (
+                {visibleTabs.map((tab) => (
                     <button
                         key={tab.id}
                         type="button"
@@ -196,6 +211,44 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                         </SettingGroup>
                     </>
                 )}
+
+                {/* Sync Tab */}
+                {activeTab === 'sync' && (
+                    <>
+                        <SettingGroup title={t('settings.sync.enabled')} description={t('settings.sync.enabledDesc')}>
+                            <Toggle checked={cloudSyncEnabled} onChange={(v) => updateSetting('cloudSyncEnabled', v)} />
+                        </SettingGroup>
+
+                        <SettingGroup title={t('settings.sync.syncOnOpen')} description={t('settings.sync.syncOnOpenDesc')}>
+                            <Toggle
+                                checked={cloudSyncOnAppOpen}
+                                onChange={(v) => updateSetting('cloudSyncOnAppOpen', v)}
+                                disabled={!cloudSyncEnabled}
+                            />
+                        </SettingGroup>
+
+                        <SettingGroup title={t('settings.sync.debounceTime')} description={t('settings.sync.debounceTimeDesc')}>
+                            <NumberInput
+                                value={cloudSyncDebounceMs}
+                                onChange={(v) => updateSetting('cloudSyncDebounceMs', v)}
+                                min={500}
+                                max={10000}
+                                step={500}
+                                suffix="ms"
+                                disabled={!cloudSyncEnabled}
+                            />
+                        </SettingGroup>
+
+                        <SettingGroup title={t('settings.sync.conflictResolution')} description={t('settings.sync.conflictResolutionDesc')}>
+                            <Select
+                                value={cloudSyncConflictResolution}
+                                onChange={(v) => updateSetting('cloudSyncConflictResolution', v as ConflictResolution)}
+                                options={conflictResolutions.map((c) => ({ value: c.value, label: t(c.labelKey) }))}
+                                disabled={!cloudSyncEnabled}
+                            />
+                        </SettingGroup>
+                    </>
+                )}
             </div>
 
             {/* Footer */}
@@ -252,18 +305,21 @@ interface SelectProps {
     value: string;
     onChange: (value: string) => void;
     options: { value: string; label: string }[];
+    disabled?: boolean;
 }
 
-function Select({ value, onChange, options }: SelectProps) {
+function Select({ value, onChange, options, disabled }: SelectProps) {
     return (
         <select
             value={value}
             onChange={(e) => onChange(e.target.value)}
+            disabled={disabled}
             className={cn(
                 'px-3 py-1.5 text-sm rounded-md',
                 'bg-bg-tertiary border border-border',
                 'focus:outline-none focus:ring-2 focus:ring-primary-500',
-                'cursor-pointer'
+                'cursor-pointer',
+                disabled && 'opacity-50 cursor-not-allowed'
             )}
         >
             {options.map((opt) => (
@@ -278,19 +334,22 @@ function Select({ value, onChange, options }: SelectProps) {
 interface ToggleProps {
     checked: boolean;
     onChange: (checked: boolean) => void;
+    disabled?: boolean;
 }
 
-function Toggle({ checked, onChange }: ToggleProps) {
+function Toggle({ checked, onChange, disabled }: ToggleProps) {
     return (
         <button
             type="button"
             role="switch"
             aria-checked={checked}
-            onClick={() => onChange(!checked)}
+            onClick={() => !disabled && onChange(!checked)}
+            disabled={disabled}
             className={cn(
                 'relative inline-flex h-6 w-11 items-center rounded-full',
                 'transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2',
-                checked ? 'bg-primary-500' : 'bg-secondary-300 dark:bg-secondary-600'
+                checked ? 'bg-primary-500' : 'bg-secondary-300 dark:bg-secondary-600',
+                disabled && 'opacity-50 cursor-not-allowed'
             )}
         >
             <span
