@@ -446,9 +446,32 @@
         "terms_notice": "By signing in, you agree to our Terms of Service and Privacy Policy.",
         "connected_services": "Connected Services",
         "sync_status": "Sync Status",
+        "sign_in_to_use": "Sign in to use {{feature}}",
         "errors": {
             "github_failed": "Failed to sign in with GitHub. Please try again.",
             "google_failed": "Failed to sign in with Google. Please try again."
+        }
+    },
+    "features": {
+        "cloud_sync": {
+            "title": "Cloud Sync",
+            "description": "Sign in to sync your documents across all your devices."
+        },
+        "github": {
+            "title": "GitHub Integration",
+            "description": "Sign in to access and edit Markdown files from your GitHub repositories."
+        },
+        "google_drive": {
+            "title": "Google Drive",
+            "description": "Sign in to access and edit Markdown files from your Google Drive."
+        },
+        "settings_sync": {
+            "title": "Settings Sync",
+            "description": "Sign in to sync your editor settings across devices."
+        },
+        "shared_documents": {
+            "title": "Shared Documents",
+            "description": "Sign in to access documents shared with you."
         }
     },
     "sync": {

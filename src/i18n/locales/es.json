@@ -446,9 +446,32 @@
         "terms_notice": "Al iniciar sesión, aceptas nuestros Términos de Servicio y Política de Privacidad.",
         "connected_services": "Servicios Conectados",
         "sync_status": "Estado de Sincronización",
+        "sign_in_to_use": "Inicia sesión para usar {{feature}}",
         "errors": {
             "github_failed": "Error al iniciar sesión con GitHub. Por favor, inténtalo de nuevo.",
             "google_failed": "Error al iniciar sesión con Google. Por favor, inténtalo de nuevo."
+        }
+    },
+    "features": {
+        "cloud_sync": {
+            "title": "Sincronización en la Nube",
+            "description": "Inicia sesión para sincronizar tus documentos en todos tus dispositivos."
+        },
+        "github": {
+            "title": "Integración con GitHub",
+            "description": "Inicia sesión para acceder y editar archivos Markdown de tus repositorios de GitHub."
+        },
+        "google_drive": {
+            "title": "Google Drive",
+            "description": "Inicia sesión para acceder y editar archivos Markdown de tu Google Drive."
+        },
+        "settings_sync": {
+            "title": "Sincronización de Configuración",
+            "description": "Inicia sesión para sincronizar tu configuración del editor entre dispositivos."
+        },
+        "shared_documents": {
+            "title": "Documentos Compartidos",
+            "description": "Inicia sesión para acceder a documentos compartidos contigo."
         }
     },
     "sync": {
