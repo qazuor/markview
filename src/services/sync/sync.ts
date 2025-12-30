@@ -4,6 +4,7 @@
  */
 
 import { useDocumentStore } from '@/stores/documentStore';
+import { useSettingsStore } from '@/stores/settingsStore';
 import { useSyncStore } from '@/stores/syncStore';
 import type { DocumentUpsertPayload, SyncDocument, SyncFolder, SyncQueueItem } from '@/types/sync';
 import { SyncConflictError, syncApi } from './api';
@@ -13,7 +14,21 @@ import { syncQueue } from './queue';
 const MAX_RETRIES = 3;
 const RETRY_DELAYS = [1000, 5000, 15000]; // Exponential backoff
 const AUTO_SYNC_INTERVAL = 30000; // 30 seconds
-const DEBOUNCE_DELAY = 2000; // 2 seconds
+const DEFAULT_DEBOUNCE_DELAY = 2000; // 2 seconds (fallback)
+
+/**
+ * Get current debounce delay from settings
+ */
+function getDebounceDelay(): number {
+    return useSettingsStore.getState().cloudSyncDebounceMs ?? DEFAULT_DEBOUNCE_DELAY;
+}
+
+/**
+ * Check if cloud sync is enabled in settings
+ */
+function isSyncEnabled(): boolean {
+    return useSettingsStore.getState().cloudSyncEnabled ?? true;
+}
 
 let autoSyncInterval: ReturnType<typeof setInterval> | null = null;
 let debounceTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -103,6 +118,12 @@ export function stopAutoSync(): void {
  * Perform initial sync (fetch all from server)
  */
 export async function initialSync(): Promise<void> {
+    // Check if sync on app open is enabled
+    const settings = useSettingsStore.getState();
+    if (!settings.cloudSyncEnabled || !settings.cloudSyncOnAppOpen) {
+        return;
+    }
+
     if (!isOnline) {
         useSyncStore.getState().setSyncState('offline');
         return;
@@ -130,6 +151,8 @@ export async function initialSync(): Promise<void> {
  * Sync all changes (pull from server, push local changes)
  */
 export async function syncAll(): Promise<void> {
+    if (!isSyncEnabled()) return;
+
     if (!isOnline) {
         useSyncStore.getState().setSyncState('offline');
         return;
@@ -370,6 +393,8 @@ async function handleConflict(item: SyncQueueItem, error: SyncConflictError): Pr
  * Queue a document for sync
  */
 export async function queueDocumentSync(document: DocumentUpsertPayload): Promise<void> {
+    if (!isSyncEnabled()) return;
+
     const store = useSyncStore.getState();
 
     const item: SyncQueueItem = {
@@ -394,6 +419,8 @@ export async function queueDocumentSync(document: DocumentUpsertPayload): Promis
  * Queue a document deletion for sync
  */
 export async function queueDocumentDelete(id: string): Promise<void> {
+    if (!isSyncEnabled()) return;
+
     const store = useSyncStore.getState();
 
     const item: SyncQueueItem = {
@@ -418,6 +445,8 @@ export async function queueDocumentDelete(id: string): Promise<void> {
  * Queue a folder for sync
  */
 export function queueFolderSync(folder: SyncFolder): void {
+    if (!isSyncEnabled()) return;
+
     const store = useSyncStore.getState();
 
     const item: SyncQueueItem = {
@@ -439,6 +468,8 @@ export function queueFolderSync(folder: SyncFolder): void {
  * Queue a folder deletion for sync
  */
 export function queueFolderDelete(id: string): void {
+    if (!isSyncEnabled()) return;
+
     const store = useSyncStore.getState();
 
     const item: SyncQueueItem = {
@@ -460,6 +491,8 @@ export function queueFolderDelete(id: string): void {
  * Debounced sync to batch rapid changes
  */
 function debouncedSync(): void {
+    if (!isSyncEnabled()) return;
+
     if (debounceTimeout) {
         clearTimeout(debounceTimeout);
     }
@@ -467,7 +500,7 @@ function debouncedSync(): void {
     debounceTimeout = setTimeout(() => {
         debounceTimeout = null;
         processQueue();
-    }, DEBOUNCE_DELAY);
+    }, getDebounceDelay());
 }
 
 /**
