@@ -9,7 +9,7 @@ import { StatusBar } from '@/components/statusbar';
 import { TabBar } from '@/components/tabs';
 import { Toolbar } from '@/components/toolbar';
 import { DropOverlay } from '@/components/ui';
-import { useAutoSave, useDragAndDrop, useFileImport, useMobile, useOnboarding, useTheme, useZoom } from '@/hooks';
+import { useDragAndDrop, useFileImport, useMobile, useOnboarding, useTheme, useZoom } from '@/hooks';
 import { usePreviewSync } from '@/hooks/useBroadcastChannel';
 import { useDocumentStore, useSettingsStore, useUIStore } from '@/stores';
 import { cn } from '@/utils/cn';
@@ -95,8 +95,7 @@ export function App() {
         syncContentRef.current = syncContent;
     }, [syncContent]);
 
-    // Auto-save
-    const { isSaving, save } = useAutoSave(activeDocument);
+    // Note: Documents are auto-persisted via Zustand persist middleware
 
     // File import and drag & drop
     const { importFiles, openFileDialog } = useFileImport();
@@ -159,10 +158,9 @@ export function App() {
                 return;
             }
 
-            // Ctrl+S - Save
+            // Ctrl+S - Prevent browser save dialog (documents auto-persist)
             if (isMod && e.key === 's' && !e.shiftKey) {
                 e.preventDefault();
-                save();
                 return;
             }
 
@@ -226,7 +224,6 @@ export function App() {
         openModal,
         closeModal,
         activeModal,
-        save,
         zenMode,
         toggleZenMode,
         setZenMode
@@ -304,7 +301,7 @@ export function App() {
     return (
         <div className="flex h-dvh flex-col bg-bg-primary text-text-primary">
             {/* Header with logo and file menu */}
-            {!zenMode && <Header onImport={openFileDialog} onSave={save} onStartTour={startTour} className="shrink-0" />}
+            {!zenMode && <Header onImport={openFileDialog} onStartTour={startTour} className="shrink-0" />}
 
             {/* Tab bar */}
             {!zenMode && <TabBar className="shrink-0" />}
@@ -386,8 +383,7 @@ export function App() {
                     line={activeDocument?.cursor?.line}
                     column={activeDocument?.cursor?.column}
                     content={activeDocument?.content}
-                    isModified={activeDocument?.isModified}
-                    isSaving={isSaving}
+                    syncStatus={activeDocument?.syncStatus}
                     className="shrink-0"
                 />
             )}
