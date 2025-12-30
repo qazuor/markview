@@ -1,6 +1,8 @@
+import type { SyncStatus } from '@/types';
 import { cn } from '@/utils/cn';
 import { X } from 'lucide-react';
 import type React from 'react';
+import { useTranslation } from 'react-i18next';
 import { EditableTabName } from './EditableTabName';
 import { TabContextMenu } from './TabContextMenu';
 
@@ -8,13 +10,13 @@ interface TabProps {
     id: string;
     name: string;
     isActive: boolean;
-    isModified: boolean;
+    syncStatus: SyncStatus;
     onClick: () => void;
     onClose: (e: React.MouseEvent) => void;
     onMiddleClick: (e: React.MouseEvent) => void;
     onCloseOthers: () => void;
     onCloseAll: () => void;
-    onCloseSaved: () => void;
+    onCloseSynced: () => void;
 }
 
 /**
@@ -24,14 +26,16 @@ export function Tab({
     id,
     name,
     isActive,
-    isModified,
+    syncStatus,
     onClick,
     onClose,
     onMiddleClick,
     onCloseOthers,
     onCloseAll,
-    onCloseSaved
+    onCloseSynced
 }: TabProps) {
+    const { t } = useTranslation();
+
     const handleAuxClick = (e: React.MouseEvent) => {
         // Middle mouse button
         if (e.button === 1) {
@@ -44,13 +48,36 @@ export function Tab({
         onClose(e);
     };
 
+    // Sync status colors using hex values for inline styles (avoids Tailwind purging issues)
+    const statusColors: Record<SyncStatus, string> = {
+        synced: '#22c55e', // green-500
+        local: '#22c55e', // green-500
+        modified: '#f97316', // orange-500
+        syncing: '#3b82f6', // blue-500
+        'cloud-pending': '#06b6d4', // cyan-500 (distinct from orange, represents "cloud")
+        error: '#ef4444' // red-500
+    };
+
+    const statusTooltips: Record<SyncStatus, string> = {
+        synced: t('syncStatus.synced'),
+        local: t('syncStatus.synced'),
+        modified: t('syncStatus.modified'),
+        syncing: t('syncStatus.syncing'),
+        'cloud-pending': t('syncStatus.cloudPending'),
+        error: t('syncStatus.error')
+    };
+
+    const statusColor = statusColors[syncStatus] || '#22c55e';
+    const statusTooltip = statusTooltips[syncStatus] || t('syncStatus.synced');
+    const isSyncing = syncStatus === 'syncing';
+
     return (
         <TabContextMenu
             tabId={id}
             onClose={() => onClose({ stopPropagation: () => {} } as React.MouseEvent)}
             onCloseOthers={onCloseOthers}
             onCloseAll={onCloseAll}
-            onCloseSaved={onCloseSaved}
+            onCloseSynced={onCloseSynced}
         >
             <div
                 role="tab"
@@ -73,11 +100,15 @@ export function Tab({
                     isActive ? 'bg-bg-primary text-text-primary' : 'bg-bg-secondary text-text-secondary hover:bg-bg-tertiary'
                 )}
             >
-                {/* Modified indicator */}
-                {isModified && <span className="absolute left-1.5 top-1/2 -translate-y-1/2 h-2 w-2 rounded-full bg-primary-500" />}
+                {/* Sync status indicator with tooltip */}
+                <span
+                    className={cn('absolute left-1.5 top-1/2 -translate-y-1/2 h-2.5 w-2.5 rounded-full', isSyncing && 'animate-pulse')}
+                    style={{ backgroundColor: statusColor }}
+                    title={statusTooltip}
+                />
 
                 {/* Tab name - double-click to rename */}
-                <EditableTabName documentId={id} name={name} isActive={isActive} className={cn('flex-1 text-sm', isModified && 'ml-2')} />
+                <EditableTabName documentId={id} name={name} isActive={isActive} className="flex-1 text-sm ml-2" />
 
                 {/* Close button */}
                 <button

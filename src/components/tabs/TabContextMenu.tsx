@@ -20,13 +20,13 @@ interface TabContextMenuProps {
     onClose: () => void;
     onCloseOthers: () => void;
     onCloseAll: () => void;
-    onCloseSaved: () => void;
+    onCloseSynced: () => void;
 }
 
 /**
  * Context menu for tab operations
  */
-export function TabContextMenu({ tabId, children, onClose, onCloseOthers, onCloseAll, onCloseSaved }: TabContextMenuProps) {
+export function TabContextMenu({ tabId, children, onClose, onCloseOthers, onCloseAll, onCloseSynced }: TabContextMenuProps) {
     const { t } = useTranslation();
     const { getDocument, renameDocument, createDocument, documents } = useDocumentStore();
 
@@ -107,9 +107,9 @@ export function TabContextMenu({ tabId, children, onClose, onCloseOthers, onClos
                     {t('contextMenu.closeAllTabs')}
                 </ContextMenuItem>
 
-                <ContextMenuItem onClick={onCloseSaved}>
+                <ContextMenuItem onClick={onCloseSynced}>
                     <XCircle className="mr-2 h-4 w-4" />
-                    {t('contextMenu.closeSavedTabs')}
+                    {t('contextMenu.closeSyncedTabs')}
                 </ContextMenuItem>
 
                 <ContextMenuSeparator />

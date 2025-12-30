@@ -29,7 +29,7 @@ describe('TabContextMenu', () => {
         onClose: vi.fn(),
         onCloseOthers: vi.fn(),
         onCloseAll: vi.fn(),
-        onCloseSaved: vi.fn()
+        onCloseSynced: vi.fn()
     };
 
     it('should render children', () => {
