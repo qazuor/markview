@@ -10,6 +10,7 @@ export {
     type ContextMenuPosition
 } from './useContextMenu';
 export { useDebounce } from './useDebounce';
+export { useDocumentSync } from './useDocumentSync';
 export { useDragAndDrop } from './useDragAndDrop';
 export { useFileImport, type FileImportResult } from './useFileImport';
 export { useLocalStorage } from './useLocalStorage';
