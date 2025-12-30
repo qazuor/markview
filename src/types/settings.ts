@@ -11,6 +11,8 @@ export const ZOOM_STEP = 2;
 export const DEFAULT_EDITOR_FONT_SIZE = 14;
 export const DEFAULT_PREVIEW_FONT_SIZE = 16;
 
+export type ConflictResolution = 'ask' | 'local' | 'server';
+
 export interface Settings {
     // Appearance
     theme: Theme;
@@ -33,6 +35,12 @@ export interface Settings {
 
     // Language
     language: Language;
+
+    // Cloud Sync
+    cloudSyncEnabled: boolean;
+    cloudSyncDebounceMs: number;
+    cloudSyncOnAppOpen: boolean;
+    cloudSyncConflictResolution: ConflictResolution;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -49,5 +57,9 @@ export const DEFAULT_SETTINGS: Settings = {
     autoSaveInterval: 2000,
     formatOnSave: false,
     lintOnType: true,
-    language: 'en'
+    language: 'en',
+    cloudSyncEnabled: true,
+    cloudSyncDebounceMs: 2000,
+    cloudSyncOnAppOpen: true,
+    cloudSyncConflictResolution: 'ask'
 };
