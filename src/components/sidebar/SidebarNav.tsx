@@ -1,9 +1,9 @@
 import { IconButton, Tooltip } from '@/components/ui';
 import { cn } from '@/utils/cn';
-import { FileText, List, Search } from 'lucide-react';
+import { FileText, Github, HardDrive, List, Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-export type SidebarSection = 'explorer' | 'toc' | 'search';
+export type SidebarSection = 'explorer' | 'toc' | 'search' | 'github' | 'gdrive';
 
 interface SidebarNavProps {
     activeSection: SidebarSection;
@@ -20,7 +20,9 @@ export function SidebarNav({ activeSection, onSectionChange, className }: Sideba
     const sections = [
         { id: 'explorer' as const, icon: FileText, labelKey: 'sidebar.explorer' },
         { id: 'toc' as const, icon: List, labelKey: 'sidebar.toc' },
-        { id: 'search' as const, icon: Search, labelKey: 'sidebar.search' }
+        { id: 'search' as const, icon: Search, labelKey: 'sidebar.search' },
+        { id: 'github' as const, icon: Github, labelKey: 'sidebar.github' },
+        { id: 'gdrive' as const, icon: HardDrive, labelKey: 'sidebar.gdrive' }
     ];
 
     return (

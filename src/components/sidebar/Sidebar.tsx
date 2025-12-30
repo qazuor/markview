@@ -4,6 +4,8 @@ import { ChevronLeft } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FileExplorer } from './FileExplorer';
+import { GitHubExplorer } from './GitHubExplorer';
+import { GoogleDriveExplorer } from './GoogleDriveExplorer';
 import { SearchPanel } from './SearchPanel';
 import { SidebarNav, type SidebarSection } from './SidebarNav';
 import { TableOfContents } from './TableOfContents';
@@ -74,6 +76,8 @@ export function Sidebar({
                     {activeSection === 'search' && (
                         <SearchPanel content={content} onNavigate={(line, column) => onNavigate?.(line, column)} onReplace={onReplace} />
                     )}
+                    {activeSection === 'github' && <GitHubExplorer onFileOpened={() => setActiveSection('explorer')} />}
+                    {activeSection === 'gdrive' && <GoogleDriveExplorer onFileOpened={() => setActiveSection('explorer')} />}
                 </div>
 
                 {/* Collapse button */}
