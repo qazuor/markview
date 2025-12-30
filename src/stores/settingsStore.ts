@@ -13,7 +13,16 @@ import {
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 
-interface SettingsState extends Settings {
+export type SyncStatus = 'idle' | 'syncing' | 'synced' | 'error' | 'offline';
+
+interface SyncState {
+    syncStatus: SyncStatus;
+    lastSyncedAt: string | null;
+    syncError: string | null;
+    pendingChanges: boolean;
+}
+
+interface SettingsState extends Settings, SyncState {
     updateSetting: <K extends keyof Settings>(key: K, value: Settings[K]) => void;
     updateSettings: (settings: Partial<Settings>) => void;
     resetSettings: () => void;
@@ -32,20 +41,35 @@ interface SettingsState extends Settings {
     zoomPreviewOut: () => void;
     resetPreviewZoom: () => void;
     getZoomPercentage: () => number;
+    // Sync functions
+    setSyncStatus: (status: SyncStatus) => void;
+    setSyncError: (error: string | null) => void;
+    markSynced: () => void;
+    markPendingChanges: () => void;
+    mergeServerSettings: (serverSettings: Partial<Settings>) => void;
+    getSettingsForSync: () => Settings;
 }
+
+const DEFAULT_SYNC_STATE: SyncState = {
+    syncStatus: 'idle',
+    lastSyncedAt: null,
+    syncError: null,
+    pendingChanges: false
+};
 
 export const useSettingsStore = create<SettingsState>()(
     devtools(
         persist(
-            (set) => ({
+            (set, get) => ({
                 ...DEFAULT_SETTINGS,
+                ...DEFAULT_SYNC_STATE,
 
                 updateSetting: (key, value) => {
-                    set({ [key]: value });
+                    set({ [key]: value, pendingChanges: true });
                 },
 
                 updateSettings: (settings) => {
-                    set(settings);
+                    set({ ...settings, pendingChanges: true });
                 },
 
                 resetSettings: () => {
@@ -136,10 +160,80 @@ export const useSettingsStore = create<SettingsState>()(
                     const editorPercent = Math.round((state.editorFontSize / DEFAULT_EDITOR_FONT_SIZE) * 100);
                     const previewPercent = Math.round((state.previewFontSize / DEFAULT_PREVIEW_FONT_SIZE) * 100);
                     return Math.round((editorPercent + previewPercent) / 2);
+                },
+
+                // Sync functions
+                setSyncStatus: (status) => {
+                    set({ syncStatus: status });
+                },
+
+                setSyncError: (error) => {
+                    set({ syncError: error, syncStatus: error ? 'error' : 'idle' });
+                },
+
+                markSynced: () => {
+                    set({
+                        syncStatus: 'synced',
+                        lastSyncedAt: new Date().toISOString(),
+                        syncError: null,
+                        pendingChanges: false
+                    });
+                },
+
+                markPendingChanges: () => {
+                    set({ pendingChanges: true });
+                },
+
+                mergeServerSettings: (serverSettings) => {
+                    const currentState = get();
+                    // Server settings take precedence, but we keep local values for missing keys
+                    set({
+                        ...currentState,
+                        ...serverSettings,
+                        pendingChanges: false
+                    });
+                },
+
+                getSettingsForSync: () => {
+                    const state = get();
+                    // Return only the settings, not the sync state or functions
+                    return {
+                        theme: state.theme,
+                        previewStyle: state.previewStyle,
+                        editorFontSize: state.editorFontSize,
+                        previewFontSize: state.previewFontSize,
+                        fontFamily: state.fontFamily,
+                        wordWrap: state.wordWrap,
+                        lineNumbers: state.lineNumbers,
+                        minimap: state.minimap,
+                        syncScroll: state.syncScroll,
+                        autoSave: state.autoSave,
+                        autoSaveInterval: state.autoSaveInterval,
+                        formatOnSave: state.formatOnSave,
+                        lintOnType: state.lintOnType,
+                        language: state.language
+                    };
                 }
             }),
             {
-                name: 'markview:settings'
+                name: 'markview:settings',
+                partialize: (state) => ({
+                    // Persist settings but not sync state
+                    theme: state.theme,
+                    previewStyle: state.previewStyle,
+                    editorFontSize: state.editorFontSize,
+                    previewFontSize: state.previewFontSize,
+                    fontFamily: state.fontFamily,
+                    wordWrap: state.wordWrap,
+                    lineNumbers: state.lineNumbers,
+                    minimap: state.minimap,
+                    syncScroll: state.syncScroll,
+                    autoSave: state.autoSave,
+                    autoSaveInterval: state.autoSaveInterval,
+                    formatOnSave: state.formatOnSave,
+                    lintOnType: state.lintOnType,
+                    language: state.language
+                })
             }
         ),
         { name: 'SettingsStore' }
