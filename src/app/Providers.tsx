@@ -1,7 +1,7 @@
 import '@/i18n';
 import { AuthProvider } from '@/components/auth';
 import { InstallPrompt, OfflineIndicator, UpdatePrompt } from '@/components/pwa';
-import { SettingsSyncProvider } from '@/components/sync';
+import { DocumentSyncWatcher, SettingsSyncProvider, SyncConflictModal } from '@/components/sync';
 import type { ReactNode } from 'react';
 
 interface ProvidersProps {
@@ -13,9 +13,11 @@ export function Providers({ children }: ProvidersProps) {
         <AuthProvider>
             <SettingsSyncProvider>
                 {children}
+                <DocumentSyncWatcher />
                 <InstallPrompt />
                 <OfflineIndicator />
                 <UpdatePrompt />
+                <SyncConflictModal />
             </SettingsSyncProvider>
         </AuthProvider>
     );

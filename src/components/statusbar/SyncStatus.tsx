@@ -1,5 +1,6 @@
 import { useAuth } from '@/components/auth/AuthProvider';
-import { type SyncStatus as SyncStatusType, useSettingsStore } from '@/stores/settingsStore';
+import { useSyncStore } from '@/stores/syncStore';
+import type { SyncState } from '@/types/sync';
 import { AlertCircle, Check, Cloud, CloudOff, Loader2, RefreshCw } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -10,16 +11,17 @@ import { useTranslation } from 'react-i18next';
 export function SyncStatus() {
     const { t } = useTranslation();
     const { isAuthenticated } = useAuth();
-    const syncStatus = useSettingsStore((s) => s.syncStatus);
-    const lastSyncedAt = useSettingsStore((s) => s.lastSyncedAt);
-    const pendingChanges = useSettingsStore((s) => s.pendingChanges);
+    const syncStatus = useSyncStore((s) => s.syncState);
+    const lastSyncedAt = useSyncStore((s) => s.lastSyncedAt);
+    const pendingQueueLength = useSyncStore((s) => s.pendingQueue.length);
+    const hasPendingChanges = pendingQueueLength > 0;
 
     // Don't show if not authenticated
     if (!isAuthenticated) {
         return null;
     }
 
-    const { icon: Icon, label, className } = getSyncStatusDisplay(syncStatus, pendingChanges, t);
+    const { icon: Icon, label, className } = getSyncStatusDisplay(syncStatus, hasPendingChanges, t);
 
     const tooltip = lastSyncedAt ? t('sync.lastSynced', { time: formatRelativeTime(lastSyncedAt) }) : t(`sync.status.${syncStatus}`);
 
@@ -32,11 +34,11 @@ export function SyncStatus() {
 }
 
 function getSyncStatusDisplay(
-    status: SyncStatusType,
-    pendingChanges: boolean,
+    status: SyncState,
+    hasPendingChanges: boolean,
     t: (key: string) => string
 ): { icon: typeof Cloud; label: string; className: string } {
-    if (pendingChanges && status !== 'syncing') {
+    if (hasPendingChanges && status !== 'syncing') {
         return {
             icon: RefreshCw,
             label: t('sync.status.pending'),

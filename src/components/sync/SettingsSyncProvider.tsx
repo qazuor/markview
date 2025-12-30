@@ -1,4 +1,4 @@
-import { useSettingsSync } from '@/hooks/useSettingsSync';
+import { useDocumentSync, useSettingsSync } from '@/hooks';
 import type { ReactNode } from 'react';
 
 interface SettingsSyncProviderProps {
@@ -6,20 +6,19 @@ interface SettingsSyncProviderProps {
 }
 
 /**
- * Provider component that enables automatic settings synchronization.
- * This component uses the useSettingsSync hook to:
- * - Fetch settings from server on login
- * - Push settings changes to server (debounced)
- * - Handle online/offline transitions
+ * Provider component that enables automatic synchronization.
+ * This component initializes:
+ * - Settings sync: fetch/push user preferences
+ * - Document sync: sync documents to cloud storage
  *
  * Must be placed inside AuthProvider.
  */
 export function SettingsSyncProvider({ children }: SettingsSyncProviderProps) {
-    // Initialize settings sync - this will:
-    // 1. Fetch settings on login
-    // 2. Auto-sync changes when authenticated
-    // 3. Handle offline/online transitions
+    // Initialize settings sync
     useSettingsSync({ autoSync: true, debounceMs: 2000 });
+
+    // Initialize document sync
+    useDocumentSync({ autoSync: true });
 
     return <>{children}</>;
 }
