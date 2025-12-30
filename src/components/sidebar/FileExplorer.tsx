@@ -1,11 +1,47 @@
 import { EditableTabName } from '@/components/tabs/EditableTabName';
 import { IconButton, Tooltip } from '@/components/ui';
 import { useDocumentStore } from '@/stores/documentStore';
+import type { Document, SyncStatus } from '@/types';
 import { cn } from '@/utils/cn';
-import { File, FolderOpen, Plus, Search, X } from 'lucide-react';
+import { AlertCircle, File, FolderOpen, GitBranch, HardDrive, Loader2, Plus, Search, X } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FileContextMenu } from './FileContextMenu';
+
+/**
+ * Get icon and color based on document source
+ */
+function getSourceIcon(source: Document['source']) {
+    switch (source) {
+        case 'github':
+            return { icon: GitBranch, color: 'text-[#6e5494]', labelKey: 'fileExplorer.source.github' };
+        case 'gdrive':
+            return { icon: HardDrive, color: 'text-[#4285f4]', labelKey: 'fileExplorer.source.gdrive' };
+        default:
+            return { icon: File, color: 'text-text-muted', labelKey: 'fileExplorer.source.local' };
+    }
+}
+
+/**
+ * Get sync status indicator style (using hex colors to avoid Tailwind purging)
+ */
+function getSyncStatusStyle(status: SyncStatus) {
+    switch (status) {
+        case 'synced':
+        case 'local':
+            return { bgColor: '#22c55e', textColor: '#22c55e', labelKey: 'fileExplorer.status.synced', showDot: true };
+        case 'modified':
+            return { bgColor: '#f97316', textColor: '#f97316', labelKey: 'fileExplorer.status.modified', showDot: true };
+        case 'syncing':
+            return { bgColor: '#3b82f6', textColor: '#3b82f6', labelKey: 'fileExplorer.status.syncing', showDot: false };
+        case 'cloud-pending':
+            return { bgColor: '#06b6d4', textColor: '#06b6d4', labelKey: 'fileExplorer.status.cloudPending', showDot: true };
+        case 'error':
+            return { bgColor: '#ef4444', textColor: '#ef4444', labelKey: 'fileExplorer.status.error', showDot: false };
+        default:
+            return { bgColor: '#22c55e', textColor: '#22c55e', labelKey: 'fileExplorer.status.synced', showDot: true };
+    }
+}
 
 interface FileExplorerProps {
     className?: string;
@@ -98,7 +134,17 @@ export function FileExplorer({ className }: FileExplorerProps) {
                                         doc.id === activeDocumentId && 'bg-bg-tertiary text-primary-500'
                                     )}
                                 >
-                                    <File className="h-4 w-4 shrink-0" />
+                                    {/* Source icon with tooltip */}
+                                    {(() => {
+                                        const { icon: Icon, color, labelKey } = getSourceIcon(doc.source);
+                                        return (
+                                            <Tooltip content={t(labelKey)} side="right">
+                                                <span className="shrink-0">
+                                                    <Icon className={cn('h-4 w-4', color)} />
+                                                </span>
+                                            </Tooltip>
+                                        );
+                                    })()}
 
                                     {/* Document name - double-click to rename */}
                                     <EditableTabName
@@ -108,12 +154,43 @@ export function FileExplorer({ className }: FileExplorerProps) {
                                         className="flex-1 min-w-0"
                                     />
 
-                                    {/* Modified indicator (shows dot) or Close button on hover */}
+                                    {/* Sync status indicator or Close button on hover */}
                                     <div className="w-4 h-4 shrink-0 flex items-center justify-center relative">
-                                        {/* Modified dot - hidden on hover */}
-                                        {doc.isModified && (
-                                            <span className="h-2 w-2 rounded-full bg-primary-500 group-hover:opacity-0 transition-opacity" />
-                                        )}
+                                        {/* Status indicator - hidden on hover */}
+                                        {(() => {
+                                            const { bgColor, textColor, labelKey, showDot } = getSyncStatusStyle(doc.syncStatus);
+                                            if (doc.syncStatus === 'syncing') {
+                                                return (
+                                                    <Tooltip content={t(labelKey)}>
+                                                        <Loader2
+                                                            className="h-3 w-3 animate-spin group-hover:opacity-0 transition-opacity"
+                                                            style={{ color: textColor }}
+                                                        />
+                                                    </Tooltip>
+                                                );
+                                            }
+                                            if (doc.syncStatus === 'error') {
+                                                return (
+                                                    <Tooltip content={t(labelKey)}>
+                                                        <AlertCircle
+                                                            className="h-3 w-3 group-hover:opacity-0 transition-opacity"
+                                                            style={{ color: textColor }}
+                                                        />
+                                                    </Tooltip>
+                                                );
+                                            }
+                                            if (showDot) {
+                                                return (
+                                                    <Tooltip content={t(labelKey)}>
+                                                        <span
+                                                            className="h-2 w-2 rounded-full group-hover:opacity-0 transition-opacity"
+                                                            style={{ backgroundColor: bgColor }}
+                                                        />
+                                                    </Tooltip>
+                                                );
+                                            }
+                                            return null;
+                                        })()}
                                         {/* Close button - visible on hover */}
                                         <button
                                             type="button"
