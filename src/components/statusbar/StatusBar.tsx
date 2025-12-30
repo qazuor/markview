@@ -1,10 +1,11 @@
 import { useMobile } from '@/hooks';
+import type { SyncStatus as SyncStatusType } from '@/types';
 import { cn } from '@/utils/cn';
 import { useTranslation } from 'react-i18next';
 import { CursorPosition } from './CursorPosition';
+import { DocumentSyncStatus } from './DocumentSyncStatus';
 import { Encoding } from './Encoding';
 import { LineEnding } from './LineEnding';
-import { SaveStatus } from './SaveStatus';
 import { SyncStatus } from './SyncStatus';
 import { WordCount } from './WordCount';
 import { ZoomControls } from './ZoomControls';
@@ -13,15 +14,14 @@ interface StatusBarProps {
     line?: number;
     column?: number;
     content?: string;
-    isModified?: boolean;
-    isSaving?: boolean;
+    syncStatus?: SyncStatusType;
     className?: string;
 }
 
 /**
  * Status bar with document information
  */
-export function StatusBar({ line = 1, column = 1, content = '', isModified = false, isSaving = false, className }: StatusBarProps) {
+export function StatusBar({ line = 1, column = 1, content = '', syncStatus = 'local', className }: StatusBarProps) {
     const { t } = useTranslation();
     const { isMobile } = useMobile();
 
@@ -44,10 +44,10 @@ export function StatusBar({ line = 1, column = 1, content = '', isModified = fal
                     <WordCount content={content} />
                 </div>
 
-                {/* Right section - save and sync status */}
+                {/* Right section - sync status */}
                 <div className="flex items-center gap-2">
                     <SyncStatus />
-                    <SaveStatus isModified={isModified} isSaving={isSaving} />
+                    <DocumentSyncStatus syncStatus={syncStatus} />
                 </div>
             </footer>
         );
@@ -75,7 +75,7 @@ export function StatusBar({ line = 1, column = 1, content = '', isModified = fal
             <div className="flex items-center gap-4">
                 <ZoomControls />
                 <SyncStatus />
-                <SaveStatus isModified={isModified} isSaving={isSaving} />
+                <DocumentSyncStatus syncStatus={syncStatus} />
                 <LineEnding />
                 <Encoding />
             </div>
