@@ -1,0 +1,1 @@
+export { SettingsSyncProvider } from './SettingsSyncProvider';
