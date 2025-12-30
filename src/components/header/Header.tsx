@@ -1,5 +1,6 @@
 import welcomeContentEs from '@/assets/welcome-es.md?raw';
 import welcomeContentEn from '@/assets/welcome.md?raw';
+import { UserMenu } from '@/components/auth';
 import { useMobile } from '@/hooks';
 import { renderMarkdown } from '@/services/markdown';
 import { useDocumentStore } from '@/stores/documentStore';
@@ -459,6 +460,9 @@ export function Header({ onImport, onSave, onStartTour, className }: HeaderProps
 
             {/* Spacer - only on desktop */}
             {!isMobile && <div className="flex-1" />}
+
+            {/* User menu */}
+            <UserMenu />
 
             {/* Backdrop */}
             {activeMenu && (
