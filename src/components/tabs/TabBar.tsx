@@ -15,7 +15,7 @@ interface TabBarProps {
  * Tab bar container with scroll and overflow handling
  */
 export function TabBar({ className }: TabBarProps) {
-    const { tabs, activeTab, selectTab, closeTab, forceCloseTab, addTab, tabCount, closeOtherTabs, closeAllTabs, closeSavedTabs } =
+    const { tabs, activeTab, selectTab, closeTab, forceCloseTab, addTab, tabCount, closeOtherTabs, closeAllTabs, closeSyncedTabs } =
         useTabs();
 
     const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -110,13 +110,13 @@ export function TabBar({ className }: TabBarProps) {
                         id={tab.id}
                         name={tab.name}
                         isActive={tab.id === activeTab}
-                        isModified={tab.isModified}
+                        syncStatus={tab.syncStatus}
                         onClick={() => selectTab(tab.id)}
                         onClose={(e) => handleTabClose(e, tab.id)}
                         onMiddleClick={(e) => handleMiddleClick(e, tab.id)}
                         onCloseOthers={() => closeOtherTabs(tab.id)}
                         onCloseAll={closeAllTabs}
-                        onCloseSaved={closeSavedTabs}
+                        onCloseSynced={closeSyncedTabs}
                     />
                 ))}
             </div>

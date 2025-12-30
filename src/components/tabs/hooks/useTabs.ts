@@ -1,10 +1,18 @@
 import { useDocumentStore } from '@/stores/documentStore';
+import type { SyncStatus } from '@/types';
 import { useCallback, useMemo, useState } from 'react';
 
 interface TabInfo {
     id: string;
     name: string;
-    isModified: boolean;
+    syncStatus: SyncStatus;
+}
+
+/**
+ * Check if a tab has unsaved cloud changes that require confirmation
+ */
+function hasUnsyncedCloudChanges(syncStatus: SyncStatus): boolean {
+    return syncStatus === 'modified';
 }
 
 /**
@@ -31,7 +39,7 @@ export function useTabs() {
             return {
                 id,
                 name: doc?.name ?? 'Untitled',
-                isModified: doc?.isModified ?? false
+                syncStatus: doc?.syncStatus ?? 'local'
             };
         });
     }, [documents, tabOrder]);
@@ -49,7 +57,8 @@ export function useTabs() {
         (id: string): { requiresConfirmation: boolean; document: ReturnType<typeof getDocument> } => {
             const doc = getDocument(id);
 
-            if (doc?.isModified) {
+            // Only require confirmation for cloud files with unsynced changes
+            if (doc && hasUnsyncedCloudChanges(doc.syncStatus)) {
                 return { requiresConfirmation: true, document: doc };
             }
 
@@ -85,33 +94,35 @@ export function useTabs() {
         });
     }, []);
 
-    const hasModifiedTabs = useMemo(() => tabs.some((tab) => tab.isModified), [tabs]);
+    const hasModifiedTabs = useMemo(() => tabs.some((tab) => hasUnsyncedCloudChanges(tab.syncStatus)), [tabs]);
 
     const closeOtherTabs = useCallback(
         (keepTabId: string) => {
-            const tabsToClose = tabs.filter((tab) => tab.id !== keepTabId && !tab.isModified);
+            const tabsToClose = tabs.filter((tab) => tab.id !== keepTabId && !hasUnsyncedCloudChanges(tab.syncStatus));
             for (const tab of tabsToClose) {
                 closeDocument(tab.id);
             }
-            setTabOrder((prev) => prev.filter((id) => id === keepTabId || tabs.find((t) => t.id === id)?.isModified));
+            setTabOrder((prev) =>
+                prev.filter((id) => id === keepTabId || hasUnsyncedCloudChanges(tabs.find((t) => t.id === id)?.syncStatus ?? 'local'))
+            );
         },
         [tabs, closeDocument]
     );
 
     const closeAllTabs = useCallback(() => {
-        const tabsToClose = tabs.filter((tab) => !tab.isModified);
+        const tabsToClose = tabs.filter((tab) => !hasUnsyncedCloudChanges(tab.syncStatus));
         for (const tab of tabsToClose) {
             closeDocument(tab.id);
         }
-        setTabOrder((prev) => prev.filter((id) => tabs.find((t) => t.id === id)?.isModified));
+        setTabOrder((prev) => prev.filter((id) => hasUnsyncedCloudChanges(tabs.find((t) => t.id === id)?.syncStatus ?? 'local')));
     }, [tabs, closeDocument]);
 
-    const closeSavedTabs = useCallback(() => {
-        const tabsToClose = tabs.filter((tab) => !tab.isModified);
+    const closeSyncedTabs = useCallback(() => {
+        const tabsToClose = tabs.filter((tab) => tab.syncStatus === 'synced' || tab.syncStatus === 'local');
         for (const tab of tabsToClose) {
             closeDocument(tab.id);
         }
-        setTabOrder((prev) => prev.filter((id) => tabs.find((t) => t.id === id)?.isModified));
+        setTabOrder((prev) => prev.filter((id) => hasUnsyncedCloudChanges(tabs.find((t) => t.id === id)?.syncStatus ?? 'local')));
     }, [tabs, closeDocument]);
 
     return {
@@ -126,6 +137,6 @@ export function useTabs() {
         tabCount: tabs.length,
         closeOtherTabs,
         closeAllTabs,
-        closeSavedTabs
+        closeSyncedTabs
     };
 }
