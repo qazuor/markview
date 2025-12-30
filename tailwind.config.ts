@@ -3,6 +3,8 @@ import type { Config } from 'tailwindcss';
 export default {
     content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
     darkMode: 'class',
+    // Safelist sync status indicator colors (dynamically generated in Tab.tsx)
+    safelist: ['bg-green-500', 'bg-orange-500', 'bg-blue-500', 'bg-cyan-500', 'bg-red-500', 'animate-pulse'],
     theme: {
         extend: {
             colors: {
