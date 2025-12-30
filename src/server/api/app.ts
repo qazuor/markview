@@ -5,7 +5,9 @@ import { HTTPException } from 'hono/http-exception';
 import { logger } from 'hono/logger';
 import { secureHeaders } from 'hono/secure-headers';
 import { auth } from '../auth';
+import { audit } from '../utils/audit';
 
+import { createRateLimiter } from './middleware/rateLimit';
 import githubRoutes from './routes/github';
 import googleRoutes from './routes/google';
 // Import routes
@@ -68,6 +70,13 @@ app.onError((err, c) => {
     console.error('API Error:', err);
 
     if (err instanceof HTTPException) {
+        // Audit security-related errors
+        if (err.status === 401) {
+            audit.unauthorized(c, c.req.path);
+        } else if (err.status === 403) {
+            audit.forbidden(c, c.req.path, err.message);
+        }
+
         return c.json(
             {
                 error: err.message,
@@ -99,15 +108,23 @@ app.get('/api/health', (c) => {
     });
 });
 
-// Auth routes - Better Auth handler
+// Auth routes - Better Auth handler (with rate limiting)
+app.use('/api/auth/*', createRateLimiter('auth'));
 app.on(['GET', 'POST'], '/api/auth/*', (c) => {
     return auth.handler(c.req.raw);
 });
 
-// Mount route groups
+// Mount route groups with rate limiting
+app.use('/api/sync/*', createRateLimiter('sync'));
 app.route('/api/sync', syncRoutes);
+
+app.use('/api/github/*', createRateLimiter('externalProxy'));
 app.route('/api/github', githubRoutes);
+
+app.use('/api/google/*', createRateLimiter('externalProxy'));
 app.route('/api/google', googleRoutes);
+
+app.use('/api/user/*', createRateLimiter('standard'));
 app.route('/api/user', userRoutes);
 
 // ============================================================================
