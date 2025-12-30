@@ -32,7 +32,11 @@
         "replaceAll": "Reemplazar Todo",
         "noResults": "Sin resultados",
         "clear": "Limpiar",
-        "filter": "Filtrar"
+        "filter": "Filtrar",
+        "selectAll": "Seleccionar Todo",
+        "deselectAll": "Deseleccionar Todo",
+        "done": "Hecho",
+        "back": "Atrás"
     },
     "aria": {
         "editorStatus": "Estado del editor",
@@ -475,7 +479,10 @@
         }
     },
     "sync": {
+        "cloudSync": "Sincronización en la Nube",
         "status": {
+            "label": "Estado",
+            "idle": "Listo",
             "synced": "Sincronizado",
             "syncing": "Sincronizando...",
             "pending": "Cambios pendientes",
@@ -483,13 +490,58 @@
             "offline": "Sin conexión"
         },
         "lastSynced": "Última sincronización: {{time}}",
+        "neverSynced": "Nunca sincronizado",
         "syncNow": "Sincronizar Ahora",
+        "pending": "pendientes",
+        "pendingChanges": "Cambios Pendientes",
+        "itemsToSync": "elementos por sincronizar",
+        "conflicts": "Conflictos",
+        "conflictsToResolve": "conflictos por resolver",
         "conflict": {
             "title": "Conflicto de Sincronización",
-            "description": "Este documento ha sido modificado en otro dispositivo.",
+            "warning": "Conflicto Detectado",
+            "description": "Este documento ha sido modificado tanto localmente como en el servidor. Elige cómo resolver este conflicto.",
+            "localVersion": "Versión Local",
+            "serverVersion": "Versión del Servidor",
+            "version": "Versión",
+            "updated": "Actualizado",
+            "lines": "Líneas",
+            "linesAdded": "líneas agregadas",
+            "linesRemoved": "líneas eliminadas",
+            "changed": "cambiado",
+            "chooseResolution": "Elige cómo resolver:",
             "keepLocal": "Mantener Versión Local",
-            "useCloud": "Usar Versión en la Nube",
-            "keepBoth": "Mantener Ambas"
+            "keepLocalDesc": "Tus cambios locales sobrescribirán la versión del servidor",
+            "keepServer": "Mantener Versión del Servidor",
+            "keepServerDesc": "La versión del servidor reemplazará tus cambios locales",
+            "keepBoth": "Mantener Ambas Versiones",
+            "keepBothDesc": "Mantener la versión del servidor y guardar la local como copia",
+            "previewContent": "Vista Previa del Contenido",
+            "differences": "Diferencias",
+            "noChanges": "No se encontraron diferencias"
+        },
+        "migration": {
+            "title": "Migrar a la Nube",
+            "intro": {
+                "title": "Habilitar Sincronización en la Nube",
+                "description": "Sincroniza tus documentos entre dispositivos y nunca pierdas tu trabajo. Tus documentos se almacenarán de forma segura en la nube."
+            },
+            "feature": {
+                "backup": "Respaldo automático en la nube",
+                "access": "Acceso desde cualquier dispositivo",
+                "sync": "Sincronización en tiempo real"
+            },
+            "documentsFound": "{{count}} documentos locales encontrados",
+            "skipForNow": "Omitir por ahora",
+            "getStarted": "Comenzar",
+            "selectDocuments": "Selecciona los documentos a migrar:",
+            "migrate": "Migrar {{count}} documentos",
+            "migrating": "Migrando documentos...",
+            "complete": "completado",
+            "success": {
+                "title": "¡Migración Completa!",
+                "description": "{{count}} documentos han sido sincronizados a la nube."
+            }
         }
     }
 }

@@ -32,7 +32,11 @@
         "replaceAll": "Replace All",
         "noResults": "No results",
         "clear": "Clear",
-        "filter": "Filter"
+        "filter": "Filter",
+        "selectAll": "Select All",
+        "deselectAll": "Deselect All",
+        "done": "Done",
+        "back": "Back"
     },
     "aria": {
         "editorStatus": "Editor status",
@@ -475,7 +479,10 @@
         }
     },
     "sync": {
+        "cloudSync": "Cloud Sync",
         "status": {
+            "label": "Status",
+            "idle": "Ready",
             "synced": "Synced",
             "syncing": "Syncing...",
             "pending": "Pending changes",
@@ -483,13 +490,58 @@
             "offline": "Offline"
         },
         "lastSynced": "Last synced: {{time}}",
+        "neverSynced": "Never synced",
         "syncNow": "Sync Now",
+        "pending": "pending",
+        "pendingChanges": "Pending Changes",
+        "itemsToSync": "items to sync",
+        "conflicts": "Conflicts",
+        "conflictsToResolve": "conflicts to resolve",
         "conflict": {
             "title": "Sync Conflict",
-            "description": "This document has been modified on another device.",
+            "warning": "Conflict Detected",
+            "description": "This document has been modified both locally and on the server. Choose how to resolve this conflict.",
+            "localVersion": "Local Version",
+            "serverVersion": "Server Version",
+            "version": "Version",
+            "updated": "Updated",
+            "lines": "Lines",
+            "linesAdded": "lines added",
+            "linesRemoved": "lines removed",
+            "changed": "changed",
+            "chooseResolution": "Choose how to resolve:",
             "keepLocal": "Keep Local Version",
-            "useCloud": "Use Cloud Version",
-            "keepBoth": "Keep Both"
+            "keepLocalDesc": "Your local changes will overwrite the server version",
+            "keepServer": "Keep Server Version",
+            "keepServerDesc": "The server version will replace your local changes",
+            "keepBoth": "Keep Both Versions",
+            "keepBothDesc": "Keep server version and save local as a copy",
+            "previewContent": "Preview Content",
+            "differences": "Differences",
+            "noChanges": "No differences found"
+        },
+        "migration": {
+            "title": "Migrate to Cloud",
+            "intro": {
+                "title": "Enable Cloud Sync",
+                "description": "Sync your documents across devices and never lose your work. Your documents will be securely stored in the cloud."
+            },
+            "feature": {
+                "backup": "Automatic backup to the cloud",
+                "access": "Access from any device",
+                "sync": "Real-time synchronization"
+            },
+            "documentsFound": "{{count}} local documents found",
+            "skipForNow": "Skip for now",
+            "getStarted": "Get Started",
+            "selectDocuments": "Select documents to migrate:",
+            "migrate": "Migrate {{count}} documents",
+            "migrating": "Migrating documents...",
+            "complete": "complete",
+            "success": {
+                "title": "Migration Complete!",
+                "description": "{{count}} documents have been synced to the cloud."
+            }
         }
     }
 }
