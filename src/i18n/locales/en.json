@@ -4,6 +4,13 @@
         "tagline": "Markdown, visualized",
         "version": "v0.1.0"
     },
+    "syncStatus": {
+        "synced": "Saved",
+        "modified": "Unsaved changes",
+        "syncing": "Saving...",
+        "cloudPending": "Saved locally, pending cloud sync",
+        "error": "Save failed"
+    },
     "common": {
         "save": "Save",
         "cancel": "Cancel",
@@ -93,6 +100,7 @@
         "search": "Search",
         "local": "Local Files",
         "github": "GitHub",
+        "gdrive": "Google Drive",
         "noFiles": "No files yet",
         "noHeadings": "No headings found",
         "noHeadingsHint": "Add headings to see the table of contents.",
@@ -107,7 +115,21 @@
         "tabs": {
             "appearance": "Appearance",
             "editor": "Editor",
-            "behavior": "Behavior"
+            "behavior": "Behavior",
+            "sync": "Cloud Sync"
+        },
+        "sync": {
+            "enabled": "Enable Cloud Sync",
+            "enabledDesc": "Automatically sync documents to the cloud",
+            "syncOnOpen": "Sync on App Open",
+            "syncOnOpenDesc": "Sync documents when opening the app",
+            "debounceTime": "Sync Delay",
+            "debounceTimeDesc": "Time to wait after changes before syncing",
+            "conflictResolution": "Conflict Resolution",
+            "conflictResolutionDesc": "How to handle sync conflicts",
+            "conflictAsk": "Ask me",
+            "conflictLocal": "Keep local",
+            "conflictServer": "Keep server"
         },
         "appearance": "Appearance",
         "editor": "Editor",
@@ -177,10 +199,36 @@
         "connect": "Connect GitHub",
         "disconnect": "Disconnect",
         "connected": "Connected as",
+        "connecting": "Connecting to GitHub...",
+        "notConnected": "Not connected to GitHub",
         "selectRepo": "Select a repository",
-        "noRepos": "No repositories found",
+        "noRepos": "No repositories",
+        "noReposFound": "No repositories found",
         "private": "Private",
-        "public": "Public"
+        "public": "Public",
+        "refresh": "Refresh",
+        "searchRepos": "Search repositories...",
+        "backToRepos": "Back to repositories",
+        "markdownOnly": "Markdown only",
+        "noFiles": "No files found",
+        "noMarkdownFiles": "No markdown files found",
+        "loading": {
+            "repos": "Loading repositories...",
+            "tree": "Loading files..."
+        }
+    },
+    "gdrive": {
+        "connect": "Connect Google Drive",
+        "disconnect": "Disconnect",
+        "connecting": "Connecting to Google Drive...",
+        "notConnected": "Not connected to Google Drive",
+        "refresh": "Refresh",
+        "searchFiles": "Search files...",
+        "markdownOnly": "Markdown only",
+        "noFiles": "No files",
+        "noFilesFound": "No files found",
+        "noMarkdownFiles": "No markdown files found",
+        "loading": "Loading files..."
     },
     "shortcuts": {
         "title": "Keyboard Shortcuts",
@@ -297,7 +345,7 @@
         "closeTab": "Close Tab",
         "closeOtherTabs": "Close Other Tabs",
         "closeAllTabs": "Close All Tabs",
-        "closeSavedTabs": "Close Saved Tabs",
+        "closeSyncedTabs": "Close Synced Tabs",
         "copyCode": "Copy Code",
         "copyAsMarkdown": "Copy as Markdown",
         "copyWithLanguage": "Copy with Language Tag",
@@ -439,7 +487,20 @@
     "fileExplorer": {
         "filterPlaceholder": "Filter files...",
         "noMatchingFiles": "No matching files",
-        "localFiles": "LOCAL FILES"
+        "localFiles": "LOCAL FILES",
+        "source": {
+            "local": "Local file",
+            "github": "GitHub",
+            "gdrive": "Google Drive"
+        },
+        "status": {
+            "local": "Local only",
+            "synced": "Synced",
+            "modified": "Modified",
+            "syncing": "Syncing...",
+            "cloudPending": "Saved locally, pending cloud sync",
+            "error": "Sync error"
+        }
     },
     "auth": {
         "sign_in": "Sign In",

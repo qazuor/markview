@@ -4,6 +4,13 @@
         "tagline": "Markdown, visualizado",
         "version": "v0.1.0"
     },
+    "syncStatus": {
+        "synced": "Guardado",
+        "modified": "Cambios sin guardar",
+        "syncing": "Guardando...",
+        "cloudPending": "Guardado local, pendiente sincronizar",
+        "error": "Error al guardar"
+    },
     "common": {
         "save": "Guardar",
         "cancel": "Cancelar",
@@ -93,6 +100,7 @@
         "search": "Buscar",
         "local": "Archivos Locales",
         "github": "GitHub",
+        "gdrive": "Google Drive",
         "noFiles": "Sin archivos aún",
         "noHeadings": "Sin encabezados",
         "noHeadingsHint": "Agrega encabezados para ver la tabla de contenidos.",
@@ -107,7 +115,21 @@
         "tabs": {
             "appearance": "Apariencia",
             "editor": "Editor",
-            "behavior": "Comportamiento"
+            "behavior": "Comportamiento",
+            "sync": "Sincronización"
+        },
+        "sync": {
+            "enabled": "Habilitar Sincronización",
+            "enabledDesc": "Sincronizar documentos automáticamente a la nube",
+            "syncOnOpen": "Sincronizar al Abrir",
+            "syncOnOpenDesc": "Sincronizar documentos al abrir la aplicación",
+            "debounceTime": "Tiempo de Espera",
+            "debounceTimeDesc": "Tiempo a esperar después de cambios antes de sincronizar",
+            "conflictResolution": "Resolución de Conflictos",
+            "conflictResolutionDesc": "Cómo manejar conflictos de sincronización",
+            "conflictAsk": "Preguntarme",
+            "conflictLocal": "Mantener local",
+            "conflictServer": "Mantener servidor"
         },
         "appearance": "Apariencia",
         "editor": "Editor",
@@ -177,10 +199,36 @@
         "connect": "Conectar GitHub",
         "disconnect": "Desconectar",
         "connected": "Conectado como",
+        "connecting": "Conectando a GitHub...",
+        "notConnected": "No conectado a GitHub",
         "selectRepo": "Selecciona un repositorio",
-        "noRepos": "No se encontraron repositorios",
+        "noRepos": "Sin repositorios",
+        "noReposFound": "No se encontraron repositorios",
         "private": "Privado",
-        "public": "Público"
+        "public": "Público",
+        "refresh": "Actualizar",
+        "searchRepos": "Buscar repositorios...",
+        "backToRepos": "Volver a repositorios",
+        "markdownOnly": "Solo Markdown",
+        "noFiles": "No se encontraron archivos",
+        "noMarkdownFiles": "No se encontraron archivos Markdown",
+        "loading": {
+            "repos": "Cargando repositorios...",
+            "tree": "Cargando archivos..."
+        }
+    },
+    "gdrive": {
+        "connect": "Conectar Google Drive",
+        "disconnect": "Desconectar",
+        "connecting": "Conectando a Google Drive...",
+        "notConnected": "No conectado a Google Drive",
+        "refresh": "Actualizar",
+        "searchFiles": "Buscar archivos...",
+        "markdownOnly": "Solo Markdown",
+        "noFiles": "Sin archivos",
+        "noFilesFound": "No se encontraron archivos",
+        "noMarkdownFiles": "No se encontraron archivos Markdown",
+        "loading": "Cargando archivos..."
     },
     "shortcuts": {
         "title": "Atajos de Teclado",
@@ -297,7 +345,7 @@
         "closeTab": "Cerrar Pestaña",
         "closeOtherTabs": "Cerrar Otras Pestañas",
         "closeAllTabs": "Cerrar Todas las Pestañas",
-        "closeSavedTabs": "Cerrar Pestañas Guardadas",
+        "closeSyncedTabs": "Cerrar Pestañas Sincronizadas",
         "copyCode": "Copiar Código",
         "copyAsMarkdown": "Copiar como Markdown",
         "copyWithLanguage": "Copiar con Etiqueta de Lenguaje",
@@ -439,7 +487,20 @@
     "fileExplorer": {
         "filterPlaceholder": "Filtrar archivos...",
         "noMatchingFiles": "Sin archivos coincidentes",
-        "localFiles": "ARCHIVOS LOCALES"
+        "localFiles": "ARCHIVOS LOCALES",
+        "source": {
+            "local": "Archivo local",
+            "github": "GitHub",
+            "gdrive": "Google Drive"
+        },
+        "status": {
+            "local": "Solo local",
+            "synced": "Sincronizado",
+            "modified": "Modificado",
+            "syncing": "Sincronizando...",
+            "cloudPending": "Guardado local, pendiente sincronizar",
+            "error": "Error de sincronización"
+        }
     },
     "auth": {
         "sign_in": "Iniciar Sesión",
