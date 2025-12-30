@@ -27,7 +27,6 @@ import {
     PanelRight,
     Plus,
     RotateCcw,
-    Save,
     Settings
 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -35,7 +34,6 @@ import { useTranslation } from 'react-i18next';
 
 interface HeaderProps {
     onImport?: () => void;
-    onSave?: () => void;
     onStartTour: () => void;
     className?: string;
 }
@@ -52,7 +50,7 @@ interface MenuItem {
     children?: MenuItem[];
 }
 
-export function Header({ onImport, onSave, onStartTour, className }: HeaderProps) {
+export function Header({ onImport, onStartTour, className }: HeaderProps) {
     const { t, i18n } = useTranslation();
     const { isMobile } = useMobile();
     const [activeMenu, setActiveMenu] = useState<string | null>(null);
@@ -85,11 +83,6 @@ export function Header({ onImport, onSave, onStartTour, className }: HeaderProps
         onImport?.();
         closeMenu();
     }, [onImport, closeMenu]);
-
-    const handleSave = useCallback(() => {
-        onSave?.();
-        closeMenu();
-    }, [onSave, closeMenu]);
 
     const handleSettings = useCallback(() => {
         openModal('settings');
@@ -210,7 +203,6 @@ export function Header({ onImport, onSave, onStartTour, className }: HeaderProps
     const fileMenuItems: MenuItem[] = [
         { id: 'new', icon: FilePlus, label: t('common.new'), shortcut: 'Ctrl+N', onClick: handleNewDocument },
         { id: 'import', icon: FolderOpen, label: t('common.import'), onClick: handleImport },
-        { id: 'save', icon: Save, label: t('common.save'), shortcut: 'Ctrl+S', onClick: handleSave },
         { id: 'sep-1', type: 'separator', label: '' },
         {
             id: 'export',
@@ -429,19 +421,6 @@ export function Header({ onImport, onSave, onStartTour, className }: HeaderProps
             {/* Mobile quick actions */}
             {isMobile && (
                 <div className="flex items-center gap-1 ml-auto">
-                    <button
-                        type="button"
-                        onClick={handleSave}
-                        className={cn(
-                            'p-2 rounded-lg',
-                            'text-text-secondary hover:text-text-primary',
-                            'hover:bg-bg-tertiary active:bg-bg-tertiary',
-                            'transition-colors touch-manipulation'
-                        )}
-                        aria-label={t('common.save')}
-                    >
-                        <Save className="h-5 w-5" />
-                    </button>
                     <button
                         type="button"
                         onClick={handleSettings}
