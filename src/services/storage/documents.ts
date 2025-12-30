@@ -187,7 +187,7 @@ export function toDocument(stored: StoredDocument): Document {
         content: stored.content,
         createdAt: new Date(stored.createdAt),
         updatedAt: new Date(stored.updatedAt),
-        isModified: false,
+        syncStatus: 'local',
         isManuallyNamed: stored.isManuallyNamed,
         source: 'local',
         cursor: stored.cursorPosition ?? { line: 1, column: 1 },
