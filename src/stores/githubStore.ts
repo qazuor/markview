@@ -1,125 +1,172 @@
-import type { GitHubFile, GitHubState, GitHubUser, Repository } from '@/types/github';
+/**
+ * GitHub Store
+ * State management for GitHub integration
+ */
+
+import type { FileTreeNode, GitHubUser, RateLimitInfo, Repository } from '@/types/github';
 import { create } from 'zustand';
-import { devtools, persist } from 'zustand/middleware';
+import { devtools } from 'zustand/middleware';
+
+interface GitHubState {
+    // Connection
+    isConnected: boolean;
+    isLoading: boolean;
+    error: string | null;
+    user: GitHubUser | null;
+
+    // Repositories
+    repositories: Repository[];
+    selectedRepo: Repository | null;
+    reposLoading: boolean;
+
+    // File Navigation
+    currentPath: string;
+    fileTree: Map<string, FileTreeNode[]>; // repo fullName -> tree
+    treeLoading: boolean;
+    expandedPaths: Set<string>;
+
+    // Rate Limit
+    rateLimit: RateLimitInfo | null;
+}
 
 interface GitHubActions {
-    // Auth
-    setToken: (token: string) => void;
-    setUser: (user: GitHubUser) => void;
-    logout: () => void;
-
-    // Loading/Error
+    // Connection
+    setConnected: (connected: boolean, user?: GitHubUser | null) => void;
     setLoading: (loading: boolean) => void;
     setError: (error: string | null) => void;
+    disconnect: () => void;
 
-    // Repos
-    setRepos: (repos: Repository[]) => void;
+    // Repositories
+    setRepositories: (repos: Repository[]) => void;
+    setReposLoading: (loading: boolean) => void;
     selectRepo: (repo: Repository | null) => void;
 
-    // Navigation
-    setCurrentPath: (path: string[]) => void;
-    navigateToFolder: (folder: string) => void;
-    navigateUp: () => void;
-    navigateToRoot: () => void;
+    // File Navigation
+    setCurrentPath: (path: string) => void;
+    setFileTree: (repoFullName: string, tree: FileTreeNode[]) => void;
+    setTreeLoading: (loading: boolean) => void;
+    toggleExpanded: (path: string) => void;
+    clearExpanded: () => void;
 
-    // Files
-    setFiles: (files: GitHubFile[]) => void;
-    clearFiles: () => void;
+    // Rate Limit
+    setRateLimit: (rateLimit: RateLimitInfo | null) => void;
+
+    // Reset
+    reset: () => void;
 }
 
 type GitHubStore = GitHubState & GitHubActions;
 
 const initialState: GitHubState = {
-    isAuthenticated: false,
+    isConnected: false,
     isLoading: false,
     error: null,
     user: null,
-    token: null,
-    repos: [],
+    repositories: [],
     selectedRepo: null,
-    currentPath: [],
-    files: []
+    reposLoading: false,
+    currentPath: '',
+    fileTree: new Map(),
+    treeLoading: false,
+    expandedPaths: new Set(),
+    rateLimit: null
 };
 
 export const useGitHubStore = create<GitHubStore>()(
     devtools(
-        persist(
-            (set) => ({
-                ...initialState,
+        (set, get) => ({
+            ...initialState,
 
-                setToken: (token) => {
-                    set({ token, isAuthenticated: true });
-                },
+            // Connection
+            setConnected: (connected, user = null) => {
+                set({ isConnected: connected, user, error: null });
+            },
 
-                setUser: (user) => {
-                    set({ user });
-                },
+            setLoading: (loading) => {
+                set({ isLoading: loading });
+            },
 
-                logout: () => {
-                    set({
-                        isAuthenticated: false,
-                        user: null,
-                        token: null,
-                        repos: [],
-                        selectedRepo: null,
-                        currentPath: [],
-                        files: []
-                    });
-                },
+            setError: (error) => {
+                set({ error, isLoading: false });
+            },
 
-                setLoading: (loading) => {
-                    set({ isLoading: loading });
-                },
+            disconnect: () => {
+                set({
+                    ...initialState,
+                    fileTree: new Map(),
+                    expandedPaths: new Set()
+                });
+            },
 
-                setError: (error) => {
-                    set({ error, isLoading: false });
-                },
+            // Repositories
+            setRepositories: (repos) => {
+                set({ repositories: repos, reposLoading: false });
+            },
 
-                setRepos: (repos) => {
-                    set({ repos, isLoading: false });
-                },
+            setReposLoading: (loading) => {
+                set({ reposLoading: loading });
+            },
 
-                selectRepo: (repo) => {
-                    set({ selectedRepo: repo, currentPath: [], files: [] });
-                },
+            selectRepo: (repo) => {
+                set({
+                    selectedRepo: repo,
+                    currentPath: '',
+                    expandedPaths: new Set()
+                });
+            },
 
-                setCurrentPath: (path) => {
-                    set({ currentPath: path });
-                },
+            // File Navigation
+            setCurrentPath: (path) => {
+                set({ currentPath: path });
+            },
 
-                navigateToFolder: (folder) => {
-                    set((state) => ({
-                        currentPath: [...state.currentPath, folder]
-                    }));
-                },
+            setFileTree: (repoFullName, tree) => {
+                const newMap = new Map(get().fileTree);
+                newMap.set(repoFullName, tree);
+                set({ fileTree: newMap, treeLoading: false });
+            },
 
-                navigateUp: () => {
-                    set((state) => ({
-                        currentPath: state.currentPath.slice(0, -1)
-                    }));
-                },
+            setTreeLoading: (loading) => {
+                set({ treeLoading: loading });
+            },
 
-                navigateToRoot: () => {
-                    set({ currentPath: [] });
-                },
-
-                setFiles: (files) => {
-                    set({ files, isLoading: false });
-                },
-
-                clearFiles: () => {
-                    set({ files: [] });
+            toggleExpanded: (path) => {
+                const expanded = new Set(get().expandedPaths);
+                if (expanded.has(path)) {
+                    expanded.delete(path);
+                } else {
+                    expanded.add(path);
                 }
-            }),
-            {
-                name: 'markview:github',
-                partialize: (state) => ({
-                    token: state.token,
-                    user: state.user,
-                    isAuthenticated: state.isAuthenticated
-                })
+                set({ expandedPaths: expanded });
+            },
+
+            clearExpanded: () => {
+                set({ expandedPaths: new Set() });
+            },
+
+            // Rate Limit
+            setRateLimit: (rateLimit) => {
+                set({ rateLimit });
+            },
+
+            // Reset
+            reset: () => {
+                set({
+                    ...initialState,
+                    fileTree: new Map(),
+                    expandedPaths: new Set()
+                });
             }
-        ),
+        }),
         { name: 'GitHubStore' }
     )
 );
+
+// Selectors
+export const selectIsConnected = (state: GitHubStore) => state.isConnected;
+export const selectUser = (state: GitHubStore) => state.user;
+export const selectRepositories = (state: GitHubStore) => state.repositories;
+export const selectSelectedRepo = (state: GitHubStore) => state.selectedRepo;
+export const selectCurrentPath = (state: GitHubStore) => state.currentPath;
+export const selectFileTree = (state: GitHubStore) => state.fileTree;
+export const selectRateLimit = (state: GitHubStore) => state.rateLimit;
