@@ -1,7 +1,43 @@
-import type { Document, Version } from '@/types';
+import type { Document, DriveFileInfo, GitHubFileInfo, SyncStatus, Version } from '@/types';
 import { extractHeading, sanitizeFilename } from '@/utils';
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
+
+export interface CreateDocumentOptions {
+    name?: string;
+    content?: string;
+    source?: Document['source'];
+    githubInfo?: GitHubFileInfo;
+    driveInfo?: DriveFileInfo;
+}
+
+/**
+ * Simple hash function for content comparison
+ */
+function hashContent(content: string): string {
+    let hash = 0;
+    for (let i = 0; i < content.length; i++) {
+        const char = content.charCodeAt(i);
+        hash = (hash << 5) - hash + char;
+        hash = hash & hash;
+    }
+    return hash.toString(36);
+}
+
+/**
+ * Determine sync status based on document source and content
+ * For local docs: compare with last persisted content
+ * For cloud docs: compare with original cloud content
+ */
+function computeSyncStatus(doc: Document, newContent: string): SyncStatus {
+    // If we have a hash to compare against, check if content changed
+    if (doc.originalContentHash) {
+        const currentHash = hashContent(newContent);
+        return currentHash === doc.originalContentHash ? 'synced' : 'modified';
+    }
+    // No hash yet means new document, treat as synced (will get hash on next persist)
+    return 'synced';
+}
 
 interface DocumentState {
     documents: Map<string, Document>;
@@ -9,7 +45,9 @@ interface DocumentState {
     versions: Map<string, Version[]>;
 
     // Document operations
-    createDocument: (options?: { name?: string; content?: string }) => string;
+    createDocument: (options?: CreateDocumentOptions) => string;
+    findDocumentByGitHub: (repo: string, path: string) => Document | undefined;
+    findDocumentByDrive: (fileId: string) => Document | undefined;
     openDocument: (id: string) => void;
     closeDocument: (id: string) => void;
     updateContent: (id: string, content: string) => void;
@@ -27,18 +65,69 @@ interface DocumentState {
     deleteVersion: (id: string, versionId: string) => void;
 
     // State
-    markAsSaved: (id: string) => void;
     updateCursor: (id: string, line: number, column: number) => void;
     updateScroll: (id: string, line: number, percentage: number) => void;
+    setSyncStatus: (id: string, status: SyncStatus) => void;
 }
 
 const generateId = () => crypto.randomUUID();
+
+// Timers for simulating sync cycle
+const syncTimers = new Map<string, NodeJS.Timeout>();
+
+/**
+ * Simulate sync cycle: modified -> syncing -> synced/cloud-pending
+ */
+function scheduleSyncCycle(docId: string, content: string, setSyncStatus: (id: string, status: SyncStatus) => void) {
+    // Clear any existing timer for this document
+    const existingTimer = syncTimers.get(docId);
+    if (existingTimer) {
+        clearTimeout(existingTimer);
+    }
+
+    // After 800ms of no changes, start "syncing"
+    const timer = setTimeout(() => {
+        setSyncStatus(docId, 'syncing');
+
+        // After 400ms of "syncing", determine final status
+        setTimeout(() => {
+            const store = useDocumentStore.getState();
+            const doc = store.documents.get(docId);
+            if (doc) {
+                const newDocs = new Map(store.documents);
+                const currentHash = hashContent(content);
+
+                // Determine final status based on source
+                let finalStatus: SyncStatus = 'synced';
+                if (doc.source === 'github' || doc.source === 'gdrive') {
+                    // For cloud files: check if content differs from original cloud version
+                    if (doc.originalContentHash && currentHash !== doc.originalContentHash) {
+                        finalStatus = 'cloud-pending';
+                    }
+                }
+
+                newDocs.set(docId, {
+                    ...doc,
+                    syncStatus: finalStatus,
+                    // For local files, update the hash (it's their "saved" baseline)
+                    // For cloud files, DON'T update originalContentHash (it represents cloud version)
+                    ...(doc.source === 'local' ? { originalContentHash: currentHash } : {})
+                });
+                useDocumentStore.setState({ documents: newDocs });
+            }
+            syncTimers.delete(docId);
+        }, 400);
+    }, 800);
+
+    syncTimers.set(docId, timer);
+}
 
 const createEmptyDocument = (): Document => ({
     id: generateId(),
     name: 'Untitled',
     content: '',
-    isModified: false,
+    syncStatus: 'synced',
+    originalContentHash: hashContent(''), // Empty content hash
     isManuallyNamed: false,
     source: 'local',
     cursor: { line: 1, column: 1 },
@@ -65,6 +154,17 @@ export const useDocumentStore = create<DocumentState>()(
                     }
                     if (options?.content) {
                         doc.content = options.content;
+                        // Update hash to match content
+                        doc.originalContentHash = hashContent(options.content);
+                    }
+                    if (options?.source) {
+                        doc.source = options.source;
+                    }
+                    if (options?.githubInfo) {
+                        doc.githubInfo = options.githubInfo;
+                    }
+                    if (options?.driveInfo) {
+                        doc.driveInfo = options.driveInfo;
                     }
 
                     set((state) => {
@@ -73,6 +173,31 @@ export const useDocumentStore = create<DocumentState>()(
                         return { documents: newDocs, activeDocumentId: doc.id };
                     });
                     return doc.id;
+                },
+
+                findDocumentByGitHub: (repo, path) => {
+                    const state = get();
+                    for (const doc of state.documents.values()) {
+                        if (doc.source === 'github' && doc.githubInfo) {
+                            const fullRepo = `${doc.githubInfo.owner}/${doc.githubInfo.repo}`;
+                            if (fullRepo === repo && doc.githubInfo.path === path) {
+                                return doc;
+                            }
+                        }
+                    }
+                    return undefined;
+                },
+
+                findDocumentByDrive: (fileId) => {
+                    const state = get();
+                    for (const doc of state.documents.values()) {
+                        if (doc.source === 'gdrive' && doc.driveInfo) {
+                            if (doc.driveInfo.fileId === fileId) {
+                                return doc;
+                            }
+                        }
+                    }
+                    return undefined;
                 },
 
                 openDocument: (id) => {
@@ -95,24 +220,30 @@ export const useDocumentStore = create<DocumentState>()(
                 },
 
                 updateContent: (id, content) => {
+                    const state = get();
+                    const doc = state.documents.get(id);
+                    if (!doc) return;
+
+                    const newSyncStatus = computeSyncStatus(doc, content);
+
                     set((state) => {
-                        const doc = state.documents.get(id);
-                        if (!doc) return state;
+                        const currentDoc = state.documents.get(id);
+                        if (!currentDoc) return state;
 
                         const newDocs = new Map(state.documents);
                         const updatedDoc: Document = {
-                            ...doc,
+                            ...currentDoc,
                             content,
-                            isModified: true,
+                            syncStatus: newSyncStatus,
                             updatedAt: new Date()
                         };
 
                         // Auto-name from first H1 if not manually named
-                        if (!doc.isManuallyNamed) {
+                        if (!currentDoc.isManuallyNamed) {
                             const heading = extractHeading(content);
                             if (heading) {
                                 updatedDoc.name = sanitizeFilename(heading);
-                            } else if (doc.name !== 'Untitled' && !content.trim()) {
+                            } else if (currentDoc.name !== 'Untitled' && !content.trim()) {
                                 // Reset to Untitled if content is cleared
                                 updatedDoc.name = 'Untitled';
                             }
@@ -121,6 +252,11 @@ export const useDocumentStore = create<DocumentState>()(
                         newDocs.set(id, updatedDoc);
                         return { documents: newDocs };
                     });
+
+                    // Schedule sync cycle if document was modified
+                    if (newSyncStatus === 'modified') {
+                        scheduleSyncCycle(id, content, get().setSyncStatus);
+                    }
                 },
 
                 renameDocument: (id, name, isManual = true) => {
@@ -207,7 +343,7 @@ export const useDocumentStore = create<DocumentState>()(
                         newDocs.set(id, {
                             ...doc,
                             content: version.content,
-                            isModified: true,
+                            syncStatus: computeSyncStatus(doc, version.content),
                             updatedAt: new Date()
                         });
 
@@ -227,13 +363,13 @@ export const useDocumentStore = create<DocumentState>()(
                     });
                 },
 
-                markAsSaved: (id) => {
+                setSyncStatus: (id, status) => {
                     set((state) => {
                         const doc = state.documents.get(id);
                         if (!doc) return state;
 
                         const newDocs = new Map(state.documents);
-                        newDocs.set(id, { ...doc, isModified: false });
+                        newDocs.set(id, { ...doc, syncStatus: status });
                         return { documents: newDocs };
                     });
                 },
@@ -274,16 +410,24 @@ export const useDocumentStore = create<DocumentState>()(
                         versions?: [string, Version[]][];
                     };
 
-                    // Rehydrate Date objects from persisted strings
+                    // Rehydrate Date objects from persisted strings and ensure all docs have hash
                     const rehydratedDocs = (persistedState.documents ?? []).map(([id, doc]) => {
-                        return [
-                            id,
-                            {
-                                ...doc,
-                                createdAt: doc.createdAt ? new Date(doc.createdAt) : new Date(),
-                                updatedAt: doc.updatedAt ? new Date(doc.updatedAt) : new Date()
-                            }
-                        ] as [string, Document];
+                        const rehydrated: Document = {
+                            ...doc,
+                            createdAt: doc.createdAt ? new Date(doc.createdAt) : new Date(),
+                            updatedAt: doc.updatedAt ? new Date(doc.updatedAt) : new Date(),
+                            // Ensure syncStatus exists (for old documents)
+                            syncStatus: doc.syncStatus === 'local' ? 'synced' : (doc.syncStatus ?? 'synced')
+                        };
+
+                        // For any document without originalContentHash, set it now
+                        // This treats the current persisted content as the "synced" baseline
+                        if (!doc.originalContentHash) {
+                            rehydrated.originalContentHash = hashContent(doc.content ?? '');
+                            rehydrated.syncStatus = 'synced';
+                        }
+
+                        return [id, rehydrated] as [string, Document];
                     });
 
                     const rehydratedVersions = (persistedState.versions ?? []).map(([id, versions]) => {

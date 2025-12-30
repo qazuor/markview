@@ -40,7 +40,7 @@ describe('documentStore', () => {
                 id,
                 name: 'Untitled',
                 content: '',
-                isModified: false,
+                syncStatus: 'synced',
                 isManuallyNamed: false,
                 source: 'local'
             });
@@ -124,7 +124,8 @@ describe('documentStore', () => {
 
             const doc = useDocumentStore.getState().documents.get(id);
             expect(doc?.content).toBe('# New Content');
-            expect(doc?.isModified).toBe(true);
+            // Content changed, so status should be 'modified'
+            expect(doc?.syncStatus).toBe('modified');
         });
 
         it('should auto-name document from H1 heading', () => {
@@ -366,7 +367,8 @@ describe('documentStore', () => {
 
                 const doc = useDocumentStore.getState().documents.get(id);
                 expect(doc?.content).toBe('Original content');
-                expect(doc?.isModified).toBe(true);
+                // Restoring changes content, status depends on whether it matches original hash
+                expect(doc?.syncStatus).toBe('modified');
             });
 
             it('should not restore non-existent version', () => {
@@ -408,32 +410,6 @@ describe('documentStore', () => {
                 expect(remainingVersions).toHaveLength(1);
                 expect(remainingVersions[0]?.label).toBe('v1');
             });
-        });
-    });
-
-    describe('markAsSaved', () => {
-        it('should mark document as saved', () => {
-            const { createDocument, updateContent, markAsSaved } = useDocumentStore.getState();
-
-            const id = createDocument();
-
-            act(() => {
-                updateContent(id, 'Content');
-                markAsSaved(id);
-            });
-
-            const doc = useDocumentStore.getState().documents.get(id);
-            expect(doc?.isModified).toBe(false);
-        });
-
-        it('should not update non-existent document', () => {
-            const { markAsSaved } = useDocumentStore.getState();
-
-            act(() => {
-                markAsSaved('non-existent-id');
-            });
-
-            expect(useDocumentStore.getState().documents.size).toBe(0);
         });
     });
 
