@@ -73,8 +73,22 @@ export function useEditorSync(options: UseEditorSyncOptions = {}): UseEditorSync
     // Get pending content for current document, or fall back to stored content
     const currentPendingContent = activeDocumentId ? pendingContentMap.current.get(activeDocumentId) : undefined;
 
+    // Debug: log when content changes from store
+    const finalContent = currentPendingContent ?? content;
+    const prevContentRef = useRef(finalContent);
+    useEffect(() => {
+        if (prevContentRef.current !== finalContent) {
+            console.log('[useEditorSync] Content changed', {
+                fromPending: !!currentPendingContent,
+                contentLength: finalContent.length,
+                storeContentLength: content.length
+            });
+            prevContentRef.current = finalContent;
+        }
+    }, [finalContent, currentPendingContent, content]);
+
     return {
-        content: currentPendingContent ?? content,
+        content: finalContent,
         documentId: activeDocumentId,
         handleChange,
         handleCursorChange

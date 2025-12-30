@@ -25,7 +25,7 @@ export function Editor({ className, onViewReady, onScroll, onScrollToReady, onSc
     const { lineNumbers, wordWrap, minimap, editorFontSize, fontFamily, lintOnType } = useSettingsStore();
     const { content, documentId, handleChange, handleCursorChange } = useEditorSync();
 
-    const { editorRef, view, setValue, focus, scrollToPercent, scrollToLine } = useCodeMirror({
+    const { editorRef, view, setValue, getValue, focus, scrollToPercent, scrollToLine } = useCodeMirror({
         initialContent: content,
         onChange: handleChange,
         onCursorChange: handleCursorChange,
@@ -55,24 +55,50 @@ export function Editor({ className, onViewReady, onScroll, onScrollToReady, onSc
         onScrollToLineReady?.(scrollToLine);
     }, [scrollToLine, onScrollToLineReady]);
 
-    // Store content in ref to avoid triggering effect on every content change
-    const contentRef = useRef(content);
-    contentRef.current = content;
-
-    // Store setValue in ref
+    // Store setValue and getValue in refs
     const setValueRef = useRef(setValue);
+    const getValueRef = useRef(getValue);
     setValueRef.current = setValue;
+    getValueRef.current = getValue;
 
     // Track previous documentId to detect document switches
     const prevDocumentIdRef = useRef<string | null>(null);
 
+    // Track if we're currently updating to avoid loops
+    const isUpdatingRef = useRef(false);
+
     // Sync content when document changes (user switches to a different document)
     useEffect(() => {
         if (documentId && documentId !== prevDocumentIdRef.current) {
-            setValueRef.current(contentRef.current);
+            isUpdatingRef.current = true;
+            setValueRef.current(content);
             prevDocumentIdRef.current = documentId;
+            // Reset flag after a tick
+            setTimeout(() => {
+                isUpdatingRef.current = false;
+            }, 0);
         }
-    }, [documentId]);
+    }, [documentId, content]);
+
+    // Sync content when it changes externally (e.g., from cross-tab sync)
+    // This effect detects when the store content differs from editor content
+    useEffect(() => {
+        // Skip if we're currently updating or if editor isn't ready
+        if (isUpdatingRef.current || !documentId) return;
+
+        const editorContent = getValueRef.current();
+
+        // Only update if content actually differs (external change)
+        if (content !== editorContent) {
+            console.log('[Editor] External content change detected, updating editor');
+            isUpdatingRef.current = true;
+            setValueRef.current(content);
+            // Reset flag after a tick
+            setTimeout(() => {
+                isUpdatingRef.current = false;
+            }, 0);
+        }
+    }, [content, documentId]);
 
     // Focus editor when document is available
     useEffect(() => {
