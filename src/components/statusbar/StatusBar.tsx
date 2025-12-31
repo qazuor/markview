@@ -32,8 +32,8 @@ export function StatusBar({ line = 1, column = 1, content = '', syncStatus = 'lo
                 data-tour="statusbar"
                 className={cn(
                     'flex items-center justify-between px-2 py-0.5',
-                    'bg-bg-secondary border-t border-border',
-                    'text-xs text-text-muted',
+                    'bg-slate-300 dark:bg-bg-secondary border-t border-slate-400 dark:border-border',
+                    'text-xs text-slate-700 dark:text-text-muted',
                     className
                 )}
                 aria-label={t('aria.editorStatus')}
@@ -59,8 +59,8 @@ export function StatusBar({ line = 1, column = 1, content = '', syncStatus = 'lo
             data-tour="statusbar"
             className={cn(
                 'flex items-center justify-between px-3 py-1',
-                'bg-bg-secondary border-t border-border',
-                'text-xs text-text-muted',
+                'bg-slate-300 dark:bg-bg-secondary border-t border-slate-400 dark:border-border',
+                'text-xs text-slate-700 dark:text-text-muted',
                 className
             )}
             aria-label={t('aria.editorStatus')}
