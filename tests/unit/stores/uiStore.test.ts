@@ -73,10 +73,10 @@ describe('uiStore', () => {
                 const { setSidebarSection } = useUIStore.getState();
 
                 act(() => {
-                    setSidebarSection('toc');
+                    setSidebarSection('github');
                 });
 
-                expect(useUIStore.getState().sidebarSection).toBe('toc');
+                expect(useUIStore.getState().sidebarSection).toBe('github');
             });
 
             it('should open sidebar when setting section', () => {
@@ -84,11 +84,11 @@ describe('uiStore', () => {
 
                 act(() => {
                     setSidebarOpen(false);
-                    setSidebarSection('search');
+                    setSidebarSection('gdrive');
                 });
 
                 const state = useUIStore.getState();
-                expect(state.sidebarSection).toBe('search');
+                expect(state.sidebarSection).toBe('gdrive');
                 expect(state.sidebarOpen).toBe(true);
             });
         });
