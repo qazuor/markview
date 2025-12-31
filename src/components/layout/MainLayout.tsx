@@ -1,3 +1,4 @@
+import { DocumentPanel } from '@/components/document-panel';
 import { Editor } from '@/components/editor';
 import { Preview } from '@/components/preview';
 import { SplitPane, Tooltip } from '@/components/ui';
@@ -13,6 +14,9 @@ import { useTranslation } from 'react-i18next';
 interface MainLayoutProps {
     className?: string;
     onEditorViewReady?: (view: EditorView | null) => void;
+    activeLine?: number;
+    onNavigate?: (line: number, column?: number) => void;
+    onReplace?: (search: string, replace: string, all: boolean) => void;
 }
 
 // Breakpoint for responsive behavior
@@ -21,7 +25,7 @@ const MOBILE_BREAKPOINT = 768;
 /**
  * Main content layout with editor and preview
  */
-export function MainLayout({ className, onEditorViewReady }: MainLayoutProps) {
+export function MainLayout({ className, onEditorViewReady, activeLine, onNavigate, onReplace }: MainLayoutProps) {
     const { t } = useTranslation();
     const [isMobile, setIsMobile] = useState(false);
     const [splitSize, setSplitSize] = useState(50);
@@ -362,6 +366,7 @@ export function MainLayout({ className, onEditorViewReady }: MainLayoutProps) {
                     />
                 </div>
                 <CollapseButton direction="right" onClick={showSplit} tooltip={t('layout.showEditor')} icon={ChevronRight} />
+                <DocumentPanel content={content} activeLine={activeLine} onNavigate={onNavigate} onReplace={onReplace} />
             </div>
         );
     }
@@ -399,6 +404,7 @@ export function MainLayout({ className, onEditorViewReady }: MainLayoutProps) {
                             />
                         </div>
                         <CollapseButton direction="right" onClick={expandEditor} tooltip={t('layout.hidePreview')} icon={ChevronRight} />
+                        <DocumentPanel content={content} activeLine={activeLine} onNavigate={onNavigate} onReplace={onReplace} />
                     </div>
                 }
                 defaultSize={splitSize}

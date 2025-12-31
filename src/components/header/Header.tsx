@@ -66,6 +66,7 @@ export function Header({ onImport, onStartTour, className }: HeaderProps) {
     const openModal = useUIStore((s) => s.openModal);
     const setViewMode = useUIStore((s) => s.setViewMode);
     const toggleSidebar = useUIStore((s) => s.toggleSidebar);
+    const setPendingRenameDocumentId = useUIStore((s) => s.setPendingRenameDocumentId);
     const theme = useSettingsStore((s) => s.theme);
     const zoomIn = useSettingsStore((s) => s.zoomIn);
     const zoomOut = useSettingsStore((s) => s.zoomOut);
@@ -75,9 +76,10 @@ export function Header({ onImport, onStartTour, className }: HeaderProps) {
     const closeMenu = useCallback(() => setActiveMenu(null), []);
 
     const handleNewDocument = useCallback(() => {
-        createDocument();
+        const id = createDocument();
+        setPendingRenameDocumentId(id);
         closeMenu();
-    }, [createDocument, closeMenu]);
+    }, [createDocument, setPendingRenameDocumentId, closeMenu]);
 
     const handleImport = useCallback(() => {
         onImport?.();
@@ -113,6 +115,11 @@ export function Header({ onImport, onStartTour, className }: HeaderProps) {
         window.open('https://github.com/qazuor/markview', '_blank', 'noopener,noreferrer');
         closeMenu();
     }, [closeMenu]);
+
+    const handleAbout = useCallback(() => {
+        openModal('about');
+        closeMenu();
+    }, [openModal, closeMenu]);
 
     const handleOpenPreviewWindow = useCallback(() => {
         const previewUrl = `${window.location.origin}${window.location.pathname}?preview`;
@@ -279,7 +286,7 @@ export function Header({ onImport, onStartTour, className }: HeaderProps) {
         { id: 'welcome', icon: BookOpen, label: t('help.welcome'), onClick: handleShowWelcome },
         { id: 'documentation', icon: ExternalLink, label: t('help.documentation'), onClick: handleOpenDocs },
         { id: 'sep-2', type: 'separator', label: '' },
-        { id: 'about', icon: Info, label: t('common.about') || 'About' }
+        { id: 'about', icon: Info, label: t('help.about'), onClick: handleAbout }
     ];
 
     const renderMenuItem = (item: MenuItem, isSubmenu = false) => {
