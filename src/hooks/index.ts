@@ -11,6 +11,8 @@ export {
 export { useDebounce } from './useDebounce';
 export { useDocumentSync } from './useDocumentSync';
 export { useDragAndDrop } from './useDragAndDrop';
+export { useGitHubSave } from './useGitHubSave';
+export { useGoogleDriveSave } from './useGoogleDriveSave';
 export { useFileImport, type FileImportResult } from './useFileImport';
 export { useLocalStorage } from './useLocalStorage';
 export { useOnboarding } from './useOnboarding';
