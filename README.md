@@ -45,10 +45,29 @@
 
 - **Multiple Tabs** - Work with several files simultaneously
 - **Auto-Save** - Automatic saving to localStorage (customizable interval)
-- **Version History** - Track and restore previous versions
+- **Version History** - Track and restore previous versions with diff viewer
 - **Drag & Drop** - Drop files directly into the editor
 - **File Explorer** - Browse and manage your documents
 - **Search & Replace** - Powerful find and replace with regex support
+- **Smart Document Creation** - New documents start with auto-edit name and H1 heading
+- **Context Menus** - Right-click menus for files (rename, duplicate, export, delete)
+
+### Cloud Integration
+
+- **GitHub Integration**
+  - Browse and open files from your repositories
+  - Create and save markdown files directly to GitHub
+  - Commit changes with custom messages
+  - Delete files from repositories
+  - Branch selection support
+
+- **Google Drive Integration**
+  - Browse and open files from your Google Drive
+  - Create files in any folder (with folder creation support)
+  - Auto-save to Google Drive (30 seconds after last edit)
+  - Manual save with Ctrl+S
+  - Delete files from Drive or just remove from local list
+  - Sync status indicator in status bar
 
 ### Import & Export
 
@@ -186,9 +205,10 @@ pnpm preview
 | Code Block | `Ctrl+Shift+` ` | `Cmd+Shift+` ` |
 | Link | `Ctrl+K` | `Cmd+K` |
 | **File Operations** |
-| Save | `Ctrl+S` | `Cmd+S` |
+| Save (local/cloud) | `Ctrl+S` | `Cmd+S` |
 | New Document | `Ctrl+N` | `Cmd+N` |
 | Open File | `Ctrl+O` | `Cmd+O` |
+| Close Tab | `Ctrl+W` | `Cmd+W` |
 | **Editing** |
 | Undo | `Ctrl+Z` | `Cmd+Z` |
 | Redo | `Ctrl+Shift+Z` | `Cmd+Shift+Z` |
@@ -224,7 +244,9 @@ markview/
 │   ├── services/         # Business logic
 │   │   ├── markdown/     # Markdown processing
 │   │   ├── storage/      # Local storage
-│   │   └── export/       # Export functionality
+│   │   ├── export/       # Export functionality
+│   │   ├── github/       # GitHub API integration
+│   │   └── gdrive/       # Google Drive API integration
 │   ├── stores/           # Zustand stores
 │   ├── types/            # TypeScript types
 │   ├── utils/            # Utility functions
@@ -262,6 +284,11 @@ Access settings through the gear icon in the toolbar or press `Ctrl+,` (Windows/
   - Auto Save Interval
   - Format on Save
   - Lint on Type
+
+- **Sync** (Cloud Integration)
+  - GitHub: Connect/disconnect, view connected account
+  - Google Drive: Connect/disconnect, view connected account
+  - Sync status indicators
 
 - **Language**
   - English
@@ -311,9 +338,11 @@ This project follows [Conventional Commits](https://www.conventionalcommits.org/
 - [x] Context menus for all components
 - [x] Zoom controls (keyboard, mouse wheel, menu)
 - [x] Version history with diff viewer
-- [ ] GitHub integration for opening/saving files
+- [x] GitHub integration for opening/saving/deleting files
+- [x] Google Drive integration with auto-sync
+- [x] Smart document creation (auto-edit name, H1 heading)
+- [x] Cloud delete options (local only or also from cloud)
 - [ ] Real-time collaboration
-- [ ] Cloud sync (optional)
 - [ ] Desktop app with Tauri
 - [ ] Advanced export options (DOCX, LaTeX)
 - [ ] Plugin system
