@@ -129,7 +129,11 @@
             "conflictResolutionDesc": "Cómo manejar conflictos de sincronización",
             "conflictAsk": "Preguntarme",
             "conflictLocal": "Mantener local",
-            "conflictServer": "Mantener servidor"
+            "conflictServer": "Mantener servidor",
+            "connectedServices": "Servicios Conectados",
+            "notConnected": "No conectado",
+            "disconnect": "Desconectar",
+            "signInToConnect": "Inicia sesión para conectar"
         },
         "appearance": "Apariencia",
         "editor": "Editor",
@@ -215,6 +219,42 @@
         "loading": {
             "repos": "Cargando repositorios...",
             "tree": "Cargando archivos..."
+        },
+        "commit": {
+            "title": "Commit a GitHub",
+            "defaultMessage": "Actualizar {{fileName}}",
+            "messageLabel": "Mensaje de commit",
+            "messagePlaceholder": "Describe tus cambios...",
+            "messageRequired": "El mensaje de commit es requerido",
+            "characters": "caracteres",
+            "recommended72": "72 recomendado",
+            "ctrlEnterToCommit": "Ctrl+Enter para commit",
+            "commit": "Commit",
+            "committing": "Guardando...",
+            "error": "Error al guardar cambios",
+            "success": "Cambios guardados exitosamente",
+            "conflict": "El archivo fue modificado en GitHub. Por favor actualiza e intenta de nuevo."
+        },
+        "createFile": {
+            "title": "Crear Archivo en GitHub",
+            "fileName": "Nombre del archivo",
+            "fileNamePlaceholder": "mi-documento.md",
+            "location": "Ubicación",
+            "commitMessage": "Mensaje de commit",
+            "defaultMessage": "Crear {{fileName}}",
+            "create": "Crear Archivo",
+            "creating": "Creando...",
+            "invalidName": "Nombre de archivo inválido",
+            "mustBeMarkdown": "El archivo debe tener extensión .md o .mdx"
+        },
+        "deleteFile": {
+            "title": "Eliminar de GitHub",
+            "warning": "Esto eliminará permanentemente el archivo de GitHub.",
+            "cannotUndo": "Esta acción no se puede deshacer.",
+            "commitMessage": "Mensaje de commit",
+            "defaultMessage": "Eliminar {{fileName}}",
+            "delete": "Eliminar",
+            "deleting": "Eliminando..."
         }
     },
     "gdrive": {
@@ -228,7 +268,35 @@
         "noFiles": "Sin archivos",
         "noFilesFound": "No se encontraron archivos",
         "noMarkdownFiles": "No se encontraron archivos Markdown",
-        "loading": "Cargando archivos..."
+        "loading": "Cargando archivos...",
+        "root": "Mi Drive",
+        "createFile": {
+            "title": "Crear Archivo en Google Drive",
+            "fileName": "Nombre del archivo",
+            "fileNamePlaceholder": "mi-documento.md",
+            "location": "Ubicación",
+            "create": "Crear Archivo",
+            "creating": "Creando...",
+            "invalidName": "Nombre de archivo inválido",
+            "mustBeMarkdown": "El archivo debe tener extensión .md o .mdx",
+            "error": "Error al crear el archivo"
+        },
+        "deleteFile": {
+            "title": "Eliminar de Google Drive",
+            "warning": "Esto eliminará el archivo de Google Drive.",
+            "movedToTrash": "El archivo será movido a la papelera.",
+            "delete": "Eliminar",
+            "deleting": "Eliminando...",
+            "error": "Error al eliminar el archivo"
+        },
+        "folder": {
+            "newFolderPlaceholder": "Nombre de la carpeta...",
+            "createFolder": "Crear carpeta",
+            "createInLocation": "La carpeta se creará en: {{location}}",
+            "nameRequired": "El nombre de la carpeta es requerido",
+            "createError": "Error al crear la carpeta",
+            "noFolders": "No se encontraron carpetas"
+        }
     },
     "shortcuts": {
         "title": "Atajos de Teclado",
@@ -314,6 +382,19 @@
         "unsavedChangesWarning": "Tus cambios se perderán si no los guardas.",
         "dontSave": "No Guardar"
     },
+    "deleteDocument": {
+        "title": "Eliminar Documento",
+        "warning": "Esta acción no se puede deshacer.",
+        "chooseOption": "¿Qué quieres eliminar?",
+        "localOnly": "Solo quitar de la lista",
+        "localOnlyDesc": "El archivo permanecerá en {{cloud}} pero se quitará de tus documentos abiertos.",
+        "alsoFromCloud": "También eliminar de {{cloud}}",
+        "alsoFromCloudDesc": "El archivo será eliminado permanentemente de {{cloud}}.",
+        "deleting": "Eliminando...",
+        "error": "Error al eliminar el documento",
+        "cloudError": "Error al eliminar de la nube",
+        "defaultCommitMessage": "Eliminar {{fileName}}"
+    },
     "versions": {
         "title": "Historial de Versiones",
         "titleWithName": "Historial de Versiones - {{documentName}}",
@@ -363,7 +444,14 @@
         "link": "Enlace",
         "image": "Imagen",
         "table": "Tabla",
-        "horizontalRule": "Línea Horizontal"
+        "horizontalRule": "Línea Horizontal",
+        "newDocument": "Nuevo Documento",
+        "importFile": "Importar Archivo",
+        "newFile": "Nuevo Archivo",
+        "newFileHere": "Nuevo Archivo Aquí",
+        "openFile": "Abrir",
+        "deleteFile": "Eliminar",
+        "refresh": "Actualizar"
     },
     "zoom": {
         "zoom": "Zoom",
@@ -394,13 +482,14 @@
         "welcome": {
             "title": "¡Bienvenido a MarkView!",
             "subtitle": "Tu potente editor de Markdown",
-            "description": "MarkView es un editor moderno de Markdown con vista previa en vivo, resaltado de sintaxis, diagramas y más. ¡Hagamos un recorrido rápido para comenzar!",
+            "description": "MarkView es un editor moderno de Markdown con vista previa en vivo, resaltado de sintaxis, diagramas, sincronización con la nube y más. ¡Hagamos un recorrido rápido para comenzar!",
             "features": {
                 "title": "Lo que puedes hacer:",
                 "realtime": "Vista previa en tiempo real mientras escribes",
                 "syntax": "Resaltado de sintaxis para bloques de código",
                 "diagrams": "Crear diagramas con Mermaid",
-                "math": "Escribir fórmulas matemáticas con KaTeX"
+                "math": "Escribir fórmulas matemáticas con KaTeX",
+                "cloud": "Sincronizar archivos con GitHub y Google Drive"
             }
         },
         "features": {
@@ -414,13 +503,13 @@
                 "title": "Vista Previa en Vivo",
                 "description": "Ve tu contenido formateado en tiempo real"
             },
+            "cloud": {
+                "title": "Sincronización en la Nube",
+                "description": "Conecta con GitHub y Google Drive para sincronizar tus archivos"
+            },
             "toc": {
                 "title": "Tabla de Contenidos",
                 "description": "Navega fácilmente por la estructura de tu documento"
-            },
-            "search": {
-                "title": "Búsqueda Rápida",
-                "description": "Encuentra cualquier cosa en todos tus documentos"
             }
         },
         "shortcuts": {
@@ -456,6 +545,10 @@
             "title": "Barra Lateral",
             "description": "Accede a tus archivos, tabla de contenidos y búsqueda desde aquí. Cambia entre secciones usando las pestañas en la parte superior."
         },
+        "cloud": {
+            "title": "Integración con la Nube",
+            "description": "Conecta con GitHub y Google Drive desde Configuración > Sincronización. Explora, abre, edita y guarda archivos directamente en tu almacenamiento en la nube."
+        },
         "statusbar": {
             "title": "Barra de Estado",
             "description": "Ve las estadísticas del documento como conteo de palabras, caracteres y tiempo estimado de lectura."
@@ -467,7 +560,26 @@
         "shortcuts": "Atajos de Teclado",
         "restartTour": "Reiniciar Recorrido",
         "welcome": "Documento de Bienvenida",
-        "documentation": "Documentación"
+        "documentation": "Documentación",
+        "about": "Acerca de MarkView"
+    },
+    "about": {
+        "title": "Acerca de MarkView",
+        "tagline": "Markdown, visualizado",
+        "version": "Versión",
+        "description": "Un editor de Markdown moderno y completo con vista previa en vivo, sincronización en la nube y potentes opciones de exportación.",
+        "featuresTitle": "Características Principales",
+        "features": {
+            "editor": "Editor CodeMirror 6",
+            "preview": "Vista previa con temas",
+            "github": "Integración con GitHub",
+            "gdrive": "Sincronización con Google Drive",
+            "export": "Múltiples formatos de exportación",
+            "pwa": "Funciona sin conexión (PWA)"
+        },
+        "madeWith": "Hecho con",
+        "by": "por",
+        "license": "Licencia MIT"
     },
     "searchPanel": {
         "title": "Buscar",

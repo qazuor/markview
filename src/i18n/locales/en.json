@@ -129,7 +129,11 @@
             "conflictResolutionDesc": "How to handle sync conflicts",
             "conflictAsk": "Ask me",
             "conflictLocal": "Keep local",
-            "conflictServer": "Keep server"
+            "conflictServer": "Keep server",
+            "connectedServices": "Connected Services",
+            "notConnected": "Not connected",
+            "disconnect": "Disconnect",
+            "signInToConnect": "Sign in to connect"
         },
         "appearance": "Appearance",
         "editor": "Editor",
@@ -215,6 +219,42 @@
         "loading": {
             "repos": "Loading repositories...",
             "tree": "Loading files..."
+        },
+        "commit": {
+            "title": "Commit to GitHub",
+            "defaultMessage": "Update {{fileName}}",
+            "messageLabel": "Commit message",
+            "messagePlaceholder": "Describe your changes...",
+            "messageRequired": "Commit message is required",
+            "characters": "characters",
+            "recommended72": "72 recommended",
+            "ctrlEnterToCommit": "Ctrl+Enter to commit",
+            "commit": "Commit",
+            "committing": "Committing...",
+            "error": "Failed to commit changes",
+            "success": "Changes committed successfully",
+            "conflict": "File was modified on GitHub. Please refresh and try again."
+        },
+        "createFile": {
+            "title": "Create File in GitHub",
+            "fileName": "File name",
+            "fileNamePlaceholder": "my-document.md",
+            "location": "Location",
+            "commitMessage": "Commit message",
+            "defaultMessage": "Create {{fileName}}",
+            "create": "Create File",
+            "creating": "Creating...",
+            "invalidName": "Invalid file name",
+            "mustBeMarkdown": "File must have .md or .mdx extension"
+        },
+        "deleteFile": {
+            "title": "Delete from GitHub",
+            "warning": "This will permanently delete the file from GitHub.",
+            "cannotUndo": "This action cannot be undone.",
+            "commitMessage": "Commit message",
+            "defaultMessage": "Delete {{fileName}}",
+            "delete": "Delete",
+            "deleting": "Deleting..."
         }
     },
     "gdrive": {
@@ -228,7 +268,35 @@
         "noFiles": "No files",
         "noFilesFound": "No files found",
         "noMarkdownFiles": "No markdown files found",
-        "loading": "Loading files..."
+        "loading": "Loading files...",
+        "root": "My Drive",
+        "createFile": {
+            "title": "Create File in Google Drive",
+            "fileName": "File name",
+            "fileNamePlaceholder": "my-document.md",
+            "location": "Location",
+            "create": "Create File",
+            "creating": "Creating...",
+            "invalidName": "Invalid file name",
+            "mustBeMarkdown": "File must have .md or .mdx extension",
+            "error": "Failed to create file"
+        },
+        "deleteFile": {
+            "title": "Delete from Google Drive",
+            "warning": "This will delete the file from Google Drive.",
+            "movedToTrash": "The file will be moved to trash.",
+            "delete": "Delete",
+            "deleting": "Deleting...",
+            "error": "Failed to delete file"
+        },
+        "folder": {
+            "newFolderPlaceholder": "New folder name...",
+            "createFolder": "Create folder",
+            "createInLocation": "New folder will be created in: {{location}}",
+            "nameRequired": "Folder name is required",
+            "createError": "Failed to create folder",
+            "noFolders": "No folders found"
+        }
     },
     "shortcuts": {
         "title": "Keyboard Shortcuts",
@@ -314,6 +382,19 @@
         "unsavedChangesWarning": "Your changes will be lost if you don't save them.",
         "dontSave": "Don't Save"
     },
+    "deleteDocument": {
+        "title": "Delete Document",
+        "warning": "This action cannot be undone.",
+        "chooseOption": "What do you want to delete?",
+        "localOnly": "Remove from list only",
+        "localOnlyDesc": "The file will remain in {{cloud}} but will be removed from your open documents.",
+        "alsoFromCloud": "Also delete from {{cloud}}",
+        "alsoFromCloudDesc": "The file will be permanently deleted from {{cloud}}.",
+        "deleting": "Deleting...",
+        "error": "Failed to delete document",
+        "cloudError": "Failed to delete from cloud",
+        "defaultCommitMessage": "Delete {{fileName}}"
+    },
     "versions": {
         "title": "Version History",
         "titleWithName": "Version History - {{documentName}}",
@@ -363,7 +444,14 @@
         "link": "Link",
         "image": "Image",
         "table": "Table",
-        "horizontalRule": "Horizontal Rule"
+        "horizontalRule": "Horizontal Rule",
+        "newDocument": "New Document",
+        "importFile": "Import File",
+        "newFile": "New File",
+        "newFileHere": "New File Here",
+        "openFile": "Open",
+        "deleteFile": "Delete",
+        "refresh": "Refresh"
     },
     "zoom": {
         "zoom": "Zoom",
@@ -394,13 +482,14 @@
         "welcome": {
             "title": "Welcome to MarkView!",
             "subtitle": "Your powerful Markdown editor",
-            "description": "MarkView is a modern Markdown editor with live preview, syntax highlighting, diagrams, and more. Let's take a quick tour to get you started!",
+            "description": "MarkView is a modern Markdown editor with live preview, syntax highlighting, diagrams, cloud sync, and more. Let's take a quick tour to get you started!",
             "features": {
                 "title": "What you can do:",
                 "realtime": "Real-time preview as you type",
                 "syntax": "Syntax highlighting for code blocks",
                 "diagrams": "Create diagrams with Mermaid",
-                "math": "Write mathematical formulas with KaTeX"
+                "math": "Write mathematical formulas with KaTeX",
+                "cloud": "Sync files with GitHub and Google Drive"
             }
         },
         "features": {
@@ -414,13 +503,13 @@
                 "title": "Live Preview",
                 "description": "See your formatted content in real-time"
             },
+            "cloud": {
+                "title": "Cloud Sync",
+                "description": "Connect to GitHub and Google Drive to sync your files"
+            },
             "toc": {
                 "title": "Table of Contents",
                 "description": "Navigate through your document structure easily"
-            },
-            "search": {
-                "title": "Quick Search",
-                "description": "Find anything across all your documents"
             }
         },
         "shortcuts": {
@@ -456,6 +545,10 @@
             "title": "Sidebar",
             "description": "Access your files, table of contents, and search from here. Switch between sections using the tabs at the top."
         },
+        "cloud": {
+            "title": "Cloud Integration",
+            "description": "Connect to GitHub and Google Drive from Settings > Sync. Browse, open, edit, and save files directly to your cloud storage."
+        },
         "statusbar": {
             "title": "Status Bar",
             "description": "See document statistics like word count, character count, and estimated reading time."
@@ -467,7 +560,26 @@
         "shortcuts": "Keyboard Shortcuts",
         "restartTour": "Restart Tour",
         "welcome": "Welcome Document",
-        "documentation": "Documentation"
+        "documentation": "Documentation",
+        "about": "About MarkView"
+    },
+    "about": {
+        "title": "About MarkView",
+        "tagline": "Markdown, visualized",
+        "version": "Version",
+        "description": "A modern, feature-rich Markdown editor with live preview, cloud sync, and powerful export options.",
+        "featuresTitle": "Key Features",
+        "features": {
+            "editor": "CodeMirror 6 editor",
+            "preview": "Live preview with themes",
+            "github": "GitHub integration",
+            "gdrive": "Google Drive sync",
+            "export": "Multiple export formats",
+            "pwa": "Works offline (PWA)"
+        },
+        "madeWith": "Made with",
+        "by": "by",
+        "license": "MIT License"
     },
     "searchPanel": {
         "title": "Search",
