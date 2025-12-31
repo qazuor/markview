@@ -1,4 +1,5 @@
 import { useDocumentStore } from '@/stores/documentStore';
+import { useUIStore } from '@/stores/uiStore';
 import { cn } from '@/utils/cn';
 import { validateFilename } from '@/utils/filename';
 import { type KeyboardEvent, useCallback, useEffect, useRef, useState } from 'react';
@@ -17,9 +18,39 @@ export function EditableTabName({ documentId, name, isActive, className }: Edita
     const [isEditing, setIsEditing] = useState(false);
     const [editValue, setEditValue] = useState(name);
     const [error, setError] = useState<string | null>(null);
+    const [isNewDocumentRename, setIsNewDocumentRename] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
 
     const renameDocument = useDocumentStore((s) => s.renameDocument);
+    const getDocument = useDocumentStore((s) => s.getDocument);
+    const updateContent = useDocumentStore((s) => s.updateContent);
+    const pendingRenameDocumentId = useUIStore((s) => s.pendingRenameDocumentId);
+    const setPendingRenameDocumentId = useUIStore((s) => s.setPendingRenameDocumentId);
+
+    const startEditing = useCallback(
+        (isNewDocument = false) => {
+            setEditValue(name);
+            setError(null);
+            setIsNewDocumentRename(isNewDocument);
+            setIsEditing(true);
+        },
+        [name]
+    );
+
+    const cancelEditing = useCallback(() => {
+        setEditValue(name);
+        setError(null);
+        setIsNewDocumentRename(false);
+        setIsEditing(false);
+    }, [name]);
+
+    // Auto-start editing when this document is flagged for rename (new document)
+    useEffect(() => {
+        if (pendingRenameDocumentId === documentId && !isEditing) {
+            startEditing(true);
+            setPendingRenameDocumentId(null);
+        }
+    }, [pendingRenameDocumentId, documentId, isEditing, startEditing, setPendingRenameDocumentId]);
 
     // Focus input when editing starts
     useEffect(() => {
@@ -36,18 +67,6 @@ export function EditableTabName({ documentId, name, isActive, className }: Edita
         }
     }, [name, isEditing]);
 
-    const startEditing = useCallback(() => {
-        setEditValue(name);
-        setError(null);
-        setIsEditing(true);
-    }, [name]);
-
-    const cancelEditing = useCallback(() => {
-        setEditValue(name);
-        setError(null);
-        setIsEditing(false);
-    }, [name]);
-
     const saveEdit = useCallback(() => {
         const trimmed = editValue.trim();
 
@@ -58,11 +77,21 @@ export function EditableTabName({ documentId, name, isActive, className }: Edita
             return;
         }
 
-        // Save
+        // Save the name
         renameDocument(documentId, trimmed, true);
+
+        // If this is a new document and content is empty, add H1 heading with the name
+        if (isNewDocumentRename) {
+            const doc = getDocument(documentId);
+            if (doc && !doc.content.trim()) {
+                updateContent(documentId, `# ${trimmed}\n\n`);
+            }
+        }
+
         setIsEditing(false);
+        setIsNewDocumentRename(false);
         setError(null);
-    }, [editValue, documentId, renameDocument]);
+    }, [editValue, documentId, renameDocument, isNewDocumentRename, getDocument, updateContent]);
 
     const handleKeyDown = useCallback(
         (e: KeyboardEvent<HTMLInputElement>) => {
@@ -123,7 +152,7 @@ export function EditableTabName({ documentId, name, isActive, className }: Edita
                 </>
             ) : (
                 <span
-                    onDoubleClick={startEditing}
+                    onDoubleClick={() => startEditing(false)}
                     className={cn('block truncate cursor-default', isActive ? 'text-text-primary' : 'text-text-secondary')}
                     title={name}
                 >

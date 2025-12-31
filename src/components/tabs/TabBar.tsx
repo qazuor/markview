@@ -90,7 +90,10 @@ export function TabBar({ className }: TabBarProps) {
     };
 
     return (
-        <div className={cn('flex items-center bg-bg-secondary border-b border-border', className)} role="tablist">
+        <div
+            className={cn('flex items-center bg-slate-50 dark:bg-bg-secondary border-b border-slate-300 dark:border-border', className)}
+            role="tablist"
+        >
             {/* Left scroll button */}
             {showLeftArrow && (
                 <IconButton

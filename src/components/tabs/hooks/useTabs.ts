@@ -1,4 +1,5 @@
 import { useDocumentStore } from '@/stores/documentStore';
+import { useUIStore } from '@/stores/uiStore';
 import type { SyncStatus } from '@/types';
 import { useCallback, useMemo, useState } from 'react';
 
@@ -20,6 +21,7 @@ function hasUnsyncedCloudChanges(syncStatus: SyncStatus): boolean {
  */
 export function useTabs() {
     const { documents, activeDocumentId, openDocument, closeDocument, createDocument, getDocument } = useDocumentStore();
+    const setPendingRenameDocumentId = useUIStore((s) => s.setPendingRenameDocumentId);
 
     const [tabOrder, setTabOrder] = useState<string[]>([]);
 
@@ -80,8 +82,9 @@ export function useTabs() {
     const addTab = useCallback(() => {
         const id = createDocument();
         setTabOrder((prev) => [...prev, id]);
+        setPendingRenameDocumentId(id);
         return id;
-    }, [createDocument]);
+    }, [createDocument, setPendingRenameDocumentId]);
 
     const reorderTabs = useCallback((fromIndex: number, toIndex: number) => {
         setTabOrder((prev) => {
