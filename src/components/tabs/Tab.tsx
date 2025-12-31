@@ -95,9 +95,11 @@ export function Tab({
                     'group relative flex items-center gap-2 px-3 py-1.5',
                     'min-w-[100px] max-w-[180px]',
                     'cursor-pointer select-none',
-                    'border-r border-border',
+                    'border-r border-slate-300 dark:border-border',
                     'transition-colors duration-150',
-                    isActive ? 'bg-bg-primary text-text-primary' : 'bg-bg-secondary text-text-secondary hover:bg-bg-tertiary'
+                    isActive
+                        ? 'bg-white dark:bg-bg-primary text-slate-900 dark:text-text-primary'
+                        : 'bg-slate-100 dark:bg-bg-secondary text-slate-600 dark:text-text-secondary hover:bg-slate-200 dark:hover:bg-bg-tertiary'
                 )}
             >
                 {/* Sync status indicator with tooltip */}
