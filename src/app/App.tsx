@@ -2,14 +2,22 @@ import welcomeContentEs from '@/assets/welcome-es.md?raw';
 import welcomeContentEn from '@/assets/welcome.md?raw';
 import { Header } from '@/components/header';
 import { MainLayout } from '@/components/layout';
-import { KeyboardShortcutsModal, OnboardingModal, SettingsModal, VersionDiffModal, VersionHistoryModal } from '@/components/modals';
+import {
+    AboutModal,
+    CommitModal,
+    KeyboardShortcutsModal,
+    OnboardingModal,
+    SettingsModal,
+    VersionDiffModal,
+    VersionHistoryModal
+} from '@/components/modals';
 import { FeatureTour } from '@/components/onboarding/FeatureTour';
 import { Sidebar } from '@/components/sidebar';
 import { StatusBar } from '@/components/statusbar';
 import { TabBar } from '@/components/tabs';
 import { Toolbar } from '@/components/toolbar';
 import { DropOverlay } from '@/components/ui';
-import { useDragAndDrop, useFileImport, useMobile, useOnboarding, useTheme, useZoom } from '@/hooks';
+import { useDragAndDrop, useFileImport, useGitHubSave, useGoogleDriveSave, useMobile, useOnboarding, useTheme, useZoom } from '@/hooks';
 import { usePreviewSync } from '@/hooks/useBroadcastChannel';
 import { useDocumentStore, useSettingsStore, useUIStore } from '@/stores';
 import { cn } from '@/utils/cn';
@@ -55,10 +63,19 @@ export function App() {
     const activeModal = useUIStore((state) => state.activeModal);
     const openModal = useUIStore((state) => state.openModal);
     const closeModal = useUIStore((state) => state.closeModal);
+    const setPendingRenameDocumentId = useUIStore((state) => state.setPendingRenameDocumentId);
 
     const activeDocument = activeDocumentId ? (documents.get(activeDocumentId) ?? null) : null;
     const [editorView, setEditorView] = useState<EditorView | null>(null);
     const [compareVersionId, setCompareVersionId] = useState<string | null>(null);
+
+    // GitHub save hook
+    const { showCommitModal, pendingDocument, openCommitModal, closeCommitModal, confirmCommit } = useGitHubSave();
+
+    // Google Drive save hook with auto-save (30 seconds after last edit)
+    const { saveToGoogleDrive } = useGoogleDriveSave({
+        autoSaveDelay: 30000
+    });
 
     // Refs for preview sync to avoid circular dependencies
     const syncContentRef = useRef<((content: string, theme: 'light' | 'dark') => void) | null>(null);
@@ -154,13 +171,22 @@ export function App() {
             // Ctrl+N - New document
             if (isMod && e.key === 'n') {
                 e.preventDefault();
-                createDocument();
+                const id = createDocument();
+                setPendingRenameDocumentId(id);
                 return;
             }
 
-            // Ctrl+S - Prevent browser save dialog (documents auto-persist)
+            // Ctrl+S - Save to cloud if it's a cloud file, otherwise just prevent browser dialog
             if (isMod && e.key === 's' && !e.shiftKey) {
                 e.preventDefault();
+                // If active document is from GitHub, open commit modal
+                if (activeDocument?.source === 'github' && activeDocument.githubInfo) {
+                    openCommitModal(activeDocument);
+                }
+                // If active document is from Google Drive, save directly
+                else if (activeDocument?.source === 'gdrive' && activeDocument.driveInfo) {
+                    saveToGoogleDrive(activeDocument);
+                }
                 return;
             }
 
@@ -216,9 +242,11 @@ export function App() {
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [
+        activeDocument,
         activeDocumentId,
         documents.size,
         createDocument,
+        setPendingRenameDocumentId,
         closeDocument,
         toggleSidebar,
         openModal,
@@ -226,7 +254,9 @@ export function App() {
         activeModal,
         zenMode,
         toggleZenMode,
-        setZenMode
+        setZenMode,
+        openCommitModal,
+        saveToGoogleDrive
     ]);
 
     // Handle editor view ready
@@ -344,18 +374,7 @@ export function App() {
                             >
                                 <X className="h-5 w-5" />
                             </button>
-                            <Sidebar
-                                content={activeDocument?.content}
-                                activeLine={activeDocument?.cursor?.line}
-                                onNavigate={(line, column) => {
-                                    handleNavigate(line, column);
-                                    setSidebarOpen(false);
-                                }}
-                                onReplace={handleReplace}
-                                isCollapsed={false}
-                                onCollapsedChange={() => setSidebarOpen(false)}
-                                className="h-full"
-                            />
+                            <Sidebar isCollapsed={false} onCollapsedChange={() => setSidebarOpen(false)} className="h-full" />
                         </div>
                     </>
                 )}
@@ -363,10 +382,6 @@ export function App() {
                 {/* Desktop Sidebar */}
                 {!isMobile && !zenMode && (
                     <Sidebar
-                        content={activeDocument?.content}
-                        activeLine={activeDocument?.cursor?.line}
-                        onNavigate={handleNavigate}
-                        onReplace={handleReplace}
                         isCollapsed={!sidebarOpen}
                         onCollapsedChange={(collapsed) => setSidebarOpen(!collapsed)}
                         className="shrink-0"
@@ -374,7 +389,13 @@ export function App() {
                 )}
 
                 {/* Editor and Preview */}
-                <MainLayout className="flex-1 min-w-0" onEditorViewReady={handleEditorViewReady} />
+                <MainLayout
+                    className="flex-1 min-w-0"
+                    onEditorViewReady={handleEditorViewReady}
+                    activeLine={activeDocument?.cursor?.line}
+                    onNavigate={handleNavigate}
+                    onReplace={handleReplace}
+                />
             </main>
 
             {/* Status bar */}
@@ -404,6 +425,7 @@ export function App() {
             <OnboardingModal isOpen={showOnboarding} onClose={() => completeOnboarding(false)} onComplete={completeOnboarding} />
             <KeyboardShortcutsModal isOpen={activeModal === 'shortcuts'} onClose={closeModal} />
             <SettingsModal isOpen={activeModal === 'settings'} onClose={closeModal} />
+            <AboutModal isOpen={activeModal === 'about'} onClose={closeModal} />
 
             {activeDocument && (
                 <VersionHistoryModal
@@ -423,6 +445,19 @@ export function App() {
                     versionId={compareVersionId}
                     currentContent={activeDocument.content}
                     onClose={() => setCompareVersionId(null)}
+                />
+            )}
+
+            {/* GitHub Commit Modal */}
+            {pendingDocument?.githubInfo && (
+                <CommitModal
+                    isOpen={showCommitModal}
+                    onClose={closeCommitModal}
+                    onCommit={confirmCommit}
+                    fileName={pendingDocument.name}
+                    repoName={`${pendingDocument.githubInfo.owner}/${pendingDocument.githubInfo.repo}`}
+                    branch={pendingDocument.githubInfo.branch}
+                    filePath={pendingDocument.githubInfo.path}
                 />
             )}
 
