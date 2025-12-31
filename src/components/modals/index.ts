@@ -1,3 +1,10 @@
+export { AboutModal } from './AboutModal';
+export { CommitModal } from './CommitModal';
+export { CreateGitHubFileModal } from './CreateGitHubFileModal';
+export { CreateGoogleDriveFileModal } from './CreateGoogleDriveFileModal';
+export { DeleteDocumentModal } from './DeleteDocumentModal';
+export { DeleteGitHubFileModal } from './DeleteGitHubFileModal';
+export { DeleteGoogleDriveFileModal } from './DeleteGoogleDriveFileModal';
 export { KeyboardShortcutsModal } from './KeyboardShortcutsModal';
 export { OnboardingModal } from './OnboardingModal';
 export { SettingsModal } from './SettingsModal';
