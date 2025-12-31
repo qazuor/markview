@@ -59,6 +59,13 @@ export function FeatureTour({ isActive, currentStep, onNext, onPrevious, onSkip,
             position: 'right'
         },
         {
+            id: 'cloud',
+            target: '[data-tour="cloud"]',
+            title: t('tour.cloud.title'),
+            description: t('tour.cloud.description'),
+            position: 'right'
+        },
+        {
             id: 'statusbar',
             target: '[data-tour="statusbar"]',
             title: t('tour.statusbar.title'),
