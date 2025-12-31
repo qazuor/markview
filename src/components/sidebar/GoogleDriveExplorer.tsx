@@ -3,13 +3,15 @@
  * Browse and select files from Google Drive
  */
 
+import { CreateGoogleDriveFileModal, DeleteGoogleDriveFileModal } from '@/components/modals';
 import { checkConnection, fetchFileContent, fetchFileTree, filterMarkdownOnly, getQuota } from '@/services/gdrive';
 import { useDocumentStore } from '@/stores/documentStore';
 import { useGoogleDriveStore } from '@/stores/gdriveStore';
 import type { DriveFileTreeNode } from '@/types/gdrive';
-import { ChevronDown, ChevronRight, File, FileText, Folder, FolderOpen, HardDrive, Loader2, RefreshCw, Search } from 'lucide-react';
+import { ChevronDown, ChevronRight, File, FileText, Folder, FolderOpen, HardDrive, Loader2, Plus, RefreshCw, Search } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { GoogleDriveEmptyContextMenu, GoogleDriveFileContextMenu, GoogleDriveFolderContextMenu } from './GoogleDriveContextMenus';
 
 interface FileTreeItemProps {
     node: DriveFileTreeNode;
@@ -18,9 +20,11 @@ interface FileTreeItemProps {
     isLoading: boolean;
     onToggle: (id: string) => void;
     onSelect: (node: DriveFileTreeNode) => void;
+    onNewFileHere: (folderId: string, folderName: string) => void;
+    onDelete: (node: DriveFileTreeNode) => void;
 }
 
-function FileTreeItem({ node, level, isExpanded, isLoading, onToggle, onSelect }: FileTreeItemProps) {
+function FileTreeItem({ node, level, isExpanded, isLoading, onToggle, onSelect, onNewFileHere, onDelete }: FileTreeItemProps) {
     const isFolder = node.type === 'folder';
     const paddingLeft = `${level * 12 + 8}px`;
 
@@ -33,7 +37,7 @@ function FileTreeItem({ node, level, isExpanded, isLoading, onToggle, onSelect }
         }
     }, [isFolder, isLoading, node, onToggle, onSelect]);
 
-    return (
+    const button = (
         <button
             type="button"
             onClick={handleClick}
@@ -69,6 +73,21 @@ function FileTreeItem({ node, level, isExpanded, isLoading, onToggle, onSelect }
             <span className="truncate">{node.name}</span>
         </button>
     );
+
+    // Wrap with appropriate context menu
+    if (isFolder) {
+        return (
+            <GoogleDriveFolderContextMenu folderId={node.id} folderName={node.name} onNewFileHere={onNewFileHere}>
+                {button}
+            </GoogleDriveFolderContextMenu>
+        );
+    }
+
+    return (
+        <GoogleDriveFileContextMenu node={node} onOpen={onSelect} onDelete={onDelete}>
+            {button}
+        </GoogleDriveFileContextMenu>
+    );
 }
 
 interface FileTreeNodesProps {
@@ -78,9 +97,11 @@ interface FileTreeNodesProps {
     loadingId: string | null;
     onToggle: (id: string) => void;
     onSelect: (node: DriveFileTreeNode) => void;
+    onNewFileHere: (folderId: string, folderName: string) => void;
+    onDelete: (node: DriveFileTreeNode) => void;
 }
 
-function FileTreeNodes({ nodes, level, expandedPaths, loadingId, onToggle, onSelect }: FileTreeNodesProps) {
+function FileTreeNodes({ nodes, level, expandedPaths, loadingId, onToggle, onSelect, onNewFileHere, onDelete }: FileTreeNodesProps) {
     return (
         <>
             {nodes.map((node) => {
@@ -95,6 +116,8 @@ function FileTreeNodes({ nodes, level, expandedPaths, loadingId, onToggle, onSel
                             isLoading={isLoading}
                             onToggle={onToggle}
                             onSelect={onSelect}
+                            onNewFileHere={onNewFileHere}
+                            onDelete={onDelete}
                         />
                         {node.type === 'folder' && isExpanded && node.children && (
                             <FileTreeNodes
@@ -104,6 +127,8 @@ function FileTreeNodes({ nodes, level, expandedPaths, loadingId, onToggle, onSel
                                 loadingId={loadingId}
                                 onToggle={onToggle}
                                 onSelect={onSelect}
+                                onNewFileHere={onNewFileHere}
+                                onDelete={onDelete}
                             />
                         )}
                     </div>
@@ -143,6 +168,10 @@ export function GoogleDriveExplorer({ onFileSelect, onFileOpened }: GoogleDriveE
     const [searchQuery, setSearchQuery] = useState('');
     const [showMarkdownOnly, setShowMarkdownOnly] = useState(true);
     const [loadingFile, setLoadingFile] = useState<string | null>(null);
+    const [showCreateModal, setShowCreateModal] = useState(false);
+    const [createFolderId, setCreateFolderId] = useState('root');
+    const [createFolderName, setCreateFolderName] = useState('');
+    const [fileToDelete, setFileToDelete] = useState<DriveFileTreeNode | null>(null);
 
     // Check connection on mount
     useEffect(() => {
@@ -276,6 +305,54 @@ export function GoogleDriveExplorer({ onFileSelect, onFileOpened }: GoogleDriveE
         [findDocumentByDrive, openDocument, createDocument, onFileSelect, onFileOpened]
     );
 
+    // Handle file creation success
+    const handleCreateSuccess = useCallback(
+        (fileId: string, name: string) => {
+            // Create document for the new file with H1 heading
+            const titleName = name.replace(/\.mdx?$/i, '');
+            createDocument({
+                name,
+                content: `# ${titleName}\n\n`,
+                source: 'gdrive',
+                driveInfo: {
+                    fileId,
+                    name,
+                    mimeType: 'text/markdown'
+                }
+            });
+
+            // Refresh file tree
+            fetchFileTree(true).then((tree) => {
+                setFileTree(tree);
+            });
+
+            onFileOpened?.();
+        },
+        [createDocument, setFileTree, onFileOpened]
+    );
+
+    // Handle new file here (from context menu)
+    const handleNewFileHere = useCallback((folderId: string, folderName: string) => {
+        setCreateFolderId(folderId);
+        setCreateFolderName(folderName);
+        setShowCreateModal(true);
+    }, []);
+
+    // Handle delete file (from context menu)
+    const handleDeleteFile = useCallback((node: DriveFileTreeNode) => {
+        setFileToDelete(node);
+    }, []);
+
+    // Handle delete success
+    const handleDeleteSuccess = useCallback(() => {
+        // Refresh file tree
+        fetchFileTree(true).then((tree) => {
+            setFileTree(tree);
+        });
+
+        setFileToDelete(null);
+    }, [setFileTree]);
+
     // Format quota for display
     const quotaDisplay = useMemo(() => {
         if (!quota) return null;
@@ -315,19 +392,29 @@ export function GoogleDriveExplorer({ onFileSelect, onFileOpened }: GoogleDriveE
         <div className="flex flex-col h-full">
             {/* Header */}
             <div className="flex items-center justify-between p-2 border-b">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-1 min-w-0">
                     {user?.picture && <img src={user.picture} alt={user.name || user.email} className="w-5 h-5 rounded-full" />}
                     <span className="text-sm font-medium truncate">{user?.name || user?.email}</span>
                 </div>
-                <button
-                    type="button"
-                    onClick={handleRefresh}
-                    disabled={treeLoading}
-                    className="p-1 hover:bg-accent rounded-sm disabled:opacity-50"
-                    title={t('gdrive.refresh', 'Refresh')}
-                >
-                    <RefreshCw className={`w-4 h-4 ${treeLoading ? 'animate-spin' : ''}`} />
-                </button>
+                <div className="flex items-center gap-1">
+                    <button
+                        type="button"
+                        onClick={() => handleNewFileHere('root', t('gdrive.root'))}
+                        className="p-1 hover:bg-accent rounded-sm"
+                        title={t('gdrive.createFile.title')}
+                    >
+                        <Plus className="w-4 h-4" />
+                    </button>
+                    <button
+                        type="button"
+                        onClick={handleRefresh}
+                        disabled={treeLoading}
+                        className="p-1 hover:bg-accent rounded-sm disabled:opacity-50"
+                        title={t('gdrive.refresh', 'Refresh')}
+                    >
+                        <RefreshCw className={`w-4 h-4 ${treeLoading ? 'animate-spin' : ''}`} />
+                    </button>
+                </div>
             </div>
 
             {/* Search */}
@@ -358,30 +445,34 @@ export function GoogleDriveExplorer({ onFileSelect, onFileOpened }: GoogleDriveE
             </div>
 
             {/* File tree */}
-            <div className="flex-1 overflow-y-auto py-1">
-                {treeLoading && !fileTree.length ? (
-                    <div className="text-center py-4">
-                        <div className="animate-spin w-5 h-5 border-2 border-primary border-t-transparent rounded-full mx-auto" />
-                    </div>
-                ) : displayedTree.length === 0 ? (
-                    <p className="text-center text-sm text-muted-foreground py-4">
-                        {searchQuery
-                            ? t('gdrive.noFilesFound', 'No files found')
-                            : showMarkdownOnly
-                              ? t('gdrive.noMarkdownFiles', 'No markdown files found')
-                              : t('gdrive.noFiles', 'No files')}
-                    </p>
-                ) : (
-                    <FileTreeNodes
-                        nodes={displayedTree}
-                        level={0}
-                        expandedPaths={expandedPaths}
-                        loadingId={loadingFile}
-                        onToggle={toggleExpanded}
-                        onSelect={handleFileSelect}
-                    />
-                )}
-            </div>
+            <GoogleDriveEmptyContextMenu onNewFile={() => handleNewFileHere('root', t('gdrive.root'))} onRefresh={handleRefresh}>
+                <div className="flex-1 overflow-y-auto py-1">
+                    {treeLoading && !fileTree.length ? (
+                        <div className="text-center py-4">
+                            <div className="animate-spin w-5 h-5 border-2 border-primary border-t-transparent rounded-full mx-auto" />
+                        </div>
+                    ) : displayedTree.length === 0 ? (
+                        <p className="text-center text-sm text-muted-foreground py-4">
+                            {searchQuery
+                                ? t('gdrive.noFilesFound', 'No files found')
+                                : showMarkdownOnly
+                                  ? t('gdrive.noMarkdownFiles', 'No markdown files found')
+                                  : t('gdrive.noFiles', 'No files')}
+                        </p>
+                    ) : (
+                        <FileTreeNodes
+                            nodes={displayedTree}
+                            level={0}
+                            expandedPaths={expandedPaths}
+                            loadingId={loadingFile}
+                            onToggle={toggleExpanded}
+                            onSelect={handleFileSelect}
+                            onNewFileHere={handleNewFileHere}
+                            onDelete={handleDeleteFile}
+                        />
+                    )}
+                </div>
+            </GoogleDriveEmptyContextMenu>
 
             {/* Quota footer */}
             {quotaDisplay && (
@@ -399,6 +490,30 @@ export function GoogleDriveExplorer({ onFileSelect, onFileOpened }: GoogleDriveE
                         />
                     </div>
                 </div>
+            )}
+
+            {/* Create File Modal */}
+            <CreateGoogleDriveFileModal
+                isOpen={showCreateModal}
+                onClose={() => {
+                    setShowCreateModal(false);
+                    setCreateFolderId('root');
+                    setCreateFolderName('');
+                }}
+                onSuccess={handleCreateSuccess}
+                currentFolderId={createFolderId}
+                currentFolderName={createFolderName || t('gdrive.root')}
+            />
+
+            {/* Delete File Modal */}
+            {fileToDelete && (
+                <DeleteGoogleDriveFileModal
+                    isOpen={!!fileToDelete}
+                    onClose={() => setFileToDelete(null)}
+                    onSuccess={handleDeleteSuccess}
+                    fileId={fileToDelete.id}
+                    fileName={fileToDelete.name}
+                />
             )}
         </div>
     );

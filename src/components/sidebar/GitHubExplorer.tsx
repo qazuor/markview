@@ -3,6 +3,7 @@
  * Browse and select files from GitHub repositories
  */
 
+import { CreateGitHubFileModal, DeleteGitHubFileModal } from '@/components/modals';
 import {
     checkConnection,
     fetchFileContent,
@@ -16,9 +17,23 @@ import { useGitHubStore } from '@/stores/githubStore';
 import type { FileTreeNode, Repository } from '@/types/github';
 import type { RepoFilterOptions } from '@/types/github';
 import { parseRepoFullName } from '@/types/github';
-import { ChevronDown, ChevronRight, File, FileText, Folder, FolderOpen, GitBranch, Loader2, Lock, RefreshCw, Search } from 'lucide-react';
+import {
+    ChevronDown,
+    ChevronRight,
+    File,
+    FileText,
+    Folder,
+    FolderOpen,
+    GitBranch,
+    Loader2,
+    Lock,
+    Plus,
+    RefreshCw,
+    Search
+} from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { GitHubEmptyContextMenu, GitHubFileContextMenu, GitHubFolderContextMenu } from './GitHubContextMenus';
 
 interface FileTreeItemProps {
     node: FileTreeNode;
@@ -27,9 +42,11 @@ interface FileTreeItemProps {
     isLoading: boolean;
     onToggle: (path: string) => void;
     onSelect: (node: FileTreeNode) => void;
+    onNewFileHere: (path: string) => void;
+    onDelete: (node: FileTreeNode) => void;
 }
 
-function FileTreeItem({ node, level, isExpanded, isLoading, onToggle, onSelect }: FileTreeItemProps) {
+function FileTreeItem({ node, level, isExpanded, isLoading, onToggle, onSelect, onNewFileHere, onDelete }: FileTreeItemProps) {
     const isDirectory = node.type === 'directory';
     const paddingLeft = `${level * 12 + 8}px`;
 
@@ -42,7 +59,7 @@ function FileTreeItem({ node, level, isExpanded, isLoading, onToggle, onSelect }
         }
     }, [isDirectory, isLoading, node, onToggle, onSelect]);
 
-    return (
+    const button = (
         <button
             type="button"
             onClick={handleClick}
@@ -78,6 +95,21 @@ function FileTreeItem({ node, level, isExpanded, isLoading, onToggle, onSelect }
             <span className="truncate">{node.name}</span>
         </button>
     );
+
+    // Wrap with appropriate context menu
+    if (isDirectory) {
+        return (
+            <GitHubFolderContextMenu folderPath={node.path} onNewFileHere={onNewFileHere}>
+                {button}
+            </GitHubFolderContextMenu>
+        );
+    }
+
+    return (
+        <GitHubFileContextMenu node={node} onOpen={onSelect} onDelete={onDelete}>
+            {button}
+        </GitHubFileContextMenu>
+    );
 }
 
 interface FileTreeNodesProps {
@@ -87,9 +119,11 @@ interface FileTreeNodesProps {
     loadingPath: string | null;
     onToggle: (path: string) => void;
     onSelect: (node: FileTreeNode) => void;
+    onNewFileHere: (path: string) => void;
+    onDelete: (node: FileTreeNode) => void;
 }
 
-function FileTreeNodes({ nodes, level, expandedPaths, loadingPath, onToggle, onSelect }: FileTreeNodesProps) {
+function FileTreeNodes({ nodes, level, expandedPaths, loadingPath, onToggle, onSelect, onNewFileHere, onDelete }: FileTreeNodesProps) {
     return (
         <>
             {nodes.map((node) => {
@@ -104,6 +138,8 @@ function FileTreeNodes({ nodes, level, expandedPaths, loadingPath, onToggle, onS
                             isLoading={isLoading}
                             onToggle={onToggle}
                             onSelect={onSelect}
+                            onNewFileHere={onNewFileHere}
+                            onDelete={onDelete}
                         />
                         {node.type === 'directory' && isExpanded && node.children && (
                             <FileTreeNodes
@@ -113,6 +149,8 @@ function FileTreeNodes({ nodes, level, expandedPaths, loadingPath, onToggle, onS
                                 loadingPath={loadingPath}
                                 onToggle={onToggle}
                                 onSelect={onSelect}
+                                onNewFileHere={onNewFileHere}
+                                onDelete={onDelete}
                             />
                         )}
                     </div>
@@ -126,9 +164,12 @@ interface RepoFileTreeProps {
     repo: Repository;
     loadingPath: string | null;
     onFileSelect: (node: FileTreeNode) => void;
+    onNewFileHere: (path: string) => void;
+    onDelete: (node: FileTreeNode) => void;
+    onRefresh: () => void;
 }
 
-function RepoFileTree({ repo, loadingPath, onFileSelect }: RepoFileTreeProps) {
+function RepoFileTree({ repo, loadingPath, onFileSelect, onNewFileHere, onDelete, onRefresh }: RepoFileTreeProps) {
     const { t } = useTranslation();
     const { fileTree, treeLoading, expandedPaths, setFileTree, setTreeLoading, toggleExpanded } = useGitHubStore();
 
@@ -162,9 +203,11 @@ function RepoFileTree({ repo, loadingPath, onFileSelect }: RepoFileTreeProps) {
 
     if (!displayedTree.length) {
         return (
-            <div className="p-4 text-center text-sm text-muted-foreground">
-                {showMarkdownOnly ? t('github.noMarkdownFiles', 'No markdown files found') : t('github.noFiles', 'No files found')}
-            </div>
+            <GitHubEmptyContextMenu onNewFile={() => onNewFileHere('')} onRefresh={onRefresh}>
+                <div className="p-4 text-center text-sm text-muted-foreground">
+                    {showMarkdownOnly ? t('github.noMarkdownFiles', 'No markdown files found') : t('github.noFiles', 'No files found')}
+                </div>
+            </GitHubEmptyContextMenu>
         );
     }
 
@@ -181,16 +224,20 @@ function RepoFileTree({ repo, loadingPath, onFileSelect }: RepoFileTreeProps) {
                     {t('github.markdownOnly', 'Markdown only')}
                 </label>
             </div>
-            <div className="flex-1 overflow-y-auto py-1">
-                <FileTreeNodes
-                    nodes={displayedTree}
-                    level={0}
-                    expandedPaths={expandedPaths}
-                    loadingPath={loadingPath}
-                    onToggle={toggleExpanded}
-                    onSelect={onFileSelect}
-                />
-            </div>
+            <GitHubEmptyContextMenu onNewFile={() => onNewFileHere('')} onRefresh={onRefresh}>
+                <div className="flex-1 overflow-y-auto py-1">
+                    <FileTreeNodes
+                        nodes={displayedTree}
+                        level={0}
+                        expandedPaths={expandedPaths}
+                        loadingPath={loadingPath}
+                        onToggle={toggleExpanded}
+                        onSelect={onFileSelect}
+                        onNewFileHere={onNewFileHere}
+                        onDelete={onDelete}
+                    />
+                </div>
+            </GitHubEmptyContextMenu>
         </div>
     );
 }
@@ -239,13 +286,17 @@ export function GitHubExplorer({ onFileSelect, onFileOpened }: GitHubExplorerPro
         setError,
         setRepositories,
         setReposLoading,
-        selectRepo
+        selectRepo,
+        setFileTree
     } = useGitHubStore();
 
     const { createDocument, findDocumentByGitHub, openDocument } = useDocumentStore();
 
     const [searchQuery, setSearchQuery] = useState('');
     const [loadingFile, setLoadingFile] = useState<string | null>(null);
+    const [showCreateModal, setShowCreateModal] = useState(false);
+    const [createPath, setCreatePath] = useState('');
+    const [fileToDelete, setFileToDelete] = useState<FileTreeNode | null>(null);
     const [filterOptions] = useState<RepoFilterOptions>({
         search: '',
         visibility: 'all',
@@ -360,6 +411,70 @@ export function GitHubExplorer({ onFileSelect, onFileOpened }: GitHubExplorerPro
         [selectedRepo, findDocumentByGitHub, openDocument, createDocument, onFileSelect, onFileOpened]
     );
 
+    // Handle file creation success
+    const handleCreateSuccess = useCallback(
+        (sha: string, path: string) => {
+            if (!selectedRepo) return;
+
+            const { owner, repo } = parseRepoFullName(selectedRepo.fullName);
+            const fileName = path.split('/').pop() || path;
+            const titleName = fileName.replace(/\.mdx?$/i, '');
+
+            // Create document for the new file with H1 heading
+            createDocument({
+                name: fileName,
+                content: `# ${titleName}\n\n`,
+                source: 'github',
+                githubInfo: {
+                    owner,
+                    repo,
+                    path,
+                    sha,
+                    branch: selectedRepo.defaultBranch
+                }
+            });
+
+            // Refresh file tree
+            fetchFileTree(selectedRepo).then((nodes) => {
+                setFileTree(selectedRepo.fullName, nodes);
+            });
+
+            onFileOpened?.();
+        },
+        [selectedRepo, createDocument, setFileTree, onFileOpened]
+    );
+
+    // Handle new file here (from context menu)
+    const handleNewFileHere = useCallback((path: string) => {
+        setCreatePath(path);
+        setShowCreateModal(true);
+    }, []);
+
+    // Handle delete file (from context menu)
+    const handleDeleteFile = useCallback((node: FileTreeNode) => {
+        setFileToDelete(node);
+    }, []);
+
+    // Handle delete success
+    const handleDeleteSuccess = useCallback(() => {
+        if (!selectedRepo) return;
+
+        // Refresh file tree
+        fetchFileTree(selectedRepo).then((nodes) => {
+            setFileTree(selectedRepo.fullName, nodes);
+        });
+
+        setFileToDelete(null);
+    }, [selectedRepo, setFileTree]);
+
+    // Handle refresh tree
+    const handleRefreshTree = useCallback(async () => {
+        if (!selectedRepo) return;
+
+        const nodes = await fetchFileTree(selectedRepo, true);
+        setFileTree(selectedRepo.fullName, nodes);
+    }, [selectedRepo, setFileTree]);
+
     // Not connected state
     if (!isConnected) {
         if (isLoading) {
@@ -387,6 +502,7 @@ export function GitHubExplorer({ onFileSelect, onFileOpened }: GitHubExplorerPro
 
     // Show file tree if repo is selected
     if (selectedRepo) {
+        const { owner, repo } = parseRepoFullName(selectedRepo.fullName);
         return (
             <div className="flex flex-col h-full">
                 <div className="flex items-center gap-2 p-2 border-b">
@@ -399,9 +515,51 @@ export function GitHubExplorer({ onFileSelect, onFileOpened }: GitHubExplorerPro
                         <ChevronRight className="w-4 h-4 rotate-180" />
                     </button>
                     <GitBranch className="w-4 h-4" />
-                    <span className="text-sm font-medium truncate">{selectedRepo.name}</span>
+                    <span className="text-sm font-medium truncate flex-1">{selectedRepo.name}</span>
+                    <button
+                        type="button"
+                        onClick={() => handleNewFileHere('')}
+                        className="p-1 hover:bg-accent rounded-sm"
+                        title={t('github.createFile.title')}
+                    >
+                        <Plus className="w-4 h-4" />
+                    </button>
                 </div>
-                <RepoFileTree repo={selectedRepo} loadingPath={loadingFile} onFileSelect={handleFileSelect} />
+                <RepoFileTree
+                    repo={selectedRepo}
+                    loadingPath={loadingFile}
+                    onFileSelect={handleFileSelect}
+                    onNewFileHere={handleNewFileHere}
+                    onDelete={handleDeleteFile}
+                    onRefresh={handleRefreshTree}
+                />
+
+                {/* Create File Modal */}
+                <CreateGitHubFileModal
+                    isOpen={showCreateModal}
+                    onClose={() => {
+                        setShowCreateModal(false);
+                        setCreatePath('');
+                    }}
+                    onSuccess={handleCreateSuccess}
+                    repoName={`${owner}/${repo}`}
+                    branch={selectedRepo.defaultBranch}
+                    currentPath={createPath}
+                />
+
+                {/* Delete File Modal */}
+                {fileToDelete && (
+                    <DeleteGitHubFileModal
+                        isOpen={!!fileToDelete}
+                        onClose={() => setFileToDelete(null)}
+                        onSuccess={handleDeleteSuccess}
+                        fileName={fileToDelete.name}
+                        filePath={fileToDelete.path}
+                        repoName={`${owner}/${repo}`}
+                        branch={selectedRepo.defaultBranch}
+                        sha={fileToDelete.sha}
+                    />
+                )}
             </div>
         );
     }
