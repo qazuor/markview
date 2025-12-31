@@ -1,4 +1,5 @@
 import { IconButton, Tooltip } from '@/components/ui';
+import type { SidebarSection } from '@/types/ui';
 import { cn } from '@/utils/cn';
 import { ChevronLeft } from 'lucide-react';
 import { useState } from 'react';
@@ -6,32 +7,19 @@ import { useTranslation } from 'react-i18next';
 import { FileExplorer } from './FileExplorer';
 import { GitHubExplorer } from './GitHubExplorer';
 import { GoogleDriveExplorer } from './GoogleDriveExplorer';
-import { SearchPanel } from './SearchPanel';
-import { SidebarNav, type SidebarSection } from './SidebarNav';
-import { TableOfContents } from './TableOfContents';
+import { SidebarNav } from './SidebarNav';
 
 interface SidebarProps {
-    content?: string;
-    activeLine?: number;
-    onNavigate?: (line: number, column?: number) => void;
-    onReplace?: (search: string, replace: string, all: boolean) => void;
     isCollapsed?: boolean;
     onCollapsedChange?: (collapsed: boolean) => void;
     className?: string;
 }
 
 /**
- * Main sidebar with file explorer, TOC, and search
+ * Main sidebar with file explorer and cloud integrations
+ * TOC and Search have been moved to the floating DocumentPanel
  */
-export function Sidebar({
-    content = '',
-    activeLine,
-    onNavigate,
-    onReplace,
-    isCollapsed = false,
-    onCollapsedChange,
-    className
-}: SidebarProps) {
+export function Sidebar({ isCollapsed = false, onCollapsedChange, className }: SidebarProps) {
     const { t } = useTranslation();
     const [activeSection, setActiveSection] = useState<SidebarSection>('explorer');
 
@@ -70,12 +58,6 @@ export function Sidebar({
                 {/* Section content */}
                 <div className="flex-1 overflow-hidden">
                     {activeSection === 'explorer' && <FileExplorer />}
-                    {activeSection === 'toc' && (
-                        <TableOfContents content={content} activeLine={activeLine} onNavigate={(line) => onNavigate?.(line)} />
-                    )}
-                    {activeSection === 'search' && (
-                        <SearchPanel content={content} onNavigate={(line, column) => onNavigate?.(line, column)} onReplace={onReplace} />
-                    )}
                     {activeSection === 'github' && <GitHubExplorer onFileOpened={() => setActiveSection('explorer')} />}
                     {activeSection === 'gdrive' && <GoogleDriveExplorer onFileOpened={() => setActiveSection('explorer')} />}
                 </div>

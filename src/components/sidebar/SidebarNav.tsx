@@ -1,9 +1,8 @@
 import { IconButton, Tooltip } from '@/components/ui';
+import type { SidebarSection } from '@/types/ui';
 import { cn } from '@/utils/cn';
-import { FileText, Github, HardDrive, List, Search } from 'lucide-react';
+import { FileText, Github, HardDrive } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-
-export type SidebarSection = 'explorer' | 'toc' | 'search' | 'github' | 'gdrive';
 
 interface SidebarNavProps {
     activeSection: SidebarSection;
@@ -12,38 +11,47 @@ interface SidebarNavProps {
 }
 
 /**
- * Sidebar navigation icons
+ * Sidebar navigation icons for file management
+ * TOC and Search have been moved to the floating DocumentPanel
  */
 export function SidebarNav({ activeSection, onSectionChange, className }: SidebarNavProps) {
     const { t } = useTranslation();
 
-    const sections = [
-        { id: 'explorer' as const, icon: FileText, labelKey: 'sidebar.explorer' },
-        { id: 'toc' as const, icon: List, labelKey: 'sidebar.toc' },
-        { id: 'search' as const, icon: Search, labelKey: 'sidebar.search' },
-        { id: 'github' as const, icon: Github, labelKey: 'sidebar.github' },
-        { id: 'gdrive' as const, icon: HardDrive, labelKey: 'sidebar.gdrive' }
+    const mainSections: { id: SidebarSection; icon: typeof FileText; labelKey: string }[] = [
+        { id: 'explorer', icon: FileText, labelKey: 'sidebar.explorer' }
     ];
+
+    const cloudSections: { id: SidebarSection; icon: typeof Github; labelKey: string }[] = [
+        { id: 'github', icon: Github, labelKey: 'sidebar.github' },
+        { id: 'gdrive', icon: HardDrive, labelKey: 'sidebar.gdrive' }
+    ];
+
+    const renderNavButton = (section: { id: SidebarSection; icon: typeof FileText; labelKey: string }) => {
+        const Icon = section.icon;
+        const isActive = activeSection === section.id;
+        const label = t(section.labelKey);
+
+        return (
+            <Tooltip key={section.id} content={label} side="right">
+                <IconButton
+                    icon={<Icon className="h-5 w-5" />}
+                    label={label}
+                    onClick={() => onSectionChange(section.id)}
+                    variant={isActive ? 'default' : 'ghost'}
+                    className={cn(isActive && 'bg-bg-tertiary text-primary-500')}
+                />
+            </Tooltip>
+        );
+    };
 
     return (
         <nav aria-label={t('aria.sidebarSections')} className={cn('flex flex-col items-center gap-1 p-1', className)}>
-            {sections.map((section) => {
-                const Icon = section.icon;
-                const isActive = activeSection === section.id;
-                const label = t(section.labelKey);
+            {mainSections.map(renderNavButton)}
 
-                return (
-                    <Tooltip key={section.id} content={label} side="right">
-                        <IconButton
-                            icon={<Icon className="h-5 w-5" />}
-                            label={label}
-                            onClick={() => onSectionChange(section.id)}
-                            variant={isActive ? 'default' : 'ghost'}
-                            className={cn(isActive && 'bg-bg-tertiary text-primary-500')}
-                        />
-                    </Tooltip>
-                );
-            })}
+            {/* Cloud integrations */}
+            <div data-tour="cloud" className="flex flex-col items-center gap-1 mt-2 pt-2 border-t border-border">
+                {cloudSections.map(renderNavButton)}
+            </div>
         </nav>
     );
 }

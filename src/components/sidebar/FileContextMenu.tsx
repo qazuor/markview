@@ -1,3 +1,4 @@
+import { DeleteDocumentModal } from '@/components/modals';
 import {
     ContextMenu,
     ContextMenuContent,
@@ -10,8 +11,10 @@ import {
     ContextMenuTrigger
 } from '@/components/ui';
 import { useDocumentStore } from '@/stores/documentStore';
+import type { Document } from '@/types';
 import { Copy, Download, FileCode, FileImage, FileText, Pencil, Trash2 } from 'lucide-react';
 import type React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 interface FileContextMenuProps {
@@ -25,6 +28,7 @@ interface FileContextMenuProps {
 export function FileContextMenu({ documentId, children }: FileContextMenuProps) {
     const { t } = useTranslation();
     const { getDocument, deleteDocument, renameDocument, createDocument, documents } = useDocumentStore();
+    const [documentToDelete, setDocumentToDelete] = useState<Document | null>(null);
 
     const handleRename = () => {
         const doc = getDocument(documentId);
@@ -87,57 +91,68 @@ export function FileContextMenu({ documentId, children }: FileContextMenuProps) 
         const doc = getDocument(documentId);
         if (!doc) return;
 
-        const confirmed = confirm(t('confirm.deleteFile'));
-        if (confirmed) {
-            deleteDocument(documentId);
+        // For cloud documents, show the delete modal with options
+        if (doc.source === 'github' || doc.source === 'gdrive') {
+            setDocumentToDelete(doc);
+        } else {
+            // For local documents, use simple confirm
+            const confirmed = confirm(t('confirm.deleteFile'));
+            if (confirmed) {
+                deleteDocument(documentId);
+            }
         }
     };
 
     return (
-        <ContextMenu>
-            <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
-            <ContextMenuContent>
-                <ContextMenuItem onClick={handleRename}>
-                    <Pencil className="mr-2 h-4 w-4" />
-                    {t('common.rename')}
-                    <ContextMenuShortcut>F2</ContextMenuShortcut>
-                </ContextMenuItem>
+        <>
+            <ContextMenu>
+                <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
+                <ContextMenuContent>
+                    <ContextMenuItem onClick={handleRename}>
+                        <Pencil className="mr-2 h-4 w-4" />
+                        {t('common.rename')}
+                        <ContextMenuShortcut>F2</ContextMenuShortcut>
+                    </ContextMenuItem>
 
-                <ContextMenuItem onClick={handleDuplicate}>
-                    <Copy className="mr-2 h-4 w-4" />
-                    {t('common.duplicate')}
-                </ContextMenuItem>
+                    <ContextMenuItem onClick={handleDuplicate}>
+                        <Copy className="mr-2 h-4 w-4" />
+                        {t('common.duplicate')}
+                    </ContextMenuItem>
 
-                <ContextMenuSeparator />
+                    <ContextMenuSeparator />
 
-                <ContextMenuSub>
-                    <ContextMenuSubTrigger>
-                        <Download className="mr-2 h-4 w-4" />
-                        {t('contextMenu.exportAs')}
-                    </ContextMenuSubTrigger>
-                    <ContextMenuSubContent>
-                        <ContextMenuItem onClick={() => handleDownload('md')}>
-                            <FileText className="mr-2 h-4 w-4" />
-                            {t('export.markdown')}
-                        </ContextMenuItem>
-                        <ContextMenuItem onClick={() => handleDownload('html')}>
-                            <FileCode className="mr-2 h-4 w-4" />
-                            {t('export.html')}
-                        </ContextMenuItem>
-                        <ContextMenuItem onClick={() => handleDownload('txt')}>
-                            <FileImage className="mr-2 h-4 w-4" />
-                            {t('contextMenu.plainText')}
-                        </ContextMenuItem>
-                    </ContextMenuSubContent>
-                </ContextMenuSub>
+                    <ContextMenuSub>
+                        <ContextMenuSubTrigger>
+                            <Download className="mr-2 h-4 w-4" />
+                            {t('contextMenu.exportAs')}
+                        </ContextMenuSubTrigger>
+                        <ContextMenuSubContent>
+                            <ContextMenuItem onClick={() => handleDownload('md')}>
+                                <FileText className="mr-2 h-4 w-4" />
+                                {t('export.markdown')}
+                            </ContextMenuItem>
+                            <ContextMenuItem onClick={() => handleDownload('html')}>
+                                <FileCode className="mr-2 h-4 w-4" />
+                                {t('export.html')}
+                            </ContextMenuItem>
+                            <ContextMenuItem onClick={() => handleDownload('txt')}>
+                                <FileImage className="mr-2 h-4 w-4" />
+                                {t('contextMenu.plainText')}
+                            </ContextMenuItem>
+                        </ContextMenuSubContent>
+                    </ContextMenuSub>
 
-                <ContextMenuSeparator />
+                    <ContextMenuSeparator />
 
-                <ContextMenuItem variant="danger" onClick={handleDelete}>
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    {t('common.delete')}
-                </ContextMenuItem>
-            </ContextMenuContent>
-        </ContextMenu>
+                    <ContextMenuItem variant="danger" onClick={handleDelete}>
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        {t('common.delete')}
+                    </ContextMenuItem>
+                </ContextMenuContent>
+            </ContextMenu>
+
+            {/* Delete Document Modal */}
+            <DeleteDocumentModal isOpen={!!documentToDelete} onClose={() => setDocumentToDelete(null)} document={documentToDelete} />
+        </>
     );
 }
