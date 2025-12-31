@@ -17,35 +17,35 @@ export function DocumentSyncStatus({ syncStatus, className }: DocumentSyncStatus
     switch (syncStatus) {
         case 'syncing':
             return (
-                <span className={cn('flex items-center gap-1 text-blue-500', className)}>
+                <span className={cn('flex items-center gap-1 text-blue-700 dark:text-blue-500', className)}>
                     <Loader2 className="h-3 w-3 animate-spin" />
                     <span>{t('fileExplorer.status.syncing')}</span>
                 </span>
             );
         case 'modified':
             return (
-                <span className={cn('flex items-center gap-1 text-orange-500', className)}>
+                <span className={cn('flex items-center gap-1 text-orange-700 dark:text-orange-500', className)}>
                     <Circle className="h-2 w-2 fill-current" />
                     <span>{t('fileExplorer.status.modified')}</span>
                 </span>
             );
         case 'synced':
             return (
-                <span className={cn('flex items-center gap-1 text-green-500', className)}>
+                <span className={cn('flex items-center gap-1 text-green-700 dark:text-green-500', className)}>
                     <Check className="h-3 w-3" />
                     <span>{t('fileExplorer.status.synced')}</span>
                 </span>
             );
         case 'error':
             return (
-                <span className={cn('flex items-center gap-1 text-red-500', className)}>
+                <span className={cn('flex items-center gap-1 text-red-700 dark:text-red-500', className)}>
                     <AlertCircle className="h-3 w-3" />
                     <span>{t('fileExplorer.status.error')}</span>
                 </span>
             );
         default: // 'local'
             return (
-                <span className={cn('flex items-center gap-1 text-gray-400', className)}>
+                <span className={cn('flex items-center gap-1 text-slate-600 dark:text-gray-400', className)}>
                     <Circle className="h-2 w-2 fill-current" />
                     <span>{t('fileExplorer.status.local')}</span>
                 </span>

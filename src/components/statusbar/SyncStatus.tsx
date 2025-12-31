@@ -42,7 +42,7 @@ function getSyncStatusDisplay(
         return {
             icon: RefreshCw,
             label: t('sync.status.pending'),
-            className: 'text-yellow-500'
+            className: 'text-amber-700 dark:text-yellow-500'
         };
     }
 
@@ -51,31 +51,31 @@ function getSyncStatusDisplay(
             return {
                 icon: Loader2,
                 label: t('sync.status.syncing'),
-                className: 'text-blue-500 animate-pulse'
+                className: 'text-blue-700 dark:text-blue-500 animate-pulse'
             };
         case 'synced':
             return {
                 icon: Check,
                 label: t('sync.status.synced'),
-                className: 'text-green-500'
+                className: 'text-green-700 dark:text-green-500'
             };
         case 'error':
             return {
                 icon: AlertCircle,
                 label: t('sync.status.error'),
-                className: 'text-red-500'
+                className: 'text-red-700 dark:text-red-500'
             };
         case 'offline':
             return {
                 icon: CloudOff,
                 label: t('sync.status.offline'),
-                className: 'text-gray-400'
+                className: 'text-slate-600 dark:text-gray-400'
             };
         default:
             return {
                 icon: Cloud,
                 label: '',
-                className: 'text-gray-400'
+                className: 'text-slate-600 dark:text-gray-400'
             };
     }
 }
