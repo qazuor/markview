@@ -8,12 +8,14 @@ import { auth } from '../auth';
 import { audit } from '../utils/audit';
 
 import { createRateLimiter } from './middleware/rateLimit';
-import exportRoutes from './routes/export';
 import githubRoutes from './routes/github';
 import googleRoutes from './routes/google';
 // Import routes
 import syncRoutes from './routes/sync';
 import userRoutes from './routes/user';
+// Note: Export routes are NOT included here because they use Puppeteer
+// which requires Node.js runtime. They are handled by separate serverless
+// functions in /api/export/ directory.
 
 // Define context variables type
 type Variables = {
@@ -127,12 +129,6 @@ app.route('/api/google', googleRoutes);
 
 app.use('/api/user/*', createRateLimiter('standard'));
 app.route('/api/user', userRoutes);
-
-// Export routes - heavy operations (PDF/image generation)
-// Note: In production on Vercel, these are handled by separate serverless functions
-// in /api/export/ with Node.js runtime for Puppeteer support
-app.use('/api/export/*', createRateLimiter('heavy'));
-app.route('/api/export', exportRoutes);
 
 // ============================================================================
 // Export
