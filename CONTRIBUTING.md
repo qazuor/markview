@@ -93,33 +93,49 @@ markview/
 ├── src/
 │   ├── app/                  # Application entry point
 │   │   ├── App.tsx          # Main App component
-│   │   └── index.tsx        # Entry file
+│   │   └── Providers.tsx    # Context providers
 │   │
 │   ├── components/           # React components
 │   │   ├── editor/          # CodeMirror editor components
 │   │   ├── preview/         # Markdown preview components
 │   │   ├── toolbar/         # Formatting toolbar
 │   │   ├── tabs/            # Document tabs
-│   │   ├── sidebar/         # File explorer, TOC
+│   │   ├── sidebar/         # File explorer, TOC, cloud browsers
 │   │   ├── statusbar/       # Status bar
 │   │   ├── modals/          # Modal dialogs
 │   │   ├── layout/          # Layout components
+│   │   ├── sync/            # Cloud sync components
+│   │   ├── auth/            # Authentication components
+│   │   ├── onboarding/      # Onboarding flow
+│   │   ├── pwa/             # PWA components
 │   │   └── ui/              # Reusable UI primitives
 │   │
 │   ├── hooks/               # Custom React hooks
-│   │   ├── useDebounce.ts  # Debounce hook
-│   │   ├── useLocalStorage.ts
+│   │   ├── useSettingsSync.ts
+│   │   ├── usePWA.ts
 │   │   └── ...
 │   │
 │   ├── services/            # Business logic
 │   │   ├── markdown/        # Markdown processing
 │   │   ├── storage/         # Local storage
-│   │   └── export/          # Export functionality
+│   │   ├── export/          # Export functionality
+│   │   ├── github/          # GitHub API integration
+│   │   ├── gdrive/          # Google Drive integration
+│   │   └── sync/            # Cloud sync service
 │   │
 │   ├── stores/              # Zustand state stores
 │   │   ├── documentStore.ts # Document state
 │   │   ├── settingsStore.ts # Settings state
-│   │   └── uiStore.ts       # UI state
+│   │   ├── uiStore.ts       # UI state
+│   │   ├── githubStore.ts   # GitHub connection state
+│   │   ├── gdriveStore.ts   # Google Drive state
+│   │   └── syncStore.ts     # Cloud sync state
+│   │
+│   ├── server/              # Backend API (Hono)
+│   │   ├── api/             # API routes and middleware
+│   │   ├── auth/            # Authentication (Better Auth)
+│   │   ├── db/              # Database schema (Drizzle)
+│   │   └── utils/           # Server utilities
 │   │
 │   ├── types/               # TypeScript type definitions
 │   ├── utils/               # Utility functions
@@ -128,7 +144,9 @@ markview/
 │
 ├── tests/
 │   ├── unit/                # Vitest unit tests
-│   └── e2e/                 # Playwright e2e tests
+│   ├── integration/         # Integration tests
+│   ├── e2e/                 # Playwright e2e tests
+│   └── helpers/             # Test utilities
 │
 ├── docs/                    # Documentation
 └── public/                  # Static assets
@@ -341,6 +359,14 @@ Common scopes include:
 - `export` - Export functionality
 - `i18n` - Internationalization
 - `storage` - Storage service
+- `sync` - Cloud sync service
+- `github` - GitHub integration
+- `gdrive` - Google Drive integration
+- `server` - Backend API
+- `auth` - Authentication
+- `stores` - Zustand stores
+- `hooks` - Custom hooks
+- `components` - General components
 - `deps` - Dependencies
 
 ---
@@ -349,9 +375,18 @@ Common scopes include:
 
 ### Test Coverage
 
-- Aim for 90%+ code coverage
+Current project coverage: **77%+ statements**, **2900+ tests**
+
+Coverage goals:
+- **Statements**: 80%+
+- **Branches**: 75%+
+- **Functions**: 80%+
+- **Lines**: 80%+
+
+Requirements:
 - All new features must include tests
 - Bug fixes should include regression tests
+- PR coverage should not decrease overall coverage
 
 ### Unit Tests (Vitest)
 
@@ -563,4 +598,4 @@ Thank you for contributing to MarkView!
 
 ---
 
-*Last updated: 2024-12-28*
+*Last updated: January 2026*
