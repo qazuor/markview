@@ -56,6 +56,21 @@
             "arrowParentheses": "always"
         }
     },
+    "overrides": [
+        {
+            "include": ["tests/**/*.ts", "tests/**/*.tsx"],
+            "linter": {
+                "rules": {
+                    "style": {
+                        "noNonNullAssertion": "off"
+                    },
+                    "suspicious": {
+                        "noExplicitAny": "off"
+                    }
+                }
+            }
+        }
+    ],
     "json": {
         "formatter": {
             "indentStyle": "space",
