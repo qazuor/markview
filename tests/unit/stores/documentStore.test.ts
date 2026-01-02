@@ -441,5 +441,220 @@ describe('documentStore', () => {
             const doc = useDocumentStore.getState().documents.get(id);
             expect(doc?.scroll).toEqual({ line: 10, percentage: 50 });
         });
+
+        it('should not update scroll for non-existent document', () => {
+            const { updateScroll } = useDocumentStore.getState();
+
+            act(() => {
+                updateScroll('non-existent-id', 10, 50);
+            });
+
+            expect(useDocumentStore.getState().documents.size).toBe(0);
+        });
+    });
+
+    describe('updateCursor - edge cases', () => {
+        it('should not update cursor for non-existent document', () => {
+            const { updateCursor } = useDocumentStore.getState();
+
+            act(() => {
+                updateCursor('non-existent-id', 5, 10);
+            });
+
+            expect(useDocumentStore.getState().documents.size).toBe(0);
+        });
+    });
+
+    describe('createDocument with options', () => {
+        it('should create document with custom name', () => {
+            const { createDocument } = useDocumentStore.getState();
+
+            const id = createDocument({ name: 'Custom Name' });
+            const doc = useDocumentStore.getState().documents.get(id);
+
+            expect(doc?.name).toBe('Custom Name');
+            expect(doc?.isManuallyNamed).toBe(true);
+        });
+
+        it('should create document with custom content', () => {
+            const { createDocument } = useDocumentStore.getState();
+
+            const id = createDocument({ content: '# Hello World' });
+            const doc = useDocumentStore.getState().documents.get(id);
+
+            expect(doc?.content).toBe('# Hello World');
+        });
+
+        it('should create document with github source', () => {
+            const { createDocument } = useDocumentStore.getState();
+
+            const githubInfo = {
+                owner: 'testowner',
+                repo: 'testrepo',
+                path: 'docs/README.md',
+                sha: 'abc123',
+                branch: 'main'
+            };
+
+            const id = createDocument({
+                source: 'github',
+                githubInfo
+            });
+            const doc = useDocumentStore.getState().documents.get(id);
+
+            expect(doc?.source).toBe('github');
+            expect(doc?.githubInfo).toEqual(githubInfo);
+        });
+
+        it('should create document with gdrive source', () => {
+            const { createDocument } = useDocumentStore.getState();
+
+            const driveInfo = {
+                fileId: 'file-123',
+                name: 'document.md',
+                mimeType: 'text/markdown'
+            };
+
+            const id = createDocument({
+                source: 'gdrive',
+                driveInfo
+            });
+            const doc = useDocumentStore.getState().documents.get(id);
+
+            expect(doc?.source).toBe('gdrive');
+            expect(doc?.driveInfo).toEqual(driveInfo);
+        });
+    });
+
+    describe('findDocumentByGitHub', () => {
+        it('should find document by github repo and path', () => {
+            const { createDocument, findDocumentByGitHub } = useDocumentStore.getState();
+
+            const githubInfo = {
+                owner: 'testowner',
+                repo: 'testrepo',
+                path: 'docs/README.md',
+                sha: 'abc123',
+                branch: 'main'
+            };
+
+            createDocument({
+                source: 'github',
+                githubInfo
+            });
+
+            const found = findDocumentByGitHub('testowner/testrepo', 'docs/README.md');
+
+            expect(found).toBeDefined();
+            expect(found?.githubInfo?.path).toBe('docs/README.md');
+        });
+
+        it('should return undefined for non-existent github file', () => {
+            const { findDocumentByGitHub } = useDocumentStore.getState();
+
+            const found = findDocumentByGitHub('owner/repo', 'missing.md');
+
+            expect(found).toBeUndefined();
+        });
+
+        it('should not find local documents', () => {
+            const { createDocument, findDocumentByGitHub } = useDocumentStore.getState();
+
+            createDocument({ name: 'Local Doc' });
+
+            const found = findDocumentByGitHub('owner/repo', 'path.md');
+
+            expect(found).toBeUndefined();
+        });
+    });
+
+    describe('findDocumentByDrive', () => {
+        it('should find document by drive file id', () => {
+            const { createDocument, findDocumentByDrive } = useDocumentStore.getState();
+
+            const driveInfo = {
+                fileId: 'file-123',
+                name: 'document.md',
+                mimeType: 'text/markdown'
+            };
+
+            createDocument({
+                source: 'gdrive',
+                driveInfo
+            });
+
+            const found = findDocumentByDrive('file-123');
+
+            expect(found).toBeDefined();
+            expect(found?.driveInfo?.fileId).toBe('file-123');
+        });
+
+        it('should return undefined for non-existent drive file', () => {
+            const { findDocumentByDrive } = useDocumentStore.getState();
+
+            const found = findDocumentByDrive('non-existent-id');
+
+            expect(found).toBeUndefined();
+        });
+
+        it('should not find local documents', () => {
+            const { createDocument, findDocumentByDrive } = useDocumentStore.getState();
+
+            createDocument({ name: 'Local Doc' });
+
+            const found = findDocumentByDrive('file-id');
+
+            expect(found).toBeUndefined();
+        });
+    });
+
+    describe('setSyncStatus', () => {
+        it('should set sync status', () => {
+            const { createDocument, setSyncStatus } = useDocumentStore.getState();
+
+            const id = createDocument();
+
+            act(() => {
+                setSyncStatus(id, 'syncing');
+            });
+
+            const doc = useDocumentStore.getState().documents.get(id);
+            expect(doc?.syncStatus).toBe('syncing');
+        });
+
+        it('should set cloud-pending status', () => {
+            const { createDocument, setSyncStatus } = useDocumentStore.getState();
+
+            const id = createDocument();
+
+            act(() => {
+                setSyncStatus(id, 'cloud-pending');
+            });
+
+            const doc = useDocumentStore.getState().documents.get(id);
+            expect(doc?.syncStatus).toBe('cloud-pending');
+        });
+
+        it('should not set status for non-existent document', () => {
+            const { setSyncStatus } = useDocumentStore.getState();
+
+            act(() => {
+                setSyncStatus('non-existent-id', 'syncing');
+            });
+
+            expect(useDocumentStore.getState().documents.size).toBe(0);
+        });
+    });
+
+    describe('restoreVersion edge cases', () => {
+        it('should not restore version for non-existent document', () => {
+            const { restoreVersion } = useDocumentStore.getState();
+
+            act(() => {
+                restoreVersion('non-existent-doc', 'version-id');
+            });
+
+            expect(useDocumentStore.getState().documents.size).toBe(0);
+        });
     });
 });

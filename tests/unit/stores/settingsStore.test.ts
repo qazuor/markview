@@ -423,4 +423,218 @@ describe('settingsStore', () => {
             expect(percentage).toBe(150); // (200 + 100) / 2
         });
     });
+
+    describe('Sync Functions', () => {
+        describe('setSyncStatus', () => {
+            it('should set sync status to syncing', () => {
+                const { setSyncStatus } = useSettingsStore.getState();
+
+                act(() => {
+                    setSyncStatus('syncing');
+                });
+
+                expect(useSettingsStore.getState().syncStatus).toBe('syncing');
+            });
+
+            it('should set sync status to synced', () => {
+                const { setSyncStatus } = useSettingsStore.getState();
+
+                act(() => {
+                    setSyncStatus('synced');
+                });
+
+                expect(useSettingsStore.getState().syncStatus).toBe('synced');
+            });
+
+            it('should set sync status to error', () => {
+                const { setSyncStatus } = useSettingsStore.getState();
+
+                act(() => {
+                    setSyncStatus('error');
+                });
+
+                expect(useSettingsStore.getState().syncStatus).toBe('error');
+            });
+
+            it('should set sync status to offline', () => {
+                const { setSyncStatus } = useSettingsStore.getState();
+
+                act(() => {
+                    setSyncStatus('offline');
+                });
+
+                expect(useSettingsStore.getState().syncStatus).toBe('offline');
+            });
+        });
+
+        describe('setSyncError', () => {
+            it('should set sync error and change status to error', () => {
+                const { setSyncError } = useSettingsStore.getState();
+
+                act(() => {
+                    setSyncError('Connection failed');
+                });
+
+                const state = useSettingsStore.getState();
+                expect(state.syncError).toBe('Connection failed');
+                expect(state.syncStatus).toBe('error');
+            });
+
+            it('should clear sync error and set status to idle', () => {
+                const { setSyncError } = useSettingsStore.getState();
+
+                act(() => {
+                    setSyncError('Some error');
+                    setSyncError(null);
+                });
+
+                const state = useSettingsStore.getState();
+                expect(state.syncError).toBeNull();
+                expect(state.syncStatus).toBe('idle');
+            });
+        });
+
+        describe('markSynced', () => {
+            it('should set synced status and clear error', () => {
+                const { setSyncError, markSynced } = useSettingsStore.getState();
+
+                act(() => {
+                    setSyncError('Previous error');
+                    markSynced();
+                });
+
+                const state = useSettingsStore.getState();
+                expect(state.syncStatus).toBe('synced');
+                expect(state.syncError).toBeNull();
+                expect(state.pendingChanges).toBe(false);
+                expect(state.lastSyncedAt).toBeDefined();
+            });
+
+            it('should set lastSyncedAt to current time', () => {
+                const { markSynced } = useSettingsStore.getState();
+                const before = new Date().toISOString();
+
+                act(() => {
+                    markSynced();
+                });
+
+                const after = new Date().toISOString();
+                const lastSyncedAt = useSettingsStore.getState().lastSyncedAt;
+
+                expect(lastSyncedAt).toBeDefined();
+                expect(lastSyncedAt && lastSyncedAt >= before).toBe(true);
+                expect(lastSyncedAt && lastSyncedAt <= after).toBe(true);
+            });
+        });
+
+        describe('markPendingChanges', () => {
+            it('should set pendingChanges to true', () => {
+                const { markPendingChanges } = useSettingsStore.getState();
+
+                act(() => {
+                    markPendingChanges();
+                });
+
+                expect(useSettingsStore.getState().pendingChanges).toBe(true);
+            });
+        });
+
+        describe('mergeServerSettings', () => {
+            it('should merge server settings with local state', () => {
+                const { updateSettings, mergeServerSettings } = useSettingsStore.getState();
+
+                act(() => {
+                    updateSettings({ theme: 'dark', autoSave: false });
+                    mergeServerSettings({ theme: 'light', previewStyle: 'github' });
+                });
+
+                const state = useSettingsStore.getState();
+                expect(state.theme).toBe('light'); // Server value takes precedence
+                expect(state.previewStyle).toBe('github'); // Server value added
+                expect(state.autoSave).toBe(false); // Local value preserved
+                expect(state.pendingChanges).toBe(false); // Cleared after merge
+            });
+
+            it('should preserve local values not in server settings', () => {
+                const { updateSettings, mergeServerSettings } = useSettingsStore.getState();
+
+                act(() => {
+                    updateSettings({ lineNumbers: false, minimap: false });
+                    mergeServerSettings({ theme: 'dark' });
+                });
+
+                const state = useSettingsStore.getState();
+                expect(state.lineNumbers).toBe(false);
+                expect(state.minimap).toBe(false);
+                expect(state.theme).toBe('dark');
+            });
+        });
+
+        describe('getSettingsForSync', () => {
+            it('should return only settings (not sync state)', () => {
+                const { updateSettings, getSettingsForSync } = useSettingsStore.getState();
+
+                act(() => {
+                    updateSettings({ theme: 'dark', autoSave: false });
+                });
+
+                const settings = getSettingsForSync();
+
+                expect(settings.theme).toBe('dark');
+                expect(settings.autoSave).toBe(false);
+                // Should not include sync state
+                expect((settings as Record<string, unknown>).syncStatus).toBeUndefined();
+                expect((settings as Record<string, unknown>).lastSyncedAt).toBeUndefined();
+                expect((settings as Record<string, unknown>).syncError).toBeUndefined();
+                expect((settings as Record<string, unknown>).pendingChanges).toBeUndefined();
+            });
+
+            it('should include all settings fields', () => {
+                const { getSettingsForSync } = useSettingsStore.getState();
+
+                const settings = getSettingsForSync();
+
+                expect(settings).toHaveProperty('theme');
+                expect(settings).toHaveProperty('previewStyle');
+                expect(settings).toHaveProperty('editorFontSize');
+                expect(settings).toHaveProperty('previewFontSize');
+                expect(settings).toHaveProperty('fontFamily');
+                expect(settings).toHaveProperty('wordWrap');
+                expect(settings).toHaveProperty('lineNumbers');
+                expect(settings).toHaveProperty('minimap');
+                expect(settings).toHaveProperty('syncScroll');
+                expect(settings).toHaveProperty('autoSave');
+                expect(settings).toHaveProperty('autoSaveInterval');
+                expect(settings).toHaveProperty('formatOnSave');
+                expect(settings).toHaveProperty('lintOnType');
+                expect(settings).toHaveProperty('language');
+                expect(settings).toHaveProperty('cloudSyncEnabled');
+                expect(settings).toHaveProperty('cloudSyncDebounceMs');
+                expect(settings).toHaveProperty('cloudSyncOnAppOpen');
+                expect(settings).toHaveProperty('cloudSyncConflictResolution');
+            });
+        });
+    });
+
+    describe('pendingChanges flag', () => {
+        it('should set pendingChanges when updateSetting is called', () => {
+            const { updateSetting } = useSettingsStore.getState();
+
+            act(() => {
+                updateSetting('theme', 'dark');
+            });
+
+            expect(useSettingsStore.getState().pendingChanges).toBe(true);
+        });
+
+        it('should set pendingChanges when updateSettings is called', () => {
+            const { updateSettings } = useSettingsStore.getState();
+
+            act(() => {
+                updateSettings({ autoSave: false });
+            });
+
+            expect(useSettingsStore.getState().pendingChanges).toBe(true);
+        });
+    });
 });
