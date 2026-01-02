@@ -7,7 +7,7 @@
         "dev": "concurrently \"pnpm dev:api\" \"pnpm dev:client\"",
         "dev:client": "vite",
         "dev:api": "tsx watch src/server/index.ts",
-        "build": "tsc -b && vite build",
+        "build": "tsc -p tsconfig.build.json && vite build",
         "preview": "vite preview",
         "lint": "biome check .",
         "lint:fix": "biome check --write .",
