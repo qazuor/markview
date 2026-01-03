@@ -52,10 +52,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         // Call Hono app
         const response = await app.fetch(request);
 
-        // Copy response headers
+        // Copy response headers - special handling for Set-Cookie
+        // Headers.forEach() only returns one value per key, but Set-Cookie can have multiple
+        const setCookieHeaders = response.headers.getSetCookie?.() || [];
+
         response.headers.forEach((value, key) => {
-            res.setHeader(key, value);
+            // Skip set-cookie as we handle it separately
+            if (key.toLowerCase() !== 'set-cookie') {
+                res.setHeader(key, value);
+            }
         });
+
+        // Set all cookies properly
+        if (setCookieHeaders.length > 0) {
+            res.setHeader('Set-Cookie', setCookieHeaders);
+        }
 
         // Set status
         res.status(response.status);
