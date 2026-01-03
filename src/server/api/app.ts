@@ -119,6 +119,21 @@ app.get('/api/health', (c) => {
     });
 });
 
+// Debug: Check what cookies are received
+app.get('/api/debug/cookies', (c) => {
+    const cookies = c.req.header('cookie') || 'none';
+    const allHeaders: Record<string, string> = {};
+    c.req.raw.headers.forEach((value, key) => {
+        allHeaders[key] = value;
+    });
+    return c.json({
+        cookies,
+        headerCount: Object.keys(allHeaders).length,
+        hasCookie: 'cookie' in allHeaders,
+        headers: allHeaders
+    });
+});
+
 // Auth routes - Better Auth handler (with rate limiting)
 app.use('/api/auth/*', createRateLimiter('auth'));
 app.on(['GET', 'POST'], '/api/auth/*', (c) => {
