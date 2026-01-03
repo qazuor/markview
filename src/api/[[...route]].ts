@@ -1,13 +1,14 @@
+import { getRequestListener } from '@hono/node-server';
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 import app from '@/server/api/app';
-import { handle } from 'hono/vercel';
 
-// Export Hono app as Vercel serverless function
-export const GET = handle(app);
-export const POST = handle(app);
-export const PUT = handle(app);
-export const PATCH = handle(app);
-export const DELETE = handle(app);
-export const OPTIONS = handle(app);
+// Create Node.js compatible request listener from Hono app
+const requestListener = getRequestListener(app.fetch);
+
+// Export as Vercel Node.js Serverless Function
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+    return requestListener(req, res);
+}
 
 // Use Node.js runtime because better-auth with Drizzle adapter
 // requires Node.js modules that are not available in Edge Runtime
