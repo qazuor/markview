@@ -137,6 +137,14 @@ app.get('/api/debug/cookies', (c) => {
 // Auth routes - Better Auth handler (with rate limiting)
 app.use('/api/auth/*', createRateLimiter('auth'));
 app.on(['GET', 'POST'], '/api/auth/*', (c) => {
+    // Log callback requests for debugging
+    if (c.req.path.includes('/callback/')) {
+        const cookies = c.req.header('cookie') || 'NO COOKIES';
+        const state = c.req.query('state') || 'NO STATE';
+        console.log('[AUTH CALLBACK] Path:', c.req.path);
+        console.log('[AUTH CALLBACK] State in URL:', state);
+        console.log('[AUTH CALLBACK] Cookies received:', cookies);
+    }
     return auth.handler(c.req.raw);
 });
 
