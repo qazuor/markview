@@ -142,13 +142,32 @@ app.get('/api/debug/db', async (c) => {
 });
 
 // Debug endpoint to see raw request details
-app.all('/api/debug/request', (c) => {
+app.all('/api/debug/request', async (c) => {
     const rawReq = c.req.raw;
+    const steps: { step: string; time: number; value?: string }[] = [];
+    const start = Date.now();
+
+    steps.push({ step: '1. Start', time: 0 });
+
+    let bodyText = '';
+    if (rawReq.method === 'POST') {
+        try {
+            bodyText = await c.req.text();
+            steps.push({ step: '2. Body read', time: Date.now() - start, value: bodyText.substring(0, 100) });
+        } catch (e) {
+            steps.push({ step: '2. Body read FAILED', time: Date.now() - start, value: String(e) });
+        }
+    }
+
+    steps.push({ step: '3. Done', time: Date.now() - start });
+
     return c.json({
         rawUrl: rawReq.url,
         method: rawReq.method,
         honoPath: c.req.path,
         honoUrl: c.req.url,
+        body: bodyText,
+        steps,
         headers: Object.fromEntries([...rawReq.headers.entries()].slice(0, 10))
     });
 });
