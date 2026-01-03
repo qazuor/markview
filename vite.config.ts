@@ -68,6 +68,12 @@ export default defineConfig({
                 maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB
                 // Cache static assets
                 globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
+                // Navigation fallback configuration
+                // CRITICAL: Exclude /api/ routes from being intercepted by the service worker
+                // This prevents the SW from serving index.html for API navigation requests
+                // (e.g., OAuth callbacks like /api/auth/callback/github)
+                navigateFallback: 'index.html',
+                navigateFallbackDenylist: [/^\/api\//],
                 // Runtime caching strategies
                 runtimeCaching: [
                     {
