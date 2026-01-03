@@ -155,10 +155,24 @@ app.get('/api/debug/auth-config', (c) => {
     });
 });
 
+// Debug: Test if auth routes are reachable
+app.get('/api/auth/test', (c) => {
+    return c.json({ status: 'auth routes reachable', timestamp: new Date().toISOString() });
+});
+
 // Auth routes - Better Auth handler (with rate limiting)
 app.use('/api/auth/*', createRateLimiter('auth'));
-app.on(['GET', 'POST'], '/api/auth/*', (c) => {
-    return auth.handler(c.req.raw);
+app.on(['GET', 'POST'], '/api/auth/*', async (c) => {
+    console.log('[AUTH] Handling request:', c.req.method, c.req.path);
+    const start = Date.now();
+    try {
+        const response = await auth.handler(c.req.raw);
+        console.log('[AUTH] Response received in', Date.now() - start, 'ms');
+        return response;
+    } catch (error) {
+        console.error('[AUTH] Error:', error);
+        throw error;
+    }
 });
 
 // Mount route groups with rate limiting
