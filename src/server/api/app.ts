@@ -133,6 +133,18 @@ app.get('/api/debug/db', async (c) => {
     }
 });
 
+// Debug endpoint to see raw request details
+app.all('/api/debug/request', (c) => {
+    const rawReq = c.req.raw;
+    return c.json({
+        rawUrl: rawReq.url,
+        method: rawReq.method,
+        honoPath: c.req.path,
+        honoUrl: c.req.url,
+        headers: Object.fromEntries([...rawReq.headers.entries()].slice(0, 10))
+    });
+});
+
 // Debug endpoint to check auth configuration (no secrets exposed)
 app.get('/api/debug/auth-config', (c) => {
     return c.json({
