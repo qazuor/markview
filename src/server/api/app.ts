@@ -180,6 +180,48 @@ app.get('/api/auth/test', (c) => {
     return c.json({ status: 'auth routes reachable', timestamp: new Date().toISOString() });
 });
 
+// Debug: Test the exact flow of auth handler
+app.post('/api/debug/auth-flow', async (c) => {
+    const steps: { step: string; time: number; value?: string }[] = [];
+    const start = Date.now();
+
+    try {
+        steps.push({ step: '1. Start', time: 0 });
+
+        const path = c.req.path;
+        steps.push({ step: '2. Got path', time: Date.now() - start, value: path });
+
+        const body = await c.req.text();
+        steps.push({ step: '3. Read body', time: Date.now() - start, value: body.substring(0, 100) });
+
+        const baseUrl = process.env.BETTER_AUTH_URL || 'http://localhost:5173';
+        const fullUrl = `${baseUrl}/api/auth/sign-in/social`;
+        steps.push({ step: '4. Built URL', time: Date.now() - start, value: fullUrl });
+
+        const newRequest = new Request(fullUrl, {
+            method: 'POST',
+            headers: c.req.raw.headers,
+            body: body
+        });
+        steps.push({ step: '5. Created Request', time: Date.now() - start });
+
+        const response = await auth.handler(newRequest);
+        steps.push({ step: '6. Got response', time: Date.now() - start, value: `status: ${response.status}` });
+
+        const responseBody = await response.text();
+        steps.push({ step: '7. Read response', time: Date.now() - start, value: responseBody.substring(0, 200) });
+
+        return c.json({ success: true, steps, totalTime: Date.now() - start });
+    } catch (error) {
+        steps.push({
+            step: 'ERROR',
+            time: Date.now() - start,
+            value: error instanceof Error ? error.message : 'Unknown'
+        });
+        return c.json({ success: false, steps, totalTime: Date.now() - start }, 500);
+    }
+});
+
 // Debug: Test social sign-in without the full flow
 app.get('/api/debug/test-social-signin', async (c) => {
     const steps: { step: string; time: number; error?: string }[] = [];
