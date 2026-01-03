@@ -133,6 +133,28 @@ app.get('/api/debug/db', async (c) => {
     }
 });
 
+// Debug endpoint to check auth configuration (no secrets exposed)
+app.get('/api/debug/auth-config', (c) => {
+    return c.json({
+        baseURL: process.env.BETTER_AUTH_URL || 'NOT SET',
+        secret: process.env.BETTER_AUTH_SECRET ? 'SET' : 'NOT SET',
+        github: {
+            clientId: process.env.GITHUB_CLIENT_ID ? 'SET' : 'NOT SET',
+            clientSecret: process.env.GITHUB_CLIENT_SECRET ? 'SET' : 'NOT SET'
+        },
+        google: {
+            clientId: process.env.GOOGLE_CLIENT_ID ? 'SET' : 'NOT SET',
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET ? 'SET' : 'NOT SET'
+        },
+        trustedOrigins: [
+            'http://localhost:5173',
+            'http://localhost:3000',
+            'https://qazuor-markview.vercel.app',
+            process.env.NEXT_PUBLIC_APP_URL || ''
+        ].filter(Boolean)
+    });
+});
+
 // Auth routes - Better Auth handler (with rate limiting)
 app.use('/api/auth/*', createRateLimiter('auth'));
 app.on(['GET', 'POST'], '/api/auth/*', (c) => {
