@@ -107,8 +107,30 @@ app.get('/api/health', (c) => {
     return c.json({
         status: 'ok',
         timestamp: new Date().toISOString(),
-        env: process.env.NODE_ENV
+        env: process.env.NODE_ENV,
+        url: c.req.url,
+        path: c.req.path
     });
+});
+
+// Debug endpoint to test DB connection
+app.get('/api/debug/db', async (c) => {
+    const start = Date.now();
+    try {
+        // Just test if auth can get session (no session expected, but tests DB)
+        await auth.api.getSession({ headers: c.req.raw.headers });
+        return c.json({
+            status: 'ok',
+            dbTime: Date.now() - start,
+            message: 'Database connection successful'
+        });
+    } catch (error) {
+        return c.json({
+            status: 'error',
+            dbTime: Date.now() - start,
+            error: error instanceof Error ? error.message : 'Unknown error'
+        }, 500);
+    }
 });
 
 // Auth routes - Better Auth handler (with rate limiting)
