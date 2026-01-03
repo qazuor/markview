@@ -74,7 +74,21 @@ export const auth = betterAuth({
         'http://localhost:3000',
         'https://qazuor-markview.vercel.app',
         process.env.NEXT_PUBLIC_APP_URL || ''
-    ].filter(Boolean)
+    ].filter(Boolean),
+
+    // Advanced cookie configuration for production
+    advanced: {
+        cookiePrefix: 'markview',
+        // Use secure cookies only in production
+        useSecureCookies: process.env.NODE_ENV === 'production',
+        // Cookie configuration
+        defaultCookieAttributes: {
+            sameSite: 'lax',
+            secure: process.env.NODE_ENV === 'production',
+            httpOnly: true,
+            path: '/'
+        }
+    }
 });
 
 // Export type for client
