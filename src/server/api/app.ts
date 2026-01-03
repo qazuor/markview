@@ -225,16 +225,44 @@ app.get('/api/debug/test-social-signin', async (c) => {
 // Auth routes - Better Auth handler (with rate limiting)
 app.use('/api/auth/*', createRateLimiter('auth'));
 app.on(['GET', 'POST'], '/api/auth/*', async (c) => {
-    console.log('[AUTH] Handling request:', c.req.method, c.req.path);
-    const start = Date.now();
-    try {
-        const response = await auth.handler(c.req.raw);
+    const rawReq = c.req.raw;
+    console.log('[AUTH] Raw request URL:', rawReq.url);
+    console.log('[AUTH] Raw request method:', rawReq.method);
+    console.log('[AUTH] c.req.path:', c.req.path);
+    console.log('[AUTH] c.req.url:', c.req.url);
+
+    // If the URL doesn't include the full path, reconstruct it
+    const requestUrl = new URL(rawReq.url);
+    console.log('[AUTH] Parsed URL pathname:', requestUrl.pathname);
+
+    // If path is just '/' or '/api', we need to use Hono's path
+    if (requestUrl.pathname === '/' || requestUrl.pathname === '/api') {
+        const baseUrl = process.env.BETTER_AUTH_URL || 'http://localhost:5173';
+        const fullUrl = `${baseUrl}${c.req.path}`;
+        console.log('[AUTH] Reconstructing request with URL:', fullUrl);
+
+        // Clone body if present
+        let body = null;
+        if (rawReq.method === 'POST' || rawReq.method === 'PUT' || rawReq.method === 'PATCH') {
+            body = await rawReq.clone().text();
+        }
+
+        const newRequest = new Request(fullUrl, {
+            method: rawReq.method,
+            headers: rawReq.headers,
+            body: body
+        });
+
+        const start = Date.now();
+        const response = await auth.handler(newRequest);
         console.log('[AUTH] Response received in', Date.now() - start, 'ms');
         return response;
-    } catch (error) {
-        console.error('[AUTH] Error:', error);
-        throw error;
     }
+
+    const start = Date.now();
+    const response = await auth.handler(rawReq);
+    console.log('[AUTH] Response received in', Date.now() - start, 'ms');
+    return response;
 });
 
 // Mount route groups with rate limiting
