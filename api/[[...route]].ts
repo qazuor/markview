@@ -9,7 +9,9 @@ export const PATCH = handle(app);
 export const DELETE = handle(app);
 export const OPTIONS = handle(app);
 
-// Also export config for Vercel
+// Use Node.js runtime because better-auth with Drizzle adapter
+// requires Node.js modules that are not available in Edge Runtime
 export const config = {
-    runtime: 'edge'
+    runtime: 'nodejs',
+    maxDuration: 30
 };
