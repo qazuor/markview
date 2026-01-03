@@ -49,7 +49,15 @@ app.use(
 );
 
 // Auth middleware - sets user and session in context
+// Skip for auth routes to avoid conflicts with better-auth
 app.use('*', async (c, next) => {
+    // Skip session check for auth routes - better-auth handles these
+    if (c.req.path.startsWith('/api/auth/')) {
+        c.set('user', null);
+        c.set('session', null);
+        return next();
+    }
+
     try {
         const session = await auth.api.getSession({
             headers: c.req.raw.headers
@@ -240,19 +248,17 @@ app.on(['GET', 'POST'], '/api/auth/*', async (c) => {
     const baseUrl = process.env.BETTER_AUTH_URL || 'http://localhost:5173';
     const fullUrl = `${baseUrl}${c.req.path}`;
 
-    // For POST/PUT/PATCH, we need to clone the body
+    // Read body as text to avoid stream issues
     const rawReq = c.req.raw;
-    let body: BodyInit | null = null;
+    let body: string | null = null;
     if (rawReq.method === 'POST' || rawReq.method === 'PUT' || rawReq.method === 'PATCH') {
-        body = rawReq.body;
+        body = await c.req.text();
     }
 
     const newRequest = new Request(fullUrl, {
         method: rawReq.method,
         headers: rawReq.headers,
-        body: body,
-        // @ts-expect-error - duplex is needed for streaming body
-        duplex: 'half'
+        body: body
     });
 
     return auth.handler(newRequest);
