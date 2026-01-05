@@ -51,6 +51,7 @@ export function App() {
     const documents = useDocumentStore((state) => state.documents);
     const activeDocumentId = useDocumentStore((state) => state.activeDocumentId);
     const createDocument = useDocumentStore((state) => state.createDocument);
+    const hasHydrated = useDocumentStore((state) => state._hasHydrated);
     const updateContent = useDocumentStore((state) => state.updateContent);
     const closeDocument = useDocumentStore((state) => state.closeDocument);
 
@@ -125,8 +126,11 @@ export function App() {
     const { isDragging } = useDragAndDrop({ onDrop: handleFileDrop });
 
     // Create Welcome documents on first visit, or empty document if all documents were closed
+    // Wait for Zustand hydration to complete before checking documents
     const initialDocCreated = useRef(false);
     useEffect(() => {
+        if (!hasHydrated) return; // Wait for hydration to complete
+
         if (documents.size === 0 && !initialDocCreated.current) {
             initialDocCreated.current = true;
             const hasVisitedBefore = localStorage.getItem('markview:hasVisited') !== null;
@@ -145,7 +149,7 @@ export function App() {
                 createDocument();
             }
         }
-    }, [documents.size, createDocument]);
+    }, [hasHydrated, documents.size, createDocument]);
 
     // Close sidebar when switching to mobile view
     useEffect(() => {

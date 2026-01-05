@@ -43,6 +43,7 @@ interface DocumentState {
     documents: Map<string, Document>;
     activeDocumentId: string | null;
     versions: Map<string, Version[]>;
+    _hasHydrated: boolean;
 
     // Document operations
     createDocument: (options?: CreateDocumentOptions) => string;
@@ -143,6 +144,7 @@ export const useDocumentStore = create<DocumentState>()(
                 documents: new Map(),
                 activeDocumentId: null,
                 versions: new Map(),
+                _hasHydrated: false,
 
                 createDocument: (options) => {
                     const doc = createEmptyDocument();
@@ -446,9 +448,25 @@ export const useDocumentStore = create<DocumentState>()(
                         activeDocumentId: persistedState.activeDocumentId ?? null,
                         versions: new Map(rehydratedVersions)
                     };
+                },
+                onRehydrateStorage: () => {
+                    return (_state, error) => {
+                        if (!error) {
+                            useDocumentStore.setState({ _hasHydrated: true });
+                        }
+                    };
                 }
             }
         ),
         { name: 'DocumentStore' }
     )
 );
+
+// Also mark as hydrated immediately if localStorage is empty (no data to hydrate)
+if (typeof window !== 'undefined') {
+    const stored = localStorage.getItem('markview:documents');
+    if (!stored) {
+        // No persisted data, mark as hydrated immediately
+        useDocumentStore.setState({ _hasHydrated: true });
+    }
+}
