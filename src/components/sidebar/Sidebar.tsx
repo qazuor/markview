@@ -23,13 +23,18 @@ export function Sidebar({ isCollapsed = false, onCollapsedChange, className }: S
     const { t } = useTranslation();
     const [activeSection, setActiveSection] = useState<SidebarSection>('explorer');
 
+    const handleSectionChangeWhenCollapsed = (section: SidebarSection) => {
+        setActiveSection(section);
+        onCollapsedChange?.(false);
+    };
+
     if (isCollapsed) {
         return (
             <aside
                 aria-label={t('aria.sidebarNavigation')}
                 className={cn('flex flex-col bg-bg-secondary border-r border-border', className)}
             >
-                <SidebarNav activeSection={activeSection} onSectionChange={setActiveSection} />
+                <SidebarNav activeSection={activeSection} onSectionChange={handleSectionChangeWhenCollapsed} />
                 <div className="flex-1" />
                 <div className="p-1">
                     <Tooltip content={t('sidebar.expandSidebar')} side="right">
