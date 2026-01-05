@@ -7,9 +7,11 @@ import { renderMarkdown } from '@/services/markdown';
 import { useDocumentStore } from '@/stores/documentStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useUIStore } from '@/stores/uiStore';
+import type { PreviewStyle } from '@/types/settings';
 import { cn } from '@/utils/cn';
 import {
     BookOpen,
+    Check,
     ChevronDown,
     Columns2,
     Download,
@@ -24,11 +26,14 @@ import {
     Keyboard,
     Menu,
     Minus,
+    Moon,
+    Palette,
     PanelLeft,
     PanelRight,
     Plus,
     RotateCcw,
-    Settings
+    Settings,
+    Sun
 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -57,8 +62,10 @@ export function Header({ onImport, onStartTour, className }: HeaderProps) {
     const [activeMenu, setActiveMenu] = useState<string | null>(null);
     const [isExporting, setIsExporting] = useState(false);
     const [exportingFormat, setExportingFormat] = useState<'pdf' | 'png' | 'jpeg' | null>(null);
+    const [isStyleDropdownOpen, setIsStyleDropdownOpen] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
     const previewWindowRef = useRef<Window | null>(null);
+    const styleDropdownRef = useRef<HTMLDivElement>(null);
 
     const createDocument = useDocumentStore((s) => s.createDocument);
     const activeDocumentId = useDocumentStore((s) => s.activeDocumentId);
@@ -69,13 +76,54 @@ export function Header({ onImport, onStartTour, className }: HeaderProps) {
     const setViewMode = useUIStore((s) => s.setViewMode);
     const toggleSidebar = useUIStore((s) => s.toggleSidebar);
     const setPendingRenameDocumentId = useUIStore((s) => s.setPendingRenameDocumentId);
-    const { isDark } = useTheme();
+    const { isDark, setTheme } = useTheme();
+    const previewStyle = useSettingsStore((s) => s.previewStyle);
+    const setPreviewStyle = useSettingsStore((s) => s.setPreviewStyle);
     const zoomIn = useSettingsStore((s) => s.zoomIn);
     const zoomOut = useSettingsStore((s) => s.zoomOut);
     const resetZoom = useSettingsStore((s) => s.resetZoom);
     const getZoomPercentage = useSettingsStore((s) => s.getZoomPercentage);
 
     const closeMenu = useCallback(() => setActiveMenu(null), []);
+
+    // Preview style options
+    const previewStyles: { value: PreviewStyle; label: string }[] = [
+        { value: 'github', label: 'GitHub' },
+        { value: 'gitlab', label: 'GitLab' },
+        { value: 'notion', label: 'Notion' },
+        { value: 'obsidian', label: 'Obsidian' },
+        { value: 'stackoverflow', label: 'Stack Overflow' },
+        { value: 'devto', label: 'Dev.to' }
+    ];
+
+    // Toggle theme between light and dark
+    const handleToggleTheme = useCallback(() => {
+        const newTheme = isDark ? 'light' : 'dark';
+        setTheme(newTheme);
+    }, [isDark, setTheme]);
+
+    // Handle preview style change
+    const handlePreviewStyleChange = useCallback(
+        (style: PreviewStyle) => {
+            setPreviewStyle(style);
+            setIsStyleDropdownOpen(false);
+        },
+        [setPreviewStyle]
+    );
+
+    // Close style dropdown on outside click
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (styleDropdownRef.current && !styleDropdownRef.current.contains(event.target as Node)) {
+                setIsStyleDropdownOpen(false);
+            }
+        };
+
+        if (isStyleDropdownOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+            return () => document.removeEventListener('mousedown', handleClickOutside);
+        }
+    }, [isStyleDropdownOpen]);
 
     const handleNewDocument = useCallback(() => {
         const id = createDocument();
@@ -471,6 +519,76 @@ export function Header({ onImport, onStartTour, className }: HeaderProps) {
 
             {/* Spacer - only on desktop */}
             {!isMobile && <div className="flex-1" />}
+
+            {/* Quick access controls - desktop only */}
+            {!isMobile && (
+                <div className="flex items-center gap-1 mr-2">
+                    {/* Theme toggle */}
+                    <button
+                        type="button"
+                        onClick={handleToggleTheme}
+                        className={cn(
+                            'p-2 rounded-lg',
+                            'text-text-secondary hover:text-text-primary',
+                            'hover:bg-bg-tertiary active:bg-bg-tertiary',
+                            'transition-colors'
+                        )}
+                        aria-label={isDark ? t('settings.themeLight') : t('settings.themeDark')}
+                        title={isDark ? t('settings.themeLight') : t('settings.themeDark')}
+                    >
+                        {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                    </button>
+
+                    {/* Preview style selector */}
+                    <div ref={styleDropdownRef} className="relative">
+                        <button
+                            type="button"
+                            onClick={() => setIsStyleDropdownOpen(!isStyleDropdownOpen)}
+                            className={cn(
+                                'flex items-center gap-1.5 px-2 py-1.5 rounded-lg',
+                                'text-text-secondary hover:text-text-primary',
+                                'hover:bg-bg-tertiary active:bg-bg-tertiary',
+                                'transition-colors text-sm',
+                                isStyleDropdownOpen && 'bg-bg-tertiary'
+                            )}
+                            aria-label={t('settings.previewStyle')}
+                            aria-expanded={isStyleDropdownOpen}
+                            aria-haspopup="listbox"
+                        >
+                            <Palette className="h-4 w-4" />
+                            <span className="hidden lg:inline">{previewStyles.find((s) => s.value === previewStyle)?.label}</span>
+                            <ChevronDown className={cn('h-3 w-3 transition-transform', isStyleDropdownOpen && 'rotate-180')} />
+                        </button>
+
+                        {isStyleDropdownOpen && (
+                            <div
+                                className={cn(
+                                    'absolute top-full right-0 mt-1 z-50',
+                                    'min-w-[160px] py-1',
+                                    'bg-bg-primary border border-border rounded-lg shadow-lg',
+                                    'animate-in fade-in slide-in-from-top-2 duration-150'
+                                )}
+                            >
+                                {previewStyles.map((style) => (
+                                    <button
+                                        key={style.value}
+                                        type="button"
+                                        onClick={() => handlePreviewStyleChange(style.value)}
+                                        className={cn(
+                                            'w-full flex items-center gap-2 px-3 py-2 text-sm text-left',
+                                            'hover:bg-bg-hover transition-colors duration-150',
+                                            previewStyle === style.value && 'text-primary-500'
+                                        )}
+                                    >
+                                        <span className="flex-1">{style.label}</span>
+                                        {previewStyle === style.value && <Check className="h-4 w-4" aria-hidden="true" />}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
 
             {/* User menu */}
             <UserMenu />
