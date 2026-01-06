@@ -124,6 +124,17 @@ export const userSettings = pgTable('user_settings', {
     updatedAt: timestamp('updated_at').notNull().defaultNow()
 });
 
+export const userSessionState = pgTable('user_session_state', {
+    id: text('id').primaryKey(),
+    userId: text('user_id')
+        .notNull()
+        .unique()
+        .references(() => users.id, { onDelete: 'cascade' }),
+    openDocumentIds: json('open_document_ids').$type<string[]>().notNull().default([]),
+    activeDocumentId: text('active_document_id'),
+    updatedAt: timestamp('updated_at').notNull().defaultNow()
+});
+
 // ============================================================================
 // Relations
 // ============================================================================
@@ -133,7 +144,8 @@ export const usersRelations = relations(users, ({ many, one }) => ({
     accounts: many(accounts),
     folders: many(folders),
     documents: many(documents),
-    settings: one(userSettings)
+    settings: one(userSettings),
+    sessionState: one(userSessionState)
 }));
 
 export const sessionsRelations = relations(sessions, ({ one }) => ({
@@ -182,6 +194,13 @@ export const userSettingsRelations = relations(userSettings, ({ one }) => ({
     })
 }));
 
+export const userSessionStateRelations = relations(userSessionState, ({ one }) => ({
+    user: one(users, {
+        fields: [userSessionState.userId],
+        references: [users.id]
+    })
+}));
+
 // ============================================================================
 // Types
 // ============================================================================
@@ -203,3 +222,6 @@ export type NewDocument = typeof documents.$inferInsert;
 
 export type UserSettings = typeof userSettings.$inferSelect;
 export type NewUserSettings = typeof userSettings.$inferInsert;
+
+export type UserSessionState = typeof userSessionState.$inferSelect;
+export type NewUserSessionState = typeof userSessionState.$inferInsert;
