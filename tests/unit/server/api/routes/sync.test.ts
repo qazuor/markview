@@ -155,7 +155,8 @@ describe('sync routes', () => {
         });
 
         it('should return 409 on version conflict', async () => {
-            const existingDoc = createMockDocument({ id: 'conflict-doc', syncVersion: 5 });
+            // Server has version 10, client sends version 3 (difference > 2 triggers conflict)
+            const existingDoc = createMockDocument({ id: 'conflict-doc', syncVersion: 10, content: '# Server content' });
             mockDbQuery.documents.findFirst.mockResolvedValue(existingDoc);
 
             const res = await app.request('/api/sync/documents/conflict-doc', {
@@ -164,7 +165,7 @@ describe('sync routes', () => {
                 body: JSON.stringify({
                     id: 'conflict-doc',
                     name: 'Old version',
-                    content: '# Stale',
+                    content: '# Different client content',
                     syncVersion: 3
                 })
             });
@@ -172,7 +173,7 @@ describe('sync routes', () => {
 
             expect(res.status).toBe(409);
             expect(json.error).toBe('Conflict');
-            expect(json.serverVersion).toBe(5);
+            expect(json.serverVersion).toBe(10);
         });
 
         it('should validate document schema', async () => {
