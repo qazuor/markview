@@ -2,8 +2,15 @@ import { useSession } from '@/lib/auth-client';
 import { syncApi } from '@/services/sync/api';
 import { sseService } from '@/services/sync/sse';
 import { useDocumentStore } from '@/stores/documentStore';
+import { useFolderStore } from '@/stores/folderStore';
 import { useSessionSyncStore } from '@/stores/sessionSyncStore';
-import type { SSEDocumentDeletedEvent, SSEDocumentUpdatedEvent, SSESessionUpdatedEvent } from '@/types/sse';
+import type {
+    SSEDocumentDeletedEvent,
+    SSEDocumentUpdatedEvent,
+    SSEFolderDeletedEvent,
+    SSEFolderUpdatedEvent,
+    SSESessionUpdatedEvent
+} from '@/types/sse';
 import { useCallback, useEffect, useRef } from 'react';
 
 // Debounce timeout for session updates
@@ -23,6 +30,10 @@ export function useSSESync() {
     // Document store - get functions directly to avoid stale closures
     const addSyncedDocument = useDocumentStore((s) => s.addSyncedDocument);
     const closeDocument = useDocumentStore((s) => s.closeDocument);
+
+    // Folder store
+    const addSyncedFolder = useFolderStore((s) => s.addSyncedFolder);
+    const deleteFolder = useFolderStore((s) => s.deleteFolder);
 
     // Session sync store
     const setIsSyncing = useSessionSyncStore((s) => s.setIsSyncing);
@@ -296,6 +307,108 @@ export function useSSESync() {
     );
 
     // ========================================================================
+    // Folder Sync Handlers
+    // ========================================================================
+
+    /**
+     * Fetch and update a specific folder from server
+     */
+    const fetchAndUpdateFolder = useCallback(
+        async (folderId: string): Promise<boolean> => {
+            try {
+                const response = await syncApi.folders.fetch();
+                const serverFolder = response.folders.find((f) => f.id === folderId);
+
+                if (serverFolder && !serverFolder.deletedAt) {
+                    console.log('[SSESync] Updating folder from server:', folderId);
+                    addSyncedFolder({
+                        id: serverFolder.id,
+                        name: serverFolder.name,
+                        parentId: serverFolder.parentId,
+                        color: serverFolder.color,
+                        icon: (serverFolder as { icon?: string | null }).icon ?? null,
+                        sortOrder: serverFolder.sortOrder,
+                        createdAt: new Date(serverFolder.createdAt),
+                        updatedAt: new Date(serverFolder.updatedAt)
+                    });
+                    return true;
+                }
+
+                if (serverFolder?.deletedAt) {
+                    console.log('[SSESync] Folder was deleted on server:', folderId);
+                    deleteFolder(folderId);
+                    return true;
+                }
+
+                console.warn('[SSESync] Folder not found on server:', folderId);
+                return false;
+            } catch (error) {
+                console.error('[SSESync] Failed to fetch folder:', folderId, error);
+                return false;
+            }
+        },
+        [addSyncedFolder, deleteFolder]
+    );
+
+    /**
+     * Handle folder updated event from another device
+     */
+    const handleFolderUpdated = useCallback(
+        async (data: SSEFolderUpdatedEvent) => {
+            if (data.originDeviceId === sseService.getDeviceId()) {
+                console.log('[SSESync] Ignoring own folder update:', data.folderId);
+                return;
+            }
+
+            console.log('[SSESync] Folder updated on another device:', data.folderId);
+            await fetchAndUpdateFolder(data.folderId);
+        },
+        [fetchAndUpdateFolder]
+    );
+
+    /**
+     * Handle folder deleted event from another device
+     */
+    const handleFolderDeleted = useCallback(
+        (data: SSEFolderDeletedEvent) => {
+            if (data.originDeviceId === sseService.getDeviceId()) {
+                return;
+            }
+
+            console.log('[SSESync] Folder deleted on another device:', data.folderId);
+            deleteFolder(data.folderId);
+        },
+        [deleteFolder]
+    );
+
+    /**
+     * Fetch all folders from server on initial connection
+     */
+    const fetchAllFolders = useCallback(async () => {
+        try {
+            const response = await syncApi.folders.fetch();
+            console.log('[SSESync] Fetched folders from server:', response.folders.length);
+
+            for (const serverFolder of response.folders) {
+                if (!serverFolder.deletedAt) {
+                    addSyncedFolder({
+                        id: serverFolder.id,
+                        name: serverFolder.name,
+                        parentId: serverFolder.parentId,
+                        color: serverFolder.color,
+                        icon: (serverFolder as { icon?: string | null }).icon ?? null,
+                        sortOrder: serverFolder.sortOrder,
+                        createdAt: new Date(serverFolder.createdAt),
+                        updatedAt: new Date(serverFolder.updatedAt)
+                    });
+                }
+            }
+        } catch (error) {
+            console.error('[SSESync] Failed to fetch folders:', error);
+        }
+    }, [addSyncedFolder]);
+
+    // ========================================================================
     // Connection Management
     // ========================================================================
 
@@ -303,7 +416,10 @@ export function useSSESync() {
     const handleDocumentUpdatedRef = useRef(handleDocumentUpdated);
     const handleDocumentDeletedRef = useRef(handleDocumentDeleted);
     const handleSessionUpdatedRef = useRef(handleSessionUpdated);
+    const handleFolderUpdatedRef = useRef(handleFolderUpdated);
+    const handleFolderDeletedRef = useRef(handleFolderDeleted);
     const loadMissingDocumentsRef = useRef(loadMissingDocuments);
+    const fetchAllFoldersRef = useRef(fetchAllFolders);
 
     // Keep refs up to date
     useEffect(() => {
@@ -322,6 +438,18 @@ export function useSSESync() {
         loadMissingDocumentsRef.current = loadMissingDocuments;
     }, [loadMissingDocuments]);
 
+    useEffect(() => {
+        handleFolderUpdatedRef.current = handleFolderUpdated;
+    }, [handleFolderUpdated]);
+
+    useEffect(() => {
+        handleFolderDeletedRef.current = handleFolderDeleted;
+    }, [handleFolderDeleted]);
+
+    useEffect(() => {
+        fetchAllFoldersRef.current = fetchAllFolders;
+    }, [fetchAllFolders]);
+
     // Connect/disconnect based on auth state
     useEffect(() => {
         if (!isAuthenticated) {
@@ -339,10 +467,9 @@ export function useSSESync() {
             if (state === 'connected') {
                 useSessionSyncStore.getState().setConnectionId(sseService.getConnectionId());
 
-                // Fetch initial session state and documents when connected
-                syncApi.session
-                    .fetch()
-                    .then(async (serverSession) => {
+                // Fetch initial session state, documents, and folders when connected
+                Promise.all([syncApi.session.fetch(), fetchAllFoldersRef.current()])
+                    .then(async ([serverSession]) => {
                         console.log('[SSESync] Fetched initial session state:', serverSession);
                         lastSessionUpdate.current = {
                             openIds: serverSession.openDocumentIds,
@@ -355,7 +482,7 @@ export function useSSESync() {
                         }
                     })
                     .catch((error) => {
-                        console.error('[SSESync] Failed to fetch initial session state:', error);
+                        console.error('[SSESync] Failed to fetch initial state:', error);
                     });
             } else {
                 useSessionSyncStore.getState().setConnectionId(null);
@@ -383,6 +510,14 @@ export function useSSESync() {
             handleSessionUpdatedRef.current(data);
         });
 
+        const unsubFolderUpdated = sseService.onEvent('folder:updated', (data) => {
+            handleFolderUpdatedRef.current(data);
+        });
+
+        const unsubFolderDeleted = sseService.onEvent('folder:deleted', (data) => {
+            handleFolderDeletedRef.current(data);
+        });
+
         return () => {
             unsubState();
             unsubConnected();
@@ -390,6 +525,8 @@ export function useSSESync() {
             unsubDocUpdated();
             unsubDocDeleted();
             unsubSessionUpdated();
+            unsubFolderUpdated();
+            unsubFolderDeleted();
             sseService.disconnect();
 
             if (sessionUpdateTimeout.current) {
