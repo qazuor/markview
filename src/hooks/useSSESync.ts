@@ -36,6 +36,10 @@ export function useSSESync() {
     });
     const isAuthenticatedRef = useRef(isAuthenticated);
 
+    // Track documents explicitly closed by user in this session
+    // These should NOT be re-opened by remote session updates
+    const locallyClosedDocsRef = useRef<Set<string>>(new Set());
+
     // Keep auth ref up to date
     useEffect(() => {
         isAuthenticatedRef.current = isAuthenticated;
@@ -154,15 +158,20 @@ export function useSSESync() {
 
     /**
      * Load missing documents from server by their IDs
+     * Excludes documents that were explicitly closed by the user in this session
      */
     const loadMissingDocuments = useCallback(
         async (documentIds: string[]) => {
             // Get fresh documents state
             const currentDocs = useDocumentStore.getState().documents;
-            const missingDocIds = documentIds.filter((docId) => !currentDocs.has(docId));
+
+            // Filter out documents that:
+            // 1. Already exist locally
+            // 2. Were explicitly closed by the user (should not reopen)
+            const missingDocIds = documentIds.filter((docId) => !currentDocs.has(docId) && !locallyClosedDocsRef.current.has(docId));
 
             if (missingDocIds.length === 0) {
-                console.log('[SSESync] All documents already present locally');
+                console.log('[SSESync] All documents already present locally or were closed by user');
                 return;
             }
 
@@ -389,23 +398,50 @@ export function useSSESync() {
         };
     }, [isAuthenticated]);
 
-    // Sync session state when documents change
-    const prevStateRef = useRef<{ size: number; activeId: string | null }>({ size: 0, activeId: null });
+    // Sync session state when documents change and track locally closed documents
+    const prevDocIdsRef = useRef<Set<string>>(new Set());
 
     useEffect(() => {
-        if (!isAuthenticated) return;
+        if (!isAuthenticated) {
+            // Clear locally closed docs when logging out
+            locallyClosedDocsRef.current.clear();
+            prevDocIdsRef.current.clear();
+            return;
+        }
 
         // Subscribe to document store changes
         const unsubscribe = useDocumentStore.subscribe((state) => {
-            const currentSize = state.documents.size;
-            const currentActiveId = state.activeDocumentId;
+            const currentDocIds = new Set(state.documents.keys());
+            const prevDocIds = prevDocIdsRef.current;
 
-            // Only trigger if size or activeId actually changed
-            if (currentSize !== prevStateRef.current.size || currentActiveId !== prevStateRef.current.activeId) {
-                prevStateRef.current = { size: currentSize, activeId: currentActiveId };
+            // Detect documents that were closed (were in prev but not in current)
+            for (const docId of prevDocIds) {
+                if (!currentDocIds.has(docId)) {
+                    console.log('[SSESync] Document closed locally, adding to ignore list:', docId);
+                    locallyClosedDocsRef.current.add(docId);
+                }
+            }
+
+            // Detect documents that were opened (are in current but not in prev)
+            // Remove from locally closed list if user re-opens a document
+            for (const docId of currentDocIds) {
+                if (!prevDocIds.has(docId) && locallyClosedDocsRef.current.has(docId)) {
+                    console.log('[SSESync] Document re-opened locally, removing from ignore list:', docId);
+                    locallyClosedDocsRef.current.delete(docId);
+                }
+            }
+
+            // Update previous state
+            prevDocIdsRef.current = currentDocIds;
+
+            // Trigger session sync if anything changed
+            if (currentDocIds.size !== prevDocIds.size || state.activeDocumentId !== null) {
                 debouncedSyncSessionState();
             }
         });
+
+        // Initialize with current documents
+        prevDocIdsRef.current = new Set(useDocumentStore.getState().documents.keys());
 
         return unsubscribe;
     }, [isAuthenticated, debouncedSyncSessionState]);
