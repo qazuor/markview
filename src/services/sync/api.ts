@@ -3,6 +3,7 @@
  * Handles all API calls to the sync endpoints
  */
 
+import type { SessionState } from '@/types/sse';
 import type {
     DocumentUpsertPayload,
     FolderUpsertPayload,
@@ -15,8 +16,19 @@ import type {
     SyncFoldersResponse,
     SyncStatus
 } from '@/types/sync';
+import { sseService } from './sse';
 
 const API_BASE = import.meta.env.VITE_API_URL || '';
+
+/**
+ * Get common headers including X-Device-Id for SSE sync
+ */
+function getHeaders(): HeadersInit {
+    return {
+        'Content-Type': 'application/json',
+        'X-Device-Id': sseService.getDeviceId()
+    };
+}
 
 class SyncApiError extends Error {
     constructor(
@@ -71,7 +83,7 @@ export async function fetchDocuments(since?: string): Promise<SyncDocumentsRespo
     const response = await fetch(url.toString(), {
         method: 'GET',
         credentials: 'include',
-        headers: { 'Content-Type': 'application/json' }
+        headers: getHeaders()
     });
 
     return handleResponse<SyncDocumentsResponse>(response);
@@ -85,7 +97,7 @@ export async function upsertDocument(payload: DocumentUpsertPayload): Promise<Sy
     const response = await fetch(`${API_BASE}/api/sync/documents/${payload.id}`, {
         method: 'PUT',
         credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getHeaders(),
         body: JSON.stringify(payload)
     });
 
@@ -99,7 +111,7 @@ export async function deleteDocument(id: string): Promise<SyncDeleteResponse> {
     const response = await fetch(`${API_BASE}/api/sync/documents/${id}`, {
         method: 'DELETE',
         credentials: 'include',
-        headers: { 'Content-Type': 'application/json' }
+        headers: getHeaders()
     });
 
     return handleResponse<SyncDeleteResponse>(response);
@@ -122,7 +134,7 @@ export async function fetchFolders(since?: string): Promise<SyncFoldersResponse>
     const response = await fetch(url.toString(), {
         method: 'GET',
         credentials: 'include',
-        headers: { 'Content-Type': 'application/json' }
+        headers: getHeaders()
     });
 
     return handleResponse<SyncFoldersResponse>(response);
@@ -135,7 +147,7 @@ export async function upsertFolder(payload: FolderUpsertPayload): Promise<SyncFo
     const response = await fetch(`${API_BASE}/api/sync/folders/${payload.id}`, {
         method: 'PUT',
         credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getHeaders(),
         body: JSON.stringify(payload)
     });
 
@@ -149,7 +161,7 @@ export async function deleteFolder(id: string): Promise<SyncDeleteResponse> {
     const response = await fetch(`${API_BASE}/api/sync/folders/${id}`, {
         method: 'DELETE',
         credentials: 'include',
-        headers: { 'Content-Type': 'application/json' }
+        headers: getHeaders()
     });
 
     return handleResponse<SyncDeleteResponse>(response);
@@ -166,10 +178,44 @@ export async function fetchSyncStatus(): Promise<SyncStatus> {
     const response = await fetch(`${API_BASE}/api/sync/status`, {
         method: 'GET',
         credentials: 'include',
-        headers: { 'Content-Type': 'application/json' }
+        headers: getHeaders()
     });
 
     return handleResponse<SyncStatus>(response);
+}
+
+// ============================================================================
+// Session State API
+// ============================================================================
+
+/**
+ * Fetch current session state (open documents, active document)
+ */
+export async function fetchSessionState(): Promise<SessionState> {
+    const response = await fetch(`${API_BASE}/api/sync/session`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: getHeaders()
+    });
+
+    return handleResponse<SessionState>(response);
+}
+
+/**
+ * Update session state
+ */
+export async function updateSessionState(payload: {
+    openDocumentIds: string[];
+    activeDocumentId: string | null;
+}): Promise<SessionState> {
+    const response = await fetch(`${API_BASE}/api/sync/session`, {
+        method: 'PUT',
+        credentials: 'include',
+        headers: getHeaders(),
+        body: JSON.stringify(payload)
+    });
+
+    return handleResponse<SessionState>(response);
 }
 
 // ============================================================================
@@ -188,6 +234,10 @@ export const syncApi = {
         fetch: fetchFolders,
         upsert: upsertFolder,
         delete: deleteFolder
+    },
+    session: {
+        fetch: fetchSessionState,
+        update: updateSessionState
     },
     status: fetchSyncStatus
 };

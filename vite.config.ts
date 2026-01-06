@@ -144,6 +144,20 @@ export default defineConfig({
         port: 5173,
         open: true,
         proxy: {
+            // SSE endpoint needs special handling - no buffering, long timeout
+            '/api/sync/sse': {
+                target: 'http://localhost:3017',
+                changeOrigin: true,
+                // Disable response buffering for SSE
+                configure: (proxy) => {
+                    proxy.on('proxyRes', (proxyRes) => {
+                        // Ensure no buffering for SSE
+                        proxyRes.headers['cache-control'] = 'no-cache';
+                        proxyRes.headers['x-accel-buffering'] = 'no';
+                    });
+                }
+            },
+            // Regular API endpoints
             '/api': {
                 target: 'http://localhost:3017',
                 changeOrigin: true

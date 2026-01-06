@@ -11,6 +11,7 @@ import { createRateLimiter } from './middleware/rateLimit';
 import githubRoutes from './routes/github';
 import googleRoutes from './routes/google';
 // Import routes
+import sseRoutes from './routes/sse';
 import syncRoutes from './routes/sync';
 import userRoutes from './routes/user';
 // Note: Export routes are NOT included here because they use Puppeteer
@@ -42,7 +43,7 @@ app.use(
             process.env.NEXT_PUBLIC_APP_URL || ''
         ].filter(Boolean),
         credentials: true,
-        allowHeaders: ['Content-Type', 'Authorization', 'Cookie'],
+        allowHeaders: ['Content-Type', 'Authorization', 'Cookie', 'X-Device-Id'],
         allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
         exposeHeaders: ['Set-Cookie']
     })
@@ -121,6 +122,10 @@ app.get('/api/health', (c) => {
 // Auth routes - Better Auth handler (with rate limiting)
 app.use('/api/auth/*', createRateLimiter('auth'));
 app.on(['GET', 'POST'], '/api/auth/*', (c) => auth.handler(c.req.raw));
+
+// SSE routes FIRST - no rate limiting for streaming connections
+// Must be registered before /api/sync/* to avoid rate limiter
+app.route('/api/sync/sse', sseRoutes);
 
 // Mount route groups with rate limiting
 app.use('/api/sync/*', createRateLimiter('sync'));

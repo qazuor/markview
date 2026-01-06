@@ -30,6 +30,7 @@ import {
     useZoom
 } from '@/hooks';
 import { usePreviewSync } from '@/hooks/useBroadcastChannel';
+import { useSSESync } from '@/hooks/useSSESync';
 import { useDocumentStore, useSettingsStore, useUIStore } from '@/stores';
 import { cn } from '@/utils/cn';
 import type { EditorView } from '@codemirror/view';
@@ -41,6 +42,7 @@ export function App() {
     const { t } = useTranslation();
     useTheme();
     useZoom(); // Global zoom keyboard shortcuts and mouse wheel
+    useSSESync(); // Real-time sync across devices via SSE
 
     const { isMobile } = useMobile();
     const prevIsMobileRef = useRef(isMobile);
